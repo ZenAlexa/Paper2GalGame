@@ -4,7 +4,7 @@
  * AI-powered script generation system for converting academic papers
  * into WebGAL format educational visual novels
  *
- * @version 0.1.0
+ * @version 0.2.0
  * @author Paper2GalGame Team
  */
 
@@ -13,6 +13,35 @@ export { ScriptGenerator } from './generator';
 export type { GenerationResult } from './generator';
 export { ScriptValidator } from './validator';
 export { OpenRouterClient } from './openrouter';
+
+// Incremental generation system
+export {
+  PaperSegmentationStrategy,
+  createSegmentationStrategy,
+  IncrementalScriptGenerator,
+  createIncrementalGenerator,
+  MultiPaperSaveSystem,
+  createSaveSystem
+} from './incremental';
+
+export type {
+  PaperSegment,
+  SegmentType,
+  SegmentStatus,
+  SegmentProgress,
+  GenerationProgress,
+  BackgroundTask,
+  IncrementalGenerationResult,
+  SegmentEvent,
+  SegmentEventListener,
+  WaitingDialogue,
+  IncrementalConfig,
+  ScriptGeneratorInterface,
+  GameInstance,
+  SaveData,
+  GameProgress,
+  SaveSystemConfig
+} from './incremental';
 
 // Character system
 export {

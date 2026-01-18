@@ -1,0 +1,498 @@
+/**
+ * Paper Selection Styles
+ *
+ * Styling for paper upload and game management interface
+ * Uses warm color palette consistent with visual novel aesthetics
+ */
+
+// Color palette (warm, soft colors)
+$primary: #FFB7C5;      // Cherry blossom pink
+$primary-dark: #E8A0AE;
+$cream: #FFF5EE;        // Soft cream
+$text-primary: #4A3728; // Warm dark brown
+$text-secondary: #8B7355;
+$accent: #F4A261;       // Warm orange
+$success: #81B29A;      // Soft green
+$error: #E07A5F;        // Soft red
+$shadow: rgba(74, 55, 40, 0.1);
+$overlay: rgba(255, 245, 238, 0.95);
+
+.paperSelection {
+  min-height: 100vh;
+  background: linear-gradient(135deg, $cream 0%, #FFF0E8 100%);
+  font-family: 'Noto Sans JP', 'Noto Sans SC', sans-serif;
+  color: $text-primary;
+}
+
+.mainView {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+// Header
+.header {
+  text-align: center;
+  margin-bottom: 3rem;
+
+  h1 {
+    font-size: 2.5rem;
+    color: $primary-dark;
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+    text-shadow: 2px 2px 4px $shadow;
+  }
+
+  .subtitle {
+    font-size: 1.1rem;
+    color: $text-secondary;
+  }
+}
+
+// Language Selector
+.languageSelector {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+
+  .langBtn {
+    padding: 0.5rem 1rem;
+    border: 2px solid $primary;
+    background: transparent;
+    color: $text-primary;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+
+    &:hover {
+      background: $primary;
+      color: white;
+    }
+
+    &.active {
+      background: $primary;
+      color: white;
+    }
+  }
+}
+
+// Content Layout
+.content {
+  display: grid;
+  gap: 2rem;
+}
+
+// Section Styles
+.newGameSection,
+.continueSection {
+  background: $overlay;
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 4px 20px $shadow;
+
+  h2 {
+    color: $primary-dark;
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid $primary;
+  }
+}
+
+// File Uploader
+.fileUploader {
+  border: 3px dashed $primary;
+  border-radius: 15px;
+  padding: 3rem 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: rgba(255, 183, 197, 0.05);
+
+  &:hover {
+    border-color: $primary-dark;
+    background: rgba(255, 183, 197, 0.1);
+  }
+
+  &.hasFile {
+    border-style: solid;
+    background: rgba(129, 178, 154, 0.1);
+    border-color: $success;
+  }
+
+  .uploadIcon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+
+  .uploadHint {
+    font-size: 1.1rem;
+    color: $text-primary;
+    margin-bottom: 0.5rem;
+  }
+
+  .supportedFormats {
+    font-size: 0.9rem;
+    color: $text-secondary;
+  }
+
+  .selectedFile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+
+    .fileName {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: $success;
+    }
+
+    .fileSize {
+      font-size: 0.9rem;
+      color: $text-secondary;
+    }
+  }
+}
+
+// Character Selector
+.characterSelector {
+  margin-top: 2rem;
+
+  h3 {
+    font-size: 1.3rem;
+    color: $text-primary;
+    margin-bottom: 0.5rem;
+  }
+
+  .hint {
+    color: $text-secondary;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+
+  .warning {
+    color: $error;
+    font-size: 0.9rem;
+    margin-top: 1rem;
+    text-align: center;
+  }
+}
+
+.characterGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.characterCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+  border: 2px solid transparent;
+  border-radius: 15px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px $shadow;
+  }
+
+  &.selected {
+    border-color: $primary;
+    background: rgba(255, 183, 197, 0.1);
+
+    .selectIndicator {
+      background: $primary;
+      color: white;
+    }
+  }
+
+  .characterSprite {
+    width: 120px;
+    height: 160px;
+    object-fit: cover;
+    object-position: top;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+  }
+
+  .characterInfo {
+    text-align: center;
+
+    h4 {
+      font-size: 1.1rem;
+      color: $text-primary;
+      margin-bottom: 0.25rem;
+    }
+
+    .role {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      background: $primary;
+      color: white;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .description {
+      font-size: 0.85rem;
+      color: $text-secondary;
+      line-height: 1.4;
+    }
+  }
+
+  .selectIndicator {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    width: 24px;
+    height: 24px;
+    border: 2px solid $primary;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+  }
+}
+
+// Buttons
+.startButton,
+.playButton {
+  display: block;
+  width: 100%;
+  max-width: 300px;
+  margin: 2rem auto 0;
+  padding: 1rem 2rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, $primary 0%, $primary-dark 100%);
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(255, 183, 197, 0.4);
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 183, 197, 0.6);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.retryButton {
+  @extend .startButton;
+  background: linear-gradient(135deg, $text-secondary 0%, $text-primary 100%);
+  box-shadow: 0 4px 15px $shadow;
+
+  &:hover {
+    box-shadow: 0 6px 20px $shadow;
+  }
+}
+
+// Progress Display
+.progressDisplay {
+  text-align: center;
+  padding: 2rem;
+
+  h3 {
+    font-size: 1.5rem;
+    color: $primary-dark;
+    margin-bottom: 1.5rem;
+  }
+
+  .progressBar {
+    width: 100%;
+    max-width: 500px;
+    height: 20px;
+    background: rgba(255, 183, 197, 0.2);
+    border-radius: 10px;
+    margin: 0 auto 1rem;
+    overflow: hidden;
+
+    .progressFill {
+      height: 100%;
+      background: linear-gradient(90deg, $primary 0%, $accent 100%);
+      border-radius: 10px;
+      transition: width 0.3s ease;
+    }
+  }
+
+  .progressText {
+    color: $text-secondary;
+    font-size: 0.95rem;
+  }
+}
+
+// Saved Games
+.savedGames {
+  h2 {
+    color: $primary-dark;
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid $primary;
+  }
+
+  .noGames {
+    text-align: center;
+    color: $text-secondary;
+    padding: 2rem;
+  }
+}
+
+.gamesList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.gameCard {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 2px 10px $shadow;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px $shadow;
+  }
+
+  .gameScreenshot {
+    width: 100px;
+    height: 75px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-right: 1rem;
+  }
+
+  .gameInfo {
+    flex: 1;
+
+    h3 {
+      font-size: 1.1rem;
+      color: $text-primary;
+      margin-bottom: 0.25rem;
+    }
+
+    .progress,
+    .lastPlayed {
+      font-size: 0.85rem;
+      color: $text-secondary;
+      margin: 0.25rem 0;
+    }
+  }
+
+  .gameActions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+
+    button {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover {
+        transform: translateY(-1px);
+      }
+    }
+
+    .continueBtn {
+      background: $primary;
+      color: white;
+
+      &:hover {
+        background: $primary-dark;
+      }
+    }
+
+    .loadSaveBtn {
+      background: $accent;
+      color: white;
+
+      &:hover {
+        background: darken($accent, 10%);
+      }
+    }
+
+    .deleteBtn {
+      background: transparent;
+      color: $error;
+      border: 1px solid $error;
+
+      &:hover {
+        background: $error;
+        color: white;
+      }
+    }
+  }
+}
+
+// Footer
+.footer {
+  text-align: center;
+  padding: 2rem;
+  color: $text-secondary;
+  font-size: 0.9rem;
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .mainView {
+    padding: 1rem;
+  }
+
+  .header h1 {
+    font-size: 2rem;
+  }
+
+  .characterGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .gameCard {
+    flex-direction: column;
+    text-align: center;
+
+    .gameScreenshot {
+      margin-right: 0;
+      margin-bottom: 1rem;
+    }
+
+    .gameActions {
+      justify-content: center;
+      margin-top: 1rem;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .characterGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .languageSelector {
+    flex-wrap: wrap;
+  }
+}

@@ -234,3 +234,98 @@ $height: 330px;
   //line-height: 2em;
   overflow: hidden;
 }
+
+// =========================================================================
+// Mathematical Formula Styles for WebGAL Text Box Integration
+// =========================================================================
+
+// Display formula styling
+:global(.webgal-math-display) {
+  margin: 10px 0;
+  text-align: center;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+
+  // Ensure proper display within dialogue box
+  .katex-display {
+    margin: 0.5em 0;
+    text-align: center;
+  }
+
+  // Maintain consistency with WebGAL text styling
+  .katex {
+    color: inherit;
+    font-size: inherit;
+  }
+}
+
+// Inline formula styling
+:global(.webgal-math-inline) {
+  vertical-align: baseline;
+  display: inline;
+
+  .katex {
+    font-size: 1em;
+    line-height: 1.2;
+    color: inherit;
+  }
+}
+
+// Formula rendering error styling
+:global(.webgal-math-error) {
+  color: #ff6b6b;
+  background: rgba(255, 107, 107, 0.1);
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-family: monospace;
+  font-size: 0.9em;
+  border: 1px dashed #ff6b6b;
+}
+
+// Multi-language formula font adaptation
+:global(.math-lang-zh) {
+  .katex {
+    font-family: 'KaTeX_Main', 'Noto Serif CJK SC', serif;
+  }
+}
+
+:global(.math-lang-jp) {
+  .katex {
+    font-family: 'KaTeX_Main', 'Noto Serif CJK JP', serif;
+  }
+}
+
+:global(.math-lang-en) {
+  .katex {
+    font-family: 'KaTeX_Main', 'Computer Modern', serif;
+  }
+}
+
+// Mobile device adaptation
+@media (max-width: 768px) {
+  :global(.webgal-math-display) {
+    font-size: 0.9em;
+    overflow-x: auto;
+    margin: 8px 0;
+  }
+
+  :global(.webgal-math-inline) {
+    .katex {
+      font-size: 0.95em;
+    }
+  }
+}
+
+// Ensure mathematical formulas coordinate with text box styling
+.TextBox_main {
+  :global(.webgal-math-display),
+  :global(.webgal-math-inline) {
+    // Inherit text color from dialogue box
+    .katex {
+      color: inherit;
+    }
+  }
+
+  // Ensure formula display effects with text shadow environment
+  @include text_shadow_textElement;
+}

@@ -133,7 +133,10 @@ export class OpenRouterClient {
       if (!choice?.message?.content) {
         throw new Error('Empty script generated');
       }
-      const generatedScript = choice.message.content;
+
+      // Sanitize the generated script to fix any incorrect asset references
+      const rawScript = choice.message.content;
+      const generatedScript = OpenRouterClient.sanitizeScript(rawScript);
 
       // Basic validation
       const validation = this.validateGeneratedScript(generatedScript, request.characters);
@@ -161,70 +164,114 @@ export class OpenRouterClient {
 
   /**
    * Build system prompt for script generation
+   * Includes correct asset file mappings to prevent 404 errors
    */
   private buildSystemPrompt(characters: string[]): string {
-    // Multi-language generation - supports Chinese, Japanese, and English
+    // Map character IDs to actual sprite files
+    const characterSpriteMap: Record<string, string> = {
+      host: 'stand.webp',
+      energizer: 'stand2.webp',
+      analyst: 'stand.webp',
+      interpreter: 'stand2.webp'
+    };
 
-    return `# Paper2GalGame 剧本生成专家
+    // Build character-sprite mapping for prompt
+    const characterMappings = characters.map(char => {
+      const sprite = characterSpriteMap[char] || 'stand.webp';
+      return `- ${char}: use "${sprite}"`;
+    }).join('\n');
 
-你是专门为Paper2GalGame项目生成高质量WebGAL脚本的AI助手。
+    return `# Paper2GalGame Script Generation Expert
 
-## 角色设定
-使用以下角色进行对话生成：${characters.join('、')}
+You are an AI assistant specialized in generating high-quality WebGAL scripts for Paper2GalGame.
 
-每个角色都有独特的性格和表达方式，必须严格按照角色设定生成对话。
+## Character Configuration
+Available characters: ${characters.join(', ')}
 
-## WebGAL脚本格式要求
-- 使用标准WebGAL命令格式
-- 背景：changeBg:背景图片.webp;
-- 角色：changeFigure:角色名.webp -position;
-- 对话：say:对话内容 -speaker=角色名 -vocal=语音文件.wav;
-- 等待：wait:时间毫秒;
+Each character has unique personality and speaking style. Follow character settings strictly.
 
-## 生成要求
-1. **教育性优先**：确保论文内容准确传达
-2. **角色一致性**：严格遵循每个角色的性格特点
-3. **对话自然**：角色间有真实的互动和讨论
-4. **脚本完整**：包含开场、内容讲解、讨论、总结
+## CRITICAL: Asset File Requirements
+You MUST use ONLY these exact file names:
 
-## 语言要求
-生成多语言对话（中文、日文、英文），语言表达要符合各角色特点。
+### Available Backgrounds (use ONLY these):
+- bg.webp (main classroom/meeting room)
 
-请生成符合以上要求的完整WebGAL脚本。`;
+### Character Sprite Mapping (MUST follow exactly):
+${characterMappings}
+
+### Position Options:
+- -left (left side)
+- -center (center)
+- -right (right side)
+
+## WebGAL Script Format
+- Background: changeBg:bg.webp;
+- Character: changeFigure:stand.webp -center; (use sprite from mapping above)
+- Dialogue: say:dialogue content -speaker=character_id;
+- Wait: wait:1000;
+- BGM: playBgm:bgm.mp3;
+
+## Script Structure
+1. **Opening** (2-3 lines): Set background, introduce characters
+2. **Main Content** (15-25 lines): Explain paper content with character interactions
+3. **Analysis** (5-8 lines): Deep analysis of key findings
+4. **Summary** (3-5 lines): Summarize key points
+5. **Closing** (1-2 lines): Farewell
+
+## Example Script Format:
+\`\`\`
+changeBg:bg.webp;
+changeFigure:stand.webp -center;
+say:Welcome everyone, today we'll discuss this paper. -speaker=host;
+changeFigure:stand2.webp -right;
+say:I'm excited to learn about this topic! -speaker=energizer;
+\`\`\`
+
+## Language
+Generate dialogues in Japanese for natural voice synthesis. Include educational content accurately.
+
+Generate a complete WebGAL script following the above requirements exactly.`;
   }
 
   /**
    * Build user prompt with paper data
+   * Reinforces asset requirements to prevent 404 errors
    */
   private buildUserPrompt(paperData: any, options: any): string {
-    const { language, educationalWeight, style } = options;
+    const { educationalWeight, style } = options;
 
-    return `# 论文转换任务
+    return `# Paper Conversion Task
 
-## 论文信息
-**标题**：${paperData.metadata?.title || '未知标题'}
-**作者**：${paperData.metadata?.authors?.join('、') || '未知作者'}
+## Paper Information
+**Title**: ${paperData.metadata?.title || 'Unknown Title'}
+**Authors**: ${paperData.metadata?.authors?.join(', ') || 'Unknown Authors'}
 
-## 论文内容摘要
+## Paper Summary
 ${this.extractPaperSummary(paperData)}
 
-## 生成要求
-- **语言**：${language === 'zh' ? '中文' : '日文'}
-- **教育重点**：${educationalWeight * 100}%
-- **难度**：${style}
+## Generation Requirements
+- **Language**: Japanese (for natural TTS voice synthesis)
+- **Educational Focus**: ${(educationalWeight * 100).toFixed(0)}%
+- **Complexity**: ${style}
 
-## 脚本结构要求
-1. **开场介绍** (2-3句)：角色登场，介绍论文主题
-2. **核心内容** (15-25句)：分段讲解论文要点，角色互动讨论
-3. **重点分析** (5-8句)：深入分析关键发现或方法
-4. **总结讨论** (3-5句)：总结要点，角色发表感想
-5. **结束语** (1-2句)：结束本次学习
+## CRITICAL REMINDERS:
+1. Use ONLY bg.webp for changeBg commands
+2. Use ONLY stand.webp or stand2.webp for changeFigure commands
+3. Start the script with: changeBg:bg.webp;
+4. Each changeFigure must use the correct sprite from the mapping
 
-请生成完整的WebGAL脚本，确保：
-- 每个角色的对话都符合其性格特点
-- 准确传达论文的核心内容和价值
-- 对话自然流畅，富有教育意义
-- 严格遵循WebGAL脚本格式`;
+## Script Structure:
+1. **Opening** (2-3 dialogues): Set bg.webp, introduce characters with their sprites
+2. **Main Content** (15-25 dialogues): Explain paper content, switch characters
+3. **Analysis** (5-8 dialogues): Deep dive into key findings
+4. **Summary** (3-5 dialogues): Key takeaways
+5. **Closing** (1-2 dialogues): Farewell
+
+Generate the complete WebGAL script now. Remember:
+- Follow each character's personality
+- Accurately convey the paper's core content
+- Natural dialogue flow with educational value
+- STRICTLY follow WebGAL script format with correct asset filenames`;
   }
 
   /**
@@ -232,7 +279,7 @@ ${this.extractPaperSummary(paperData)}
    */
   private extractPaperSummary(paperData: any): string {
     if (!paperData.sections || paperData.sections.length === 0) {
-      return paperData.rawText?.substring(0, 1000) || '无可用内容';
+      return paperData.rawText?.substring(0, 1000) || 'No content available';
     }
 
     const sections = paperData.sections;
@@ -245,7 +292,38 @@ ${this.extractPaperSummary(paperData)}
       }
     }
 
-    return summary || paperData.rawText?.substring(0, 1000) || '无可用内容';
+    return summary || paperData.rawText?.substring(0, 1000) || 'No content available';
+  }
+
+  /**
+   * Sanitize generated script to ensure correct asset filenames
+   * Post-processing to fix any AI-generated incorrect asset references
+   */
+  static sanitizeScript(script: string): string {
+    let sanitized = script;
+
+    // Fix background references - only bg.webp is available
+    sanitized = sanitized.replace(
+      /changeBg:([^;]+\.webp)/gi,
+      'changeBg:bg.webp'
+    );
+
+    // Fix figure references - map character names to actual sprites
+    const figurePatterns = [
+      { pattern: /changeFigure:host\.webp/gi, replacement: 'changeFigure:stand.webp' },
+      { pattern: /changeFigure:energizer\.webp/gi, replacement: 'changeFigure:stand2.webp' },
+      { pattern: /changeFigure:analyst\.webp/gi, replacement: 'changeFigure:stand.webp' },
+      { pattern: /changeFigure:interpreter\.webp/gi, replacement: 'changeFigure:stand2.webp' },
+      // Common AI-generated mistakes
+      { pattern: /changeFigure:character[^;]*\.webp/gi, replacement: 'changeFigure:stand.webp' },
+      { pattern: /changeFigure:figure[^;]*\.webp/gi, replacement: 'changeFigure:stand.webp' },
+    ];
+
+    for (const { pattern, replacement } of figurePatterns) {
+      sanitized = sanitized.replace(pattern, replacement);
+    }
+
+    return sanitized;
   }
 
   /**

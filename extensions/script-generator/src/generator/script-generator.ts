@@ -176,73 +176,82 @@ export class ScriptGenerator {
 
   /**
    * Build enhanced prompt with multi-language support
+   * Includes correct asset file mappings to prevent 404 errors
    */
   private buildEnhancedPrompt(paperData: ParsedPaper, options: GenerationOptions): string {
     const selectedCharacters = options.characters
       .map(id => getCharacter(id))
       .filter((char): char is Character => char !== null);
 
+    // Map character IDs to actual sprite files
+    const characterSpriteMap: Record<string, string> = {
+      host: 'stand.webp',
+      energizer: 'stand2.webp',
+      analyst: 'stand.webp',
+      interpreter: 'stand2.webp'
+    };
+
     const primaryLang = options.multiLanguage.primaryLanguage;
-    const characterDetails = selectedCharacters.map(char => `
+    const characterDetails = selectedCharacters.map(char => {
+      const sprite = characterSpriteMap[char.id] || 'stand.webp';
+      return `
 ### ${char.name[primaryLang]} (${char.id})
-- **性格**: ${char.personality.join('、')}
-- **表达方式**: ${char.speakingStyle.join('、')}
-- **论文角色**: ${char.paperRole}
-- **常用语**: ${char.phrases.slice(0, 3).join('、')}
-`).join('\n');
+- **Sprite**: ${sprite}
+- **Personality**: ${char.personality.join(', ')}
+- **Speaking Style**: ${char.speakingStyle.join(', ')}
+- **Paper Role**: ${char.paperRole}
+- **Phrases**: ${char.phrases.slice(0, 3).join(', ')}`;
+    }).join('\n');
 
     const paperSummary = this.createPaperSummary(paperData);
 
-    return `# Paper2GalGame 三语言并行剧本生成
+    return `# Paper2GalGame Multi-Language Script Generation
 
-## 任务概述
-将学术论文转换为WebGAL格式的教育性Galgame脚本，**同时生成中文、日文、英文三个版本**，平衡教育价值与娱乐性。
+## Task Overview
+Convert academic paper to WebGAL format educational visual novel script with trilingual support (Chinese, Japanese, English).
 
-## 重要要求 ⭐
-**每句对话都必须提供中文、日文、英文三个版本，格式严格如下：**
+## CRITICAL: Asset Requirements
+### Available Backgrounds (MUST use only these):
+- bg.webp (classroom/meeting room)
 
-示例格式:
-changeBg:教室.webp;
-changeFigure:nene.webp -center;
-say:大家好，今天我们来学习这篇论文。||皆さん、こんにちは。今日はこの論文を学習しましょう。||Hello everyone, let's study this paper today. -speaker=绫地宁宁||あやち ねね||Ayachi Nene -vocal=nene_001.wav;
+### Character Sprite Mapping (MUST follow exactly):
+- host → stand.webp
+- energizer → stand2.webp
+- analyst → stand.webp
+- interpreter → stand2.webp
 
-**格式说明**:
-- 对话内容: 中文内容||日文内容||英文内容
-- 角色名: 中文名||日文名||英文名
-- 语音文件统一使用日文命名
+## Example Format:
+\`\`\`
+changeBg:bg.webp;
+changeFigure:stand.webp -center;
+say:今日は論文について学びましょう。 -speaker=host;
+changeFigure:stand2.webp -right;
+say:楽しみですね！ -speaker=energizer;
+\`\`\`
 
-## 角色配置
+## Character Configuration
 ${characterDetails}
 
-## 论文内容
-**标题**: ${paperData.metadata.title}
-**作者**: ${paperData.metadata.authors?.join('、') || '未知'}
+## Paper Content
+**Title**: ${paperData.metadata.title}
+**Authors**: ${paperData.metadata.authors?.join(', ') || 'Unknown'}
 
 ${paperSummary}
 
-## 生成要求
+## Script Structure
+1. **Opening** (2-3 dialogues): Set bg.webp, introduce characters
+2. **Main Content** (20-30 dialogues): Explain paper content, character interactions
+3. **Discussion** (8-12 dialogues): Analyze key points
+4. **Summary** (4-6 dialogues): Summarize main takeaways
+5. **Closing** (2 dialogues): Farewell
 
-### 脚本结构
-1. **开场** (2-3句): 角色登场，营造学习氛围
-2. **内容讲解** (20-30句): 分段详细讲解，角色互动
-3. **深入讨论** (8-12句): 重点难点分析，角色各抒己见
-4. **总结回顾** (4-6句): 总结要点，加深理解
-5. **结束** (2句): 结束语，期待下次
+## Quality Standards
+- Educational weight: ${(options.style.educationalWeight * 100).toFixed(0)}%
+- Complexity: ${options.style.complexity}
+- Primary language: ${primaryLang}
+- Interactions: ${options.style.interactive ? 'enabled' : 'disabled'}
 
-### 三语言对话要求
-- **中文**: 标准现代汉语，教育性用词
-- **日文**: 自然的口语日语，符合角色人设
-- **英文**: 地道英语表达，学术性适中
-- **一致性**: 三种语言表达相同含义，但要自然地道
-- **角色特色**: 每种语言都要体现角色性格特点
-
-### 质量标准
-- 教育权重: ${(options.style.educationalWeight * 100).toFixed(0)}%
-- 复杂度: ${options.style.complexity}
-- 主要语言: ${primaryLang}
-- 互动性: ${options.style.interactive ? '启用' : '禁用'}
-
-请生成完整的三语言WebGAL脚本，确保每句话都有对应的三种语言版本，内容准确且自然。`;
+Generate complete WebGAL script with correct asset filenames. Use Japanese for dialogue content.`;
   }
 
   /**
@@ -260,7 +269,7 @@ ${paperSummary}
     }
 
     if (!summary) {
-      summary = `### 论文内容\n${paperData.rawText.substring(0, 1200)}...\n`;
+      summary = `### Paper Content\n${paperData.rawText.substring(0, 1200)}...\n`;
     }
 
     return summary;
@@ -499,12 +508,12 @@ ${paperSummary}
    */
   private generateSceneTitle(type: string, index: number): string {
     const titles = {
-      introduction: '开场介绍',
-      content: `内容讲解 ${Math.floor(index / 2) + 1}`,
-      discussion: `深入讨论 ${Math.floor(index / 2)}`,
-      summary: '总结回顾'
+      introduction: 'Opening Introduction',
+      content: `Content Explanation ${Math.floor(index / 2) + 1}`,
+      discussion: `In-depth Discussion ${Math.floor(index / 2)}`,
+      summary: 'Summary Review'
     };
-    return titles[type as keyof typeof titles] || `场景 ${index + 1}`;
+    return titles[type as keyof typeof titles] || `Scene ${index + 1}`;
   }
 
   /**
@@ -512,12 +521,12 @@ ${paperSummary}
    */
   private generateSceneObjectives(type: string): string[] {
     const objectives = {
-      introduction: ['营造学习氛围', '介绍论文主题', '角色登场'],
-      content: ['传达论文核心内容', '确保概念理解', '维持学习兴趣'],
-      discussion: ['深化理解', '多角度分析', '激发思考'],
-      summary: ['巩固知识', '总结要点', '展望应用']
+      introduction: ['Set learning atmosphere', 'Introduce paper topic', 'Character entrance'],
+      content: ['Convey core paper content', 'Ensure concept understanding', 'Maintain learning interest'],
+      discussion: ['Deepen understanding', 'Multi-angle analysis', 'Inspire thinking'],
+      summary: ['Consolidate knowledge', 'Summarize key points', 'Outlook applications']
     };
-    return objectives[type as keyof typeof objectives] || ['推进剧情发展'];
+    return objectives[type as keyof typeof objectives] || ['Advance story development'];
   }
 
   /**

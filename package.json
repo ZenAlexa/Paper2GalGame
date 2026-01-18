@@ -7,9 +7,13 @@
   "scripts": {
     "build": "yarn parser:build && yarn webgal:build",
     "build-ci": "yarn parser:build-ci && yarn webgal:build",
-    "dev": "yarn parser:build && yarn webgal:dev",
+    "dev": "yarn parser:build && concurrently \"yarn api:dev\" \"yarn webgal:dev\"",
+    "dev:frontend": "yarn parser:build && yarn webgal:dev",
     "webgal:dev": "cd packages/webgal && yarn dev",
     "webgal:build": "cd packages/webgal && yarn build",
+    "api:dev": "cd extensions/api && yarn dev",
+    "api:build": "cd extensions/api && yarn build",
+    "ext:build": "yarn workspace @paper2galgame/paper-parser build && yarn workspace @paper2galgame/script-generator build && yarn workspace @paper2galgame/tts-service build",
     "parser:test": "cd packages/parser && yarn test",
     "parser:test-coverage": "cd packages/parser && yarn coverage",
     "parser:build": "cd packages/parser && yarn build",
@@ -18,12 +22,16 @@
   "license": "MPL-2.0",
   "workspaces": {
     "packages": [
-      "packages/*"
+      "packages/*",
+      "extensions/*"
     ]
   },
   "private": true,
   "engines": {
     "node": ">=18"
   },
-  "packageManager": "yarn@1.22.22"
+  "packageManager": "yarn@1.22.22",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
 }

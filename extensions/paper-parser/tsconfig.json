@@ -26,6 +26,8 @@
     "node_modules",
     "dist",
     "**/*.test.ts",
-    "**/*.spec.ts"
+    "**/*.spec.ts",
+    "src/engines/**/*",
+    "src/types/enhanced-paper.ts"
   ]
 }

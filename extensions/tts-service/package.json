@@ -21,7 +21,7 @@
   "author": "Paper2GalGame",
   "license": "MIT",
   "dependencies": {
-    "@paper2galgame/script-generator": "workspace:*"
+    "@paper2galgame/script-generator": "*"
   },
   "devDependencies": {
     "@types/jest": "^29.5.11",

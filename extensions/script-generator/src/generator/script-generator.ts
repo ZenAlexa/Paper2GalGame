@@ -275,8 +275,15 @@ ${paperSummary}
     options: GenerationOptions,
     apiMetadata: any
   ): Promise<WebGALScript> {
-    const lines = rawScript.split('\n')
-      .filter(line => line.trim())
+    // Extract script content from markdown code blocks if present
+    let cleanScript = rawScript;
+    const codeBlockMatch = rawScript.match(/```(?:webgal)?\n([\s\S]*?)```/);
+    if (codeBlockMatch && codeBlockMatch[1]) {
+      cleanScript = codeBlockMatch[1];
+    }
+
+    const lines = cleanScript.split('\n')
+      .filter(line => line.trim() && !line.trim().startsWith('//')) // Filter comments
       .map((line, index) => this.parseScriptLine(line, index));
 
     // Group lines into scenes based on content flow

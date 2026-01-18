@@ -98,11 +98,10 @@ export interface TTSProviderConfig {
 
 /**
  * Minimax-specific configuration
+ * Note: GroupId is no longer needed for new Minimax API (api.minimax.io)
  */
 export interface MinimaxConfig extends TTSProviderConfig {
   name: 'minimax';
-  /** Group ID for Minimax API */
-  groupId?: string;
   /** Model version */
   model?: 'speech-02-turbo' | 'speech-02-hd' | 'speech-2.6-turbo' | 'speech-2.6-hd';
 }
@@ -137,63 +136,92 @@ export interface ProviderStatus {
 }
 
 /**
- * Minimax voice IDs for female characters
+ * Minimax official Japanese voice IDs
+ * Reference: https://platform.minimax.io/docs/faq/system-voice-id
  */
 export type MinimaxVoiceId =
-  | 'Sweet_Girl_2'    // Gentle, sweet voice
-  | 'Lively_Girl'     // Energetic voice
-  | 'Lovely_Girl'     // Cute voice
-  | 'Wise_Woman'      // Mature voice
-  | 'Young_Girl'      // Young voice
-  | 'Gentle_Woman';   // Soft voice
+  // Japanese female voices
+  | 'Japanese_KindLady'           // Kind Lady - warm, friendly
+  | 'Japanese_GracefulMaiden'     // Graceful Maiden - elegant, soft
+  | 'Japanese_CalmLady'           // Calm Lady - composed, mature
+  | 'Japanese_DecisivePrincess'   // Decisive Princess - confident
+  | 'Japanese_ColdQueen'          // Cold Queen - cool, dignified
+  | 'Japanese_DependableWoman'    // Dependable Woman - reliable
+  // Japanese male voices
+  | 'Japanese_IntellectualSenior' // Intellectual Senior - wise
+  | 'Japanese_GentleButler'       // Gentle Butler - polite
+  | 'Japanese_LoyalKnight'        // Loyal Knight - loyal
+  | 'Japanese_DominantMan'        // Dominant Man - strong
+  | 'Japanese_SeriousCommander'   // Serious Commander - authoritative
+  // Japanese youth voices
+  | 'Japanese_OptimisticYouth'    // Optimistic Youth - energetic
+  | 'Japanese_SportyStudent'      // Sporty Student - active
+  | 'Japanese_InnocentBoy'        // Innocent Boy - innocent
+  | 'Japanese_GenerousIzakayaOwner'; // Izakaya Owner - friendly
 
 /**
- * Minimax emotion options
- */
-export type MinimaxEmotion =
-  | 'happy'
-  | 'sad'
-  | 'angry'
-  | 'fearful'
-  | 'disgusted'
-  | 'surprised'
-  | 'calm'
-  | 'fluent';
-
-/**
- * Minimax API request body
+ * Minimax HTTP API request body
+ * Reference: https://platform.minimax.io/docs/api-reference/speech-t2a-http
  */
 export interface MinimaxTTSRequest {
+  /** Model version: speech-2.6-hd, speech-2.6-turbo, speech-02-hd, speech-02-turbo */
   model: string;
+  /** Text to synthesize (max 10,000 characters) */
   text: string;
+  /** Enable streaming output */
+  stream?: boolean;
+  /** Language hint (auto, English, Japanese, Chinese, etc.) */
+  language_boost?: string;
+  /** Output format: hex (default) or url */
+  output_format?: 'hex' | 'url';
+  /** Voice configuration */
   voice_setting: {
     voice_id: string;
     speed?: number;
     vol?: number;
     pitch?: number;
-    emotion?: string;
   };
+  /** Audio output configuration */
   audio_setting?: {
     sample_rate?: number;
     bitrate?: number;
     format?: string;
     channel?: number;
   };
+  /** Voice modification effects */
+  voice_modify?: {
+    pitch?: number;
+    intensity?: number;
+    timbre?: number;
+    sound_effects?: string;
+  };
 }
 
 /**
- * Minimax API response
+ * Minimax HTTP API response
+ * Note: Audio is hex-encoded (not base64)
+ * Reference: https://platform.minimax.io/docs/api-reference/speech-t2a-http
  */
 export interface MinimaxTTSResponse {
-  /** Base64 encoded audio data */
-  audio_file?: string;
-
-  /** Audio data in hex format */
+  /** Hex-encoded audio data */
   data?: {
     audio?: string;
+    status?: number;
   };
 
-  /** Error information */
+  /** Extra information about the generated audio */
+  extra_info?: {
+    audio_length?: number;
+    audio_sample_rate?: number;
+    audio_size?: number;
+    word_count?: number;
+    usage_characters?: number;
+  };
+
+  /** Request trace ID */
+  trace_id?: string;
+
+  /** Response status */
   base_resp?: {
     status_code: number;
     status_msg: string;

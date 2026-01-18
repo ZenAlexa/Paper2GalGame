@@ -186,9 +186,10 @@ router.get('/providers', async (_req: Request, res: Response) => {
     {
       id: 'minimax',
       name: 'Minimax TTS',
-      description: 'High-quality Japanese TTS with emotion support',
+      description: 'High-quality Japanese TTS (40+ languages)',
       requiresApiKey: true,
-      configured: !!(process.env.MINIMAX_API_KEY && process.env.MINIMAX_GROUP_ID)
+      // New Minimax API only requires API key (no GroupID needed)
+      configured: !!process.env.MINIMAX_API_KEY
     },
     {
       id: 'voicevox',

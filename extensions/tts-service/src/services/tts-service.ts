@@ -35,7 +35,6 @@ export interface TTSServiceConfig {
   /** Minimax configuration */
   minimax?: {
     apiKey?: string;
-    groupId?: string;
     model?: string;
   };
 
@@ -95,7 +94,6 @@ export class TTSService {
     // Initialize Minimax provider
     const minimaxProvider = new MinimaxTTSProvider({
       apiKey: this.config.minimax?.apiKey,
-      groupId: this.config.minimax?.groupId,
       model: this.config.minimax?.model
     });
     this.providers.set('minimax', minimaxProvider);
@@ -299,8 +297,7 @@ export function createTTSService(): TTSService {
     enableFallback: true,
     minimax: {
       apiKey: process.env.MINIMAX_API_KEY,
-      groupId: process.env.MINIMAX_GROUP_ID,
-      model: process.env.MINIMAX_MODEL || 'speech-02-turbo'
+      model: process.env.MINIMAX_MODEL || 'speech-2.6-hd'
     },
     voicevox: {
       port: parseInt(process.env.VOICEVOX_PORT || '50021', 10)

@@ -165,15 +165,33 @@ router.post('/', async (req: Request, res: Response) => {
 
       for (const scene of result.script.scenes || []) {
         for (const line of scene.lines || []) {
-          if (line.command === 'say' && line.metadata?.source) {
-            const source = line.metadata.source;
+          if (line.command === 'say') {
+            const rawContent = line.params[0] || '';
+
+            // Extract speaker from -speaker= option in content
+            let speakerName = 'unknown';
+            const speakerMatch = rawContent.match(/-speaker=(\w+)/);
+            if (speakerMatch) {
+              speakerName = speakerMatch[1];
+            } else if (line.options?.speaker) {
+              const speaker = line.options.speaker;
+              speakerName = typeof speaker === 'string' ? speaker : 'unknown';
+            }
+
+            // Extract text content (before -speaker option)
+            let textContent = rawContent;
+            const optionIndex = rawContent.indexOf(' -speaker=');
+            if (optionIndex > 0) {
+              textContent = rawContent.substring(0, optionIndex);
+            }
+
             dialogues.push({
               id: `dialogue_${dialogueIndex++}`,
-              character: source.characterId,
-              text: source.content?.zh || source.content?.jp || '',
-              textJp: source.content?.jp || '',
-              textEn: source.content?.en || '',
-              emotion: source.emotion
+              character: speakerName,
+              text: textContent,
+              textJp: textContent,
+              textEn: '',
+              emotion: 'normal'
             });
           }
         }
@@ -183,7 +201,9 @@ router.post('/', async (req: Request, res: Response) => {
       const webgalLines: string[] = [];
       for (const scene of result.script.scenes || []) {
         for (const line of scene.lines || []) {
-          webgalLines.push(line.raw);
+          if (line.raw) {
+            webgalLines.push(line.raw);
+          }
         }
       }
 

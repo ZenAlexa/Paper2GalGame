@@ -31,7 +31,8 @@ export type {
   BatchTTSRequest,
   BatchTTSResult,
   MinimaxVoiceId,
-  MinimaxEmotion,
+  MinimaxTTSRequest,
+  MinimaxTTSResponse,
   VoicevoxAudioQuery,
   VoicevoxSpeaker
 } from './types';

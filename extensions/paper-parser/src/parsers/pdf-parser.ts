@@ -4,7 +4,8 @@
  * Uses pdf.js to extract text, structure, and metadata from PDF documents.
  */
 
-// Use legacy build for Node.js compatibility
+// Use legacy build for Node.js compatibility (Node 18-21)
+// Standard build requires Node 22+ for Promise.withResolvers
 import * as pdfjs from 'pdfjs-dist/legacy/build/pdf.mjs';
 import type {
   PDFParser,
@@ -16,15 +17,17 @@ import type {
 } from '../types';
 import { BaseParserImpl } from './base-parser';
 
+// Disable worker globally for Node.js environment
+// This must be set before any getDocument() calls
+(pdfjs as any).disableWorker = true;
+
 /**
  * PDF parser implementation using pdf.js legacy build
- * Uses legacy build for better Node.js compatibility without worker
+ * Runs on main thread without web worker for Node.js compatibility
  */
 export class PDFParserImpl extends BaseParserImpl implements PDFParser {
   constructor() {
     super('PDFParser', ['pdf']);
-    // Disable worker for Node.js - use main thread instead
-    (pdfjs as any).GlobalWorkerOptions.workerSrc = '';
   }
 
   /**

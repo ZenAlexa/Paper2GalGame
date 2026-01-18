@@ -59,7 +59,8 @@ app.get('/api/health', (_req, res) => {
       timestamp: new Date().toISOString(),
       config: {
         openrouter: !!process.env.OPENROUTER_API_KEY,
-        minimax: !!(process.env.MINIMAX_API_KEY && process.env.MINIMAX_GROUP_ID),
+        // New Minimax API only requires API key (no GroupID needed)
+        minimax: !!process.env.MINIMAX_API_KEY,
         voicevox: process.env.VOICEVOX_URL || 'http://localhost:50021'
       }
     },

@@ -1,8 +1,9 @@
 /**
  * Minimax TTS Provider
  *
- * Integration with Minimax Speech-02 API for high-quality voice synthesis
- * Supports multiple female voices with emotion control
+ * High-quality Japanese voice synthesis using Minimax Speech API
+ * Supports 40+ languages with natural prosody
+ * API Reference: https://platform.minimax.io/docs/api-reference/speech-t2a-http
  */
 
 import type {
@@ -13,39 +14,38 @@ import type {
   CharacterVoiceSettings,
   MinimaxTTSRequest,
   MinimaxTTSResponse,
-  MinimaxVoiceId,
-  MinimaxEmotion
+  MinimaxVoiceId
 } from '../types';
 
 /**
- * Minimax TTS Provider implementation
+ * Minimax TTS Provider
+ * HTTP API endpoint: POST /v1/t2a_v2
+ * Audio response format: hex-encoded
  */
 export class MinimaxTTSProvider implements TTSProvider {
   readonly name = 'minimax';
-  readonly supportedLanguages = ['zh', 'jp', 'en'];
+  readonly supportedLanguages = ['zh', 'ja', 'en'];
   readonly supportedEmotions: TTSEmotion[] = [
     'neutral', 'happy', 'serious', 'excited', 'calm', 'sad', 'angry'
   ];
 
   private apiKey: string;
-  private groupId: string;
   private baseURL: string;
   private model: string;
 
   constructor(config?: {
     apiKey?: string;
-    groupId?: string;
     baseURL?: string;
     model?: string;
   }) {
     this.apiKey = config?.apiKey || process.env.MINIMAX_API_KEY || '';
-    this.groupId = config?.groupId || process.env.MINIMAX_GROUP_ID || '';
-    this.baseURL = config?.baseURL || 'https://api.minimax.chat/v1/t2a_v2';
-    this.model = config?.model || 'speech-02-turbo';
+    this.baseURL = config?.baseURL || process.env.MINIMAX_API_URL || 'https://api.minimax.io/v1/t2a_v2';
+    // Model configurable via env, defaults to speech-2.6-hd (SOTA as of 2026)
+    this.model = config?.model || process.env.MINIMAX_MODEL || 'speech-2.6-hd';
   }
 
   /**
-   * Check if Minimax API is available
+   * Check API availability with a minimal test request
    */
   async isAvailable(): Promise<boolean> {
     if (!this.apiKey) {
@@ -53,7 +53,6 @@ export class MinimaxTTSProvider implements TTSProvider {
     }
 
     try {
-      // Make a minimal test request
       const response = await fetch(this.baseURL, {
         method: 'POST',
         headers: {
@@ -62,10 +61,12 @@ export class MinimaxTTSProvider implements TTSProvider {
         },
         body: JSON.stringify({
           model: this.model,
-          text: 'test',
+          text: 'テスト',
           voice_setting: {
-            voice_id: 'Sweet_Girl_2',
-            speed: 1.0
+            voice_id: 'Japanese_GracefulMaiden',
+            speed: 1.0,
+            vol: 1,
+            pitch: 0
           }
         })
       });
@@ -78,7 +79,7 @@ export class MinimaxTTSProvider implements TTSProvider {
   }
 
   /**
-   * Get provider status
+   * Get current provider status
    */
   async getStatus(): Promise<ProviderStatus> {
     const available = await this.isAvailable();
@@ -92,7 +93,8 @@ export class MinimaxTTSProvider implements TTSProvider {
   }
 
   /**
-   * Generate audio from text using Minimax API
+   * Generate audio from text
+   * Note: HTTP API does not support emotion parameter
    */
   async generateAudio(
     text: string,
@@ -104,20 +106,20 @@ export class MinimaxTTSProvider implements TTSProvider {
     }
 
     const minimaxSettings = voiceSettings.minimax;
-    const emotion = this.mapEmotion(options?.emotion || 'neutral');
+    const modelName = minimaxSettings.model || this.model;
 
     const requestBody: MinimaxTTSRequest = {
-      model: minimaxSettings.model || this.model,
+      model: modelName,
       text: text,
+      stream: false,
       voice_setting: {
         voice_id: minimaxSettings.voice,
         speed: options?.speed ?? 1.0,
-        vol: options?.volume ?? 5,
-        pitch: options?.pitch ?? 0,
-        emotion: emotion
+        vol: options?.volume ?? 1,
+        pitch: options?.pitch ?? 0
       },
       audio_setting: {
-        sample_rate: options?.sampleRate ?? 24000,
+        sample_rate: options?.sampleRate ?? 32000,
         bitrate: 128000,
         format: options?.format ?? 'mp3',
         channel: 1
@@ -129,14 +131,10 @@ export class MinimaxTTSProvider implements TTSProvider {
   }
 
   /**
-   * Make API request to Minimax
+   * Send request to Minimax API
    */
   private async makeRequest(body: MinimaxTTSRequest): Promise<MinimaxTTSResponse> {
-    const url = this.groupId
-      ? `${this.baseURL}?GroupId=${this.groupId}`
-      : this.baseURL;
-
-    const response = await fetch(url, {
+    const response = await fetch(this.baseURL, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${this.apiKey}`,
@@ -154,85 +152,78 @@ export class MinimaxTTSProvider implements TTSProvider {
   }
 
   /**
-   * Extract audio data from API response
+   * Extract audio data from hex-encoded response
    */
   private extractAudioData(response: MinimaxTTSResponse): ArrayBuffer {
-    // Check for errors
     if (response.base_resp && response.base_resp.status_code !== 0) {
       throw new Error(`Minimax API error: ${response.base_resp.status_msg}`);
     }
 
-    // Try to get audio from different response formats
-    let base64Audio: string | undefined;
-
-    if (response.audio_file) {
-      base64Audio = response.audio_file;
-    } else if (response.data?.audio) {
-      base64Audio = response.data.audio;
-    }
-
-    if (!base64Audio) {
+    const hexAudio = response.data?.audio;
+    if (!hexAudio) {
       throw new Error('No audio data in Minimax response');
     }
 
-    // Decode base64 to ArrayBuffer
-    return this.base64ToArrayBuffer(base64Audio);
+    return this.hexToArrayBuffer(hexAudio);
   }
 
   /**
-   * Convert base64 string to ArrayBuffer
+   * Convert hex string to ArrayBuffer
    */
-  private base64ToArrayBuffer(base64: string): ArrayBuffer {
-    // Handle data URL format if present
-    const base64Data = base64.includes(',')
-      ? base64.split(',')[1]
-      : base64;
+  private hexToArrayBuffer(hex: string): ArrayBuffer {
+    const cleanHex = hex.replace(/\s/g, '').replace(/^0x/i, '');
 
-    // Node.js environment
     if (typeof Buffer !== 'undefined') {
-      const buffer = Buffer.from(base64Data, 'base64');
-      return buffer.buffer.slice(
-        buffer.byteOffset,
-        buffer.byteOffset + buffer.byteLength
-      );
+      const buffer = Buffer.from(cleanHex, 'hex');
+      const arrayBuffer = new ArrayBuffer(buffer.length);
+      const view = new Uint8Array(arrayBuffer);
+      view.set(new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength));
+      return arrayBuffer;
     }
 
-    // Browser environment
-    const binaryString = atob(base64Data);
-    const bytes = new Uint8Array(binaryString.length);
-    for (let i = 0; i < binaryString.length; i++) {
-      bytes[i] = binaryString.charCodeAt(i);
+    const bytes = new Uint8Array(cleanHex.length / 2);
+    for (let i = 0; i < cleanHex.length; i += 2) {
+      bytes[i / 2] = parseInt(cleanHex.substring(i, i + 2), 16);
     }
     return bytes.buffer;
   }
 
   /**
-   * Map internal emotion to Minimax emotion format
-   */
-  private mapEmotion(emotion: TTSEmotion): MinimaxEmotion {
-    const emotionMap: Record<TTSEmotion, MinimaxEmotion> = {
-      neutral: 'calm',
-      happy: 'happy',
-      serious: 'calm',
-      excited: 'happy',
-      calm: 'calm',
-      sad: 'sad',
-      angry: 'angry'
-    };
-    return emotionMap[emotion] || 'calm';
-  }
-
-  /**
-   * Get available voice IDs
+   * Available Japanese voice IDs
+   * Reference: https://platform.minimax.io/docs/faq/system-voice-id
    */
   static getAvailableVoices(): MinimaxVoiceId[] {
     return [
-      'Sweet_Girl_2',
-      'Lively_Girl',
-      'Lovely_Girl',
-      'Wise_Woman',
-      'Young_Girl',
-      'Gentle_Woman'
+      // Female voices - suitable for narration
+      'Japanese_GracefulMaiden',     // Elegant, soft - ideal for host
+      'Japanese_KindLady',           // Warm, friendly
+      'Japanese_CalmLady',           // Composed, mature
+      'Japanese_DecisivePrincess',   // Confident, clear
+      'Japanese_ColdQueen',          // Cool, dignified
+      'Japanese_DependableWoman',    // Reliable, steady
+      // Male voices
+      'Japanese_IntellectualSenior', // Wise, scholarly
+      'Japanese_GentleButler',       // Polite, refined
+      'Japanese_LoyalKnight',        // Loyal, strong
+      'Japanese_DominantMan',        // Authoritative
+      'Japanese_SeriousCommander',   // Commanding presence
+      // Youth voices
+      'Japanese_OptimisticYouth',    // Energetic, lively
+      'Japanese_SportyStudent',      // Active, enthusiastic
+      'Japanese_InnocentBoy',        // Innocent, curious
+      'Japanese_GenerousIzakayaOwner' // Friendly, welcoming
+    ];
+  }
+
+  /**
+   * Recommended voices for academic narration
+   */
+  static getRecommendedVoices(): MinimaxVoiceId[] {
+    return [
+      'Japanese_GracefulMaiden',     // Host - elegant narrator
+      'Japanese_OptimisticYouth',    // Energizer - lively discussion
+      'Japanese_DecisivePrincess',   // Analyst - clear analysis
+      'Japanese_CalmLady'            // Interpreter - composed explanation
     ];
   }
 

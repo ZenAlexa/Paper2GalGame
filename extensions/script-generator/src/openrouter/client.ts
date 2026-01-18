@@ -46,7 +46,7 @@ export class OpenRouterClient {
   async chatCompletion(request: ChatCompletionRequest): Promise<ChatCompletionResponse> {
     const url = `${this.config.baseURL}/chat/completions`;
 
-    const body = {
+    const body: Record<string, any> = {
       model: request.model || this.config.defaultModel,
       messages: request.messages,
       temperature: request.temperature ?? 0.8,
@@ -55,9 +55,13 @@ export class OpenRouterClient {
       frequency_penalty: request.frequency_penalty ?? 0,
       presence_penalty: request.presence_penalty ?? 0,
       ...(request.stop && { stop: request.stop }),
-      ...(request.reasoning && { reasoning: request.reasoning }),
       ...(request.stream && { stream: request.stream })
     };
+
+    // Add reasoning for Gemini 3 models (uses object format)
+    if (request.reasoning && body.model?.includes('gemini-3')) {
+      body.reasoning = { effort: 'medium' };
+    }
 
     try {
       const response = await fetch(url, {
@@ -72,8 +76,15 @@ export class OpenRouterClient {
       });
 
       if (!response.ok) {
-        const error = await response.json() as OpenRouterError;
-        throw new Error(`OpenRouter API error: ${error.message || 'Unknown error'}`);
+        const errorText = await response.text();
+        let errorMessage = 'Unknown error';
+        try {
+          const error = JSON.parse(errorText) as OpenRouterError;
+          errorMessage = error.message || JSON.stringify(error);
+        } catch {
+          errorMessage = `HTTP ${response.status}: ${errorText.substring(0, 200)}`;
+        }
+        throw new Error(`OpenRouter API error: ${errorMessage}`);
       }
 
       const result = await response.json() as ChatCompletionResponse;

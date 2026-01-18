@@ -66,8 +66,14 @@ router.post('/', upload.single('file') as any, async (req: Request, res: Respons
       const { PaperParser } = await import('@paper2galgame/paper-parser');
       const parser = new PaperParser();
 
+      // Convert Node.js Buffer to ArrayBuffer properly
+      // Create a new ArrayBuffer and copy data to avoid SharedArrayBuffer issues
+      const arrayBuffer = new ArrayBuffer(file.buffer.byteLength);
+      const view = new Uint8Array(arrayBuffer);
+      view.set(new Uint8Array(file.buffer));
+
       // Parse the paper
-      const result = await parser.parse(file.buffer.buffer as ArrayBuffer, {
+      const result = await parser.parse(arrayBuffer, {
         filename: file.originalname,
         mimeType: file.mimetype
       });

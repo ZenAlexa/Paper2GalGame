@@ -1,15 +1,15 @@
 /**
  * Character Configurations
  *
- * Detailed character settings based on original game sources
- * Research sources: 萌娘百科, BANGUMI, official game data
+ * Development character definitions for Paper2GalGame
+ * Maps character roles to TTS voice settings
  */
 
 import type { Character } from '../types';
 
 /**
- * Complete character configurations for development testing
- * Uses WebGAL default assets for local development
+ * Character configurations for academic paper narration
+ * Uses WebGAL default assets during development
  */
 export const CHARACTER_CONFIGS: Record<string, Character> = {
   host: {
@@ -21,20 +21,20 @@ export const CHARACTER_CONFIGS: Record<string, Character> = {
     },
     source: 'Development Character',
     personality: [
-      '温柔体贴的大姐姐性格',
-      '善于倾听和引导他人',
-      '对学术有浓厚兴趣',
-      '略带天然呆，但很有条理',
-      '内心细腻，善于察言观色'
+      'Gentle and caring personality',
+      'Good at listening and guiding',
+      'Strong interest in academics',
+      'Slightly airheaded but organized',
+      'Emotionally perceptive'
     ],
     speakingStyle: [
-      '语调温和，使用敬语',
-      '经常用"呢"、"哦"等语气词',
-      '善于总结和归纳要点',
-      '提出启发性问题',
-      '说话有条理，逻辑清晰'
+      'Warm tone with polite speech',
+      'Uses soft sentence endings',
+      'Good at summarizing key points',
+      'Asks thought-provoking questions',
+      'Clear and logical speech'
     ],
-    paperRole: '主持人和总结者',
+    paperRole: 'Host and summarizer',
     voiceSettings: {
       voicevox: {
         speaker: 2,
@@ -42,19 +42,19 @@ export const CHARACTER_CONFIGS: Record<string, Character> = {
         speed: 1.0
       },
       minimax: {
-        model: 'speech-02',
-        voice: 'Sweet_Girl_2',
+        model: 'speech-2.6-hd',
+        voice: 'Japanese_GracefulMaiden',
         emotion: 'neutral'
       }
     },
     phrases: [
-      '让我来为大家总结一下呢',
-      '这个问题很有意思哦',
-      '大家觉得怎么样？',
-      '嗯嗯，我明白了',
-      '接下来我们看看...'
+      'Let me summarize for everyone',
+      'That is an interesting question',
+      'What do you all think?',
+      'I understand',
+      'Let us look at the next part'
     ],
-    description: '温柔善良的主持人角色，善于总结和引导讨论。',
+    description: 'Gentle host who summarizes and guides discussion',
     sprite: 'stand.webp'
   },
 
@@ -67,19 +67,19 @@ export const CHARACTER_CONFIGS: Record<string, Character> = {
     },
     source: 'Development Character',
     personality: [
-      '活泼开朗的元气少女',
-      '好奇心强，喜欢提问',
-      '思维跳跃，反应敏捷',
-      '对温暖的渴望很强烈'
+      'Cheerful and energetic',
+      'Highly curious and inquisitive',
+      'Quick-thinking with creative ideas',
+      'Expressive emotions'
     ],
     speakingStyle: [
-      '语调活泼，感叹词丰富',
-      '经常用"诶"、"哇"、"唔"',
-      '时常提出意想不到的问题',
-      '用比喻和形象化表达',
-      '情绪表达直率而丰富'
+      'Lively tone with exclamations',
+      'Uses interjections frequently',
+      'Asks unexpected questions',
+      'Uses metaphors and vivid expressions',
+      'Direct emotional expression'
     ],
-    paperRole: '活跃气氛者和提问者',
+    paperRole: 'Energizer and questioner',
     voiceSettings: {
       voicevox: {
         speaker: 3,
@@ -87,20 +87,19 @@ export const CHARACTER_CONFIGS: Record<string, Character> = {
         speed: 1.1
       },
       minimax: {
-        model: 'speech-02',
-        voice: 'Lively_Girl',
-        emotion: 'cheerful'
+        model: 'speech-2.6-hd',
+        voice: 'Japanese_OptimisticYouth',
+        emotion: 'neutral'
       }
     },
     phrases: [
-      '诶诶！这个好有趣！',
-      '我懂了我懂了！',
-      '等等等等，还有个问题！',
-      '哇，原来如此呢',
-      '那个...那个...',
-      '真是不可思议呀'
+      'Wow, that is so interesting!',
+      'I get it now!',
+      'Wait, I have another question!',
+      'Oh, I see!',
+      'That is amazing!'
     ],
-    description: '活泼开朗的元气少女，用有趣的比喻让内容生动。',
+    description: 'Energetic character who makes content engaging',
     sprite: 'stand2.webp'
   },
 
@@ -113,18 +112,18 @@ export const CHARACTER_CONFIGS: Record<string, Character> = {
     },
     source: 'Development Character',
     personality: [
-      '理性严谨的学者型',
-      '逻辑思维极强',
-      '追求精确和深度理解',
-      '做事认真负责'
+      'Rational and rigorous scholar',
+      'Strong logical thinking',
+      'Pursues precision and deep understanding',
+      'Conscientious and responsible'
     ],
     speakingStyle: [
-      '用词精准，逻辑清晰',
-      '喜欢使用专业术语',
-      '进行严密的逻辑推理',
-      '语调相对严肃但温和'
+      'Precise wording with clear logic',
+      'Uses technical terminology',
+      'Rigorous logical reasoning',
+      'Serious but gentle tone'
     ],
-    paperRole: '深度分析者和质疑者',
+    paperRole: 'Deep analyst and critical thinker',
     voiceSettings: {
       voicevox: {
         speaker: 8,
@@ -132,20 +131,20 @@ export const CHARACTER_CONFIGS: Record<string, Character> = {
         speed: 0.9
       },
       minimax: {
-        model: 'speech-02',
-        voice: 'Lovely_Girl',
-        emotion: 'serious'
+        model: 'speech-2.6-hd',
+        voice: 'Japanese_DecisivePrincess',
+        emotion: 'neutral'
       }
     },
     phrases: [
-      '从逻辑上分析的话',
-      '这里有个问题需要探讨',
-      '让我们深入研究一下',
-      '数据显示...',
-      '按照理论框架',
-      '嗯...这个结论还需要验证'
+      'From a logical perspective',
+      'There is an issue to discuss here',
+      'Let us examine this more closely',
+      'The data shows...',
+      'According to the theoretical framework',
+      'This conclusion needs verification'
     ],
-    description: '理性严谨的学者型，深入分析论文的逻辑结构。',
+    description: 'Rigorous analyst who examines logical structure',
     sprite: 'stand.webp'
   },
 
@@ -158,18 +157,18 @@ export const CHARACTER_CONFIGS: Record<string, Character> = {
     },
     source: 'Development Character',
     personality: [
-      '博学睿智的知识者',
-      '善于联想和扩展知识',
-      '内心善良',
-      '有着独特的价值观'
+      'Knowledgeable and wise',
+      'Good at making connections',
+      'Kind-hearted',
+      'Unique perspective on things'
     ],
     speakingStyle: [
-      '表面开朗健谈',
-      '使用现代流行语汇',
-      '创造性的表达方式',
-      '善于用类比解释概念'
+      'Outgoing and talkative',
+      'Uses modern expressions',
+      'Creative explanations',
+      'Good at analogies'
     ],
-    paperRole: '生活化解释者和共鸣者',
+    paperRole: 'Practical interpreter and relatable explainer',
     voiceSettings: {
       voicevox: {
         speaker: 2,
@@ -177,26 +176,26 @@ export const CHARACTER_CONFIGS: Record<string, Character> = {
         speed: 0.85
       },
       minimax: {
-        model: 'speech-02',
-        voice: 'Wise_Woman',
-        emotion: 'calm'
+        model: 'speech-2.6-hd',
+        voice: 'Japanese_CalmLady',
+        emotion: 'neutral'
       }
     },
     phrases: [
-      '大家好！',
-      '这就像我们生活中的...',
-      '嗯嗯，我觉得',
-      '简单来说就是',
-      '啊，我懂这种感觉',
-      '用我们的话来说就是'
+      'Hello everyone!',
+      'This is like in our daily life...',
+      'I think that...',
+      'Simply put...',
+      'I understand that feeling',
+      'In other words...'
     ],
-    description: '博学睿智的知识渊博者，善于联想和扩展知识。',
+    description: 'Wise interpreter who connects concepts to daily life',
     sprite: 'stand2.webp'
   }
 };
 
 /**
- * Character interaction patterns for natural dialogue flow
+ * Character interaction patterns for dialogue flow
  */
 export const CHARACTER_INTERACTIONS: Record<string, Array<{
   participants: string[];
@@ -206,31 +205,31 @@ export const CHARACTER_INTERACTIONS: Record<string, Array<{
   explanation_flow: [
     {
       participants: ['host', 'energizer'],
-      pattern: 'host引导话题 → energizer好奇提问 → host耐心解答',
-      context: '学术概念介绍'
+      pattern: 'host introduces topic -> energizer asks questions -> host explains',
+      context: 'Academic concept introduction'
     },
     {
       participants: ['analyst', 'interpreter'],
-      pattern: 'analyst技术分析 → interpreter生活化类比 → analyst补充细节',
-      context: '方法论讨论'
+      pattern: 'analyst provides analysis -> interpreter gives analogy -> analyst adds details',
+      context: 'Methodology discussion'
     }
   ],
   discussion_flow: [
     {
       participants: ['host', 'analyst', 'energizer'],
-      pattern: 'host提出观点 → analyst逻辑分析 → energizer感性回应',
-      context: '结果解读'
+      pattern: 'host presents view -> analyst analyzes -> energizer responds',
+      context: 'Results interpretation'
     },
     {
       participants: ['interpreter', 'energizer', 'analyst'],
-      pattern: 'interpreter提出疑问 → energizer活跃响应 → analyst严谨回答',
-      context: '概念澄清'
+      pattern: 'interpreter raises question -> energizer engages -> analyst answers',
+      context: 'Concept clarification'
     }
   ]
 };
 
 /**
- * Get character by ID with validation
+ * Get character by ID
  */
 export function getCharacter(id: string): Character | null {
   return CHARACTER_CONFIGS[id] || null;

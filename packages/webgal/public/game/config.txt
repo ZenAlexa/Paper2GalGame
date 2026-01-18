@@ -1,6 +1,5 @@
-Game_name:Paper2GalGame - 论文变身美少女游戏;
+Game_name:Paper2GalGame;
 Game_key:paper2galgame;
-Title_img:title_bg.webp;
-Title_bgm:title_bgm.mp3;
-Game_Logo:logo.svg;
-Enable_Appreciation:true;
+Title_img:WebGAL_New_Enter_Image.webp;
+Title_bgm:s_Title.mp3;
+Enable_Appreciation:false;

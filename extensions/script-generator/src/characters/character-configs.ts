@@ -64,9 +64,9 @@ export const CHARACTER_CONFIGS: Record<string, Character> = {
     description: 'Gentle host who summarizes and guides discussion',
     sprite: 'stand.webp',
     relationship: {
-      role: 'senpai',
-      jp: '前輩',
-      description: 'Senior who leads discussions with warmth and patience'
+      role: 'kouhai',
+      jp: '後輩',
+      description: 'Cute junior girl who calls the player "senpai"'
     },
     assignedPhase: 1
   },
@@ -122,9 +122,9 @@ export const CHARACTER_CONFIGS: Record<string, Character> = {
     description: 'Energetic character who makes content engaging',
     sprite: 'stand2.webp',
     relationship: {
-      role: 'kouhai',
-      jp: '学弟',
-      description: 'Youngest junior who asks innocent questions with enthusiasm'
+      role: 'senpai',
+      jp: '先輩',
+      description: 'Energetic senior girl who calls the player "kouhai"'
     },
     assignedPhase: 4
   },
@@ -181,9 +181,9 @@ export const CHARACTER_CONFIGS: Record<string, Character> = {
     description: 'Rigorous analyst who examines logical structure',
     sprite: 'stand.webp',
     relationship: {
-      role: 'student',
-      jp: '学生',
-      description: 'Dedicated student who approaches problems with analytical rigor'
+      role: 'teacher',
+      jp: '先生',
+      description: 'Scholarly teacher girl who calls the player "student"'
     },
     assignedPhase: 2
   },
@@ -241,8 +241,8 @@ export const CHARACTER_CONFIGS: Record<string, Character> = {
     sprite: 'stand2.webp',
     relationship: {
       role: 'cousin',
-      jp: '表哥',
-      description: 'Friendly cousin who explains things with relatable examples'
+      jp: '表妹',
+      description: 'Cute younger cousin girl who calls the player "biaoge" (older male cousin)'
     },
     assignedPhase: 3
   }

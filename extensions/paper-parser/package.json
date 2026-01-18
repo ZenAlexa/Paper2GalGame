@@ -1,0 +1,48 @@
+{
+  "name": "@paper2galgame/paper-parser",
+  "version": "1.0.0",
+  "description": "Paper parsing module for Paper2GalGame - converts PDF/Word/TXT documents to structured JSON",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src --ext .ts,.tsx",
+    "lint:fix": "eslint src --ext .ts,.tsx --fix"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "keywords": [
+    "pdf",
+    "word",
+    "document",
+    "parser",
+    "paper",
+    "academic",
+    "visual-novel"
+  ],
+  "author": "Paper2GalGame Team",
+  "license": "MPL-2.0",
+  "dependencies": {
+    "mammoth": "^1.11.0",
+    "pdfjs-dist": "^4.10.38"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.10.2",
+    "@typescript-eslint/eslint-plugin": "^8.17.0",
+    "@typescript-eslint/parser": "^8.17.0",
+    "eslint": "^9.17.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.5",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

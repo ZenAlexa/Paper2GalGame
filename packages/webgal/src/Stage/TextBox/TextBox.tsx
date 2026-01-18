@@ -9,6 +9,7 @@ import { textSize } from '@/store/userDataInterface';
 import IMSSTextbox from '@/Stage/TextBox/IMSSTextbox';
 import { SCREEN_CONSTANTS } from '@/Core/util/constants';
 import useEscape from '@/hooks/useEscape';
+import { getMathRenderer } from '@/Core/controller/textRenderer/MathRenderer';
 
 const userAgent = navigator.userAgent;
 const isFirefox = /firefox/i.test(userAgent);
@@ -126,8 +127,17 @@ export function compileSentence(
   ignoreLineLimit?: boolean,
   replace_space_with_nbsp = true,
 ): EnhancedNode[][] {
+  // 准备数学公式渲染：提取公式并用占位符替换
+  const mathRenderer = getMathRenderer();
+  const { processedText, mathComponents } = mathRenderer.prepareMathForWebGAL(sentence);
+  // Debug logging for math processing (development only)
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[TextBox] Processed text:', processedText);
+    console.log('[TextBox] Math components count:', mathComponents.size);
+  }
+
   // 先拆行
-  const lines = sentence.split(/(?<!\\)\|/).map((val: string) => useEscape(val));
+  const lines = processedText.split(/(?<!\\)\|/).map((val: string) => useEscape(val));
   // 对每一行进行注音处理
   const rubyLines = lines.map((line) => parseString(line));
   const nodeLines = rubyLines.map((line) => {
@@ -135,15 +145,28 @@ export function compileSentence(
     line.forEach((node, index) => {
       match(node.type)
         .with(SegmentType.String, () => {
-          const chars = splitChars(node.value as string, replace_space_with_nbsp);
-          // eslint-disable-next-line max-nested-callbacks
-          ln.push(...chars.map((c) => ({ reactNode: c })));
+          const nodeValue = node.value as string;
+          // Check if this is a mathematical formula placeholder
+          if (mathRenderer.isMathPlaceholder(nodeValue)) {
+            // Use the corresponding React component for math placeholders
+            const mathComponent = mathComponents.get(nodeValue);
+            if (mathComponent) {
+              ln.push({ reactNode: mathComponent });
+            } else {
+              // Display error message if component not found
+              ln.push({ reactNode: `[Math Error: ${nodeValue}]` });
+            }
+          } else {
+            // Process regular text using standard character splitting
+            const chars = splitChars(nodeValue, replace_space_with_nbsp);
+            ln.push(...chars.map((c) => ({ reactNode: c })));
+          }
         })
         .endsWith(SegmentType.Link, () => {
           const val = node.value as EnhancedValue;
-          // 检查是否是注音文本（通过检查是否有ruby值）
+          // Check if this is ruby text (furigana) by checking for ruby value
           if (val.ruby) {
-            // 注音文本作为整体处理
+            // Process ruby text as a single unit
             const enhancedNode = (
               <span className="__enhanced_text" key={val.text + `${index}`}>
                 <ruby key={index + val.text}>
@@ -154,17 +177,29 @@ export function compileSentence(
             );
             ln.push({ reactNode: enhancedNode, enhancedValue: val.values });
           } else {
-            // 样式文本逐字处理
-            const chars = splitChars(val.text, replace_space_with_nbsp);
-            // eslint-disable-next-line max-nested-callbacks
-            chars.forEach((char, charIndex) => {
-              const enhancedNode = (
-                <span className="__enhanced_text" key={val.text + `${index}-${charIndex}`}>
-                  {char}
-                </span>
-              );
-              ln.push({ reactNode: enhancedNode, enhancedValue: val.values });
-            });
+            // Check if enhanced text contains math placeholders
+            if (mathRenderer.isMathPlaceholder(val.text)) {
+              // Use React component for math placeholders with enhanced styling
+              const mathComponent = mathComponents.get(val.text);
+              if (mathComponent) {
+                ln.push({ reactNode: mathComponent, enhancedValue: val.values });
+              } else {
+                // Display error message if component not found
+                ln.push({ reactNode: `[Math Error: ${val.text}]`, enhancedValue: val.values });
+              }
+            } else {
+              // Process enhanced text character by character
+              const chars = splitChars(val.text, replace_space_with_nbsp);
+              // eslint-disable-next-line max-nested-callbacks
+              chars.forEach((char, charIndex) => {
+                const enhancedNode = (
+                  <span className="__enhanced_text" key={val.text + `${index}-${charIndex}`}>
+                    {char}
+                  </span>
+                );
+                ln.push({ reactNode: enhancedNode, enhancedValue: val.values });
+              });
+            }
           }
         });
     });
@@ -265,6 +300,46 @@ interface Segment {
 }
 
 function parseString(input: string): Segment[] {
+  // 首先拆分数学占位符
+  const mathPlaceholderRegex = /<MATH_(DISPLAY|INLINE)_\d+>/g;
+  const segments: string[] = [];
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = mathPlaceholderRegex.exec(input)) !== null) {
+    // 添加占位符前的文本
+    if (match.index > lastIndex) {
+      segments.push(input.substring(lastIndex, match.index));
+    }
+    // 添加数学占位符
+    segments.push(match[0]);
+    lastIndex = match.index + match[0].length;
+  }
+  // 添加剩余文本
+  if (lastIndex < input.length) {
+    segments.push(input.substring(lastIndex));
+  }
+
+  const result: Segment[] = [];
+
+  for (const segment of segments) {
+    if (/<MATH_(DISPLAY|INLINE)_\d+>/.test(segment)) {
+      // 数学占位符直接作为字符串段
+      result.push({ type: SegmentType.String, value: segment });
+    } else if (segment.trim()) {
+      // 使用原始逻辑处理普通文本
+      const textResult = parseTextSegment(segment);
+      result.push(...textResult);
+    }
+  }
+
+  // 我也不知道为什么，不加这个就会导致在 Enhanced Value 处于行首时故障
+  // 你可以认为这个代码不明所以，但是不要删除
+  result.unshift({ type: SegmentType.String, value: '' });
+  return result;
+}
+
+function parseTextSegment(input: string): Segment[] {
   const regex = /(\[(.*?)\]\((.*?)\))|([^\[\]]+)/g;
   const result: Segment[] = [];
   let match: RegExpExecArray | null;
@@ -293,9 +368,6 @@ function parseString(input: string): Segment[] {
     }
   }
 
-  // 我也不知道为什么，不加这个就会导致在 Enhanced Value 处于行首时故障
-  // 你可以认为这个代码不明所以，但是不要删除
-  result.unshift({ type: SegmentType.String, value: '' });
   return result;
 }
 

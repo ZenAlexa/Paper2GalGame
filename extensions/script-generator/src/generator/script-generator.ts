@@ -339,7 +339,6 @@ Generate complete WebGAL script with correct asset filenames. Use Japanese for d
 
     if (trimmedLine.includes(':')) {
       const [command, rest] = trimmedLine.split(':', 2);
-      const params = rest ? [rest] : [];
 
       // Parse multi-language content for 'say' commands
       if (command === 'say' && rest) {
@@ -347,7 +346,7 @@ Generate complete WebGAL script with correct asset filenames. Use Japanese for d
         if (multiLangContent) {
           return {
             command: command as any,
-            params: [JSON.stringify(multiLangContent)], // Store as JSON for later extraction
+            params: [JSON.stringify(multiLangContent)],
             options: this.parseMultiLanguageOptions(trimmedLine),
             raw: trimmedLine,
             metadata: {
@@ -357,8 +356,24 @@ Generate complete WebGAL script with correct asset filenames. Use Japanese for d
             }
           };
         }
+
+        // For non-multi-language say commands, separate text from options
+        // Pattern: "text content -speaker=xxx -other=yyy;"
+        const textContent = this.extractTextContent(rest);
+        return {
+          command: command as any,
+          params: [textContent],
+          options: this.parseLineOptions(trimmedLine),
+          raw: trimmedLine,
+          metadata: {
+            confidence: 1.0,
+            relevance: 1.0
+          }
+        };
       }
 
+      // For non-say commands, keep original behavior
+      const params = rest ? [rest] : [];
       return {
         command: command as any,
         params,
@@ -382,6 +397,21 @@ Generate complete WebGAL script with correct asset filenames. Use Japanese for d
         relevance: 0.9
       }
     };
+  }
+
+  /**
+   * Extract clean text content from say command, removing options
+   * Handles: "text content -speaker=xxx;" -> "text content"
+   */
+  private extractTextContent(content: string): string {
+    // Remove trailing semicolon first
+    let text = content.replace(/;$/, '').trim();
+
+    // Remove all WebGAL options (pattern: -optionName=value)
+    // Options start with space + dash, followed by name=value
+    text = text.replace(/\s+-\w+=[^\s;]+/g, '').trim();
+
+    return text;
   }
 
   /**

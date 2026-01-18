@@ -19,11 +19,15 @@ import { IStageState } from '@/store/stageInterface';
 // import OldStage from '@/Components/Stage/OldStage/OldStage';
 
 let timeoutEventHandle: ReturnType<typeof setTimeout> | null = null;
-// 视为“未移动”的最小移动阈值（像素^2），例如 4px -> 16
+// Minimum movement threshold (pixels^2) to be considered "moved", e.g., 4px -> 16
 const MOVE_THRESHOLD_SQ = 16;
 let lastMouseX = 0;
 let lastMouseY = 0;
 let hasLastMousePos = false;
+
+// Click debounce to prevent rapid clicks from skipping multiple sentences
+let lastClickTime = 0;
+const CLICK_DEBOUNCE_MS = 150;
 
 /**
  * 检查并更新控制可见性
@@ -93,7 +97,14 @@ export const Stage: FC = () => {
       <AudioContainer />
       <div
         onClick={() => {
-          // 如果文本框没有显示，则显示文本框
+          // Debounce rapid clicks to prevent skipping multiple sentences
+          const now = Date.now();
+          if (now - lastClickTime < CLICK_DEBOUNCE_MS) {
+            return;
+          }
+          lastClickTime = now;
+
+          // Show textbox if hidden
           if (!GUIState.showTextBox) {
             dispatch(setVisibility({ component: 'showTextBox', visibility: true }));
             return;

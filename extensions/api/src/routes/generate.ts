@@ -168,21 +168,29 @@ router.post('/', async (req: Request, res: Response) => {
           if (line.command === 'say') {
             const rawContent = line.params[0] || '';
 
-            // Extract speaker from -speaker= option in content
+            // Extract speaker from options first (preferred), then from content
             let speakerName = 'unknown';
-            const speakerMatch = rawContent.match(/-speaker=(\w+)/);
-            if (speakerMatch) {
-              speakerName = speakerMatch[1];
-            } else if (line.options?.speaker) {
+            if (line.options?.speaker) {
               const speaker = line.options.speaker;
               speakerName = typeof speaker === 'string' ? speaker : 'unknown';
+            } else {
+              // Fallback: extract from content using robust regex
+              const speakerMatch = rawContent.match(/-speaker=(\w+)/);
+              if (speakerMatch) {
+                speakerName = speakerMatch[1];
+              }
             }
 
-            // Extract text content (before -speaker option)
-            let textContent = rawContent;
-            const optionIndex = rawContent.indexOf(' -speaker=');
-            if (optionIndex > 0) {
-              textContent = rawContent.substring(0, optionIndex);
+            // Extract text content by removing all WebGAL options
+            // Handles various spacing: "text -speaker=x", "text-speaker=x", "text  -speaker=x"
+            let textContent = rawContent
+              .replace(/;$/, '')           // Remove trailing semicolon
+              .replace(/\s*-\w+=[^\s;]*/g, '')  // Remove all -option=value patterns
+              .trim();
+
+            // If text is empty after extraction, use raw content without options
+            if (!textContent && rawContent) {
+              textContent = rawContent.split(/\s+-/)[0].replace(/;$/, '').trim();
             }
 
             dialogues.push({

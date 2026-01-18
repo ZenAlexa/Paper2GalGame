@@ -1,6 +1,6 @@
 import { setFastButton, startFast, stopAll, stopFast } from '@/Core/controller/gamePlay/fastSkip';
 import { nextSentence } from '@/Core/controller/gamePlay/nextSentence';
-import { fastSaveGame } from '@/Core/controller/storage/fastSaveLoad';
+import { fastSaveGame, fastSaveGameSync } from '@/Core/controller/storage/fastSaveLoad';
 import { setStorage } from '@/Core/controller/storage/storageController';
 import { WebGAL } from '@/Core/WebGAL';
 import { useGenSyncRef } from '@/hooks/useGenSyncRef';
@@ -235,14 +235,15 @@ export function useSkip() {
 }
 
 /**
- * F5刷新 & 其他情况下导致页面卸载时快速保存
+ * Fast save before page unload (F5 refresh, tab close, etc.)
+ * Uses synchronous storage since async operations won't complete during unload
  */
 export function useFastSaveBeforeUnloadPage() {
   const validMenuGameStart = useValidMenuGameStart();
-  const handleWindowUnload = useCallback(async (e: BeforeUnloadEvent) => {
+  const handleWindowUnload = useCallback((e: BeforeUnloadEvent) => {
     if (validMenuGameStart()) {
-      // 游戏启动了才保存数据 防止无效数据覆盖现在的数据
-      await fastSaveGame();
+      // Only save if game has started to prevent invalid data overwrites
+      fastSaveGameSync();
     }
   }, []);
   useMounted(() => {

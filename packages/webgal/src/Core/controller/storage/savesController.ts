@@ -29,8 +29,44 @@ export async function dumpFastSaveToStorage() {
   logger.info(`快速存档写入本地存储`);
 }
 
+/**
+ * Synchronous fast save for beforeunload event
+ * Uses localStorage as fallback since localforage is async
+ */
+export function dumpFastSaveToStorageSync() {
+  try {
+    const save = webgalStore.getState().saveData.quickSaveData;
+    if (save) {
+      const key = `${WebGAL.gameKey}-saves-fast-sync`;
+      localStorage.setItem(key, JSON.stringify(save));
+      logger.info('Fast save written to localStorage (sync)');
+    }
+  } catch (error) {
+    logger.error('Failed to write sync fast save:', error);
+  }
+}
+
 export async function getFastSaveFromStorage() {
-  const save = await localforage.getItem(`${WebGAL.gameKey}-saves-fast`);
+  // First try to get from localforage (async storage)
+  let save = await localforage.getItem(`${WebGAL.gameKey}-saves-fast`);
+
+  // If not found, try localStorage (sync fallback from beforeunload)
+  if (!save) {
+    try {
+      const syncKey = `${WebGAL.gameKey}-saves-fast-sync`;
+      const syncData = localStorage.getItem(syncKey);
+      if (syncData) {
+        save = JSON.parse(syncData);
+        // Migrate to localforage and clear localStorage
+        await localforage.setItem(`${WebGAL.gameKey}-saves-fast`, save);
+        localStorage.removeItem(syncKey);
+        logger.info('Migrated sync fast save to localforage');
+      }
+    } catch (error) {
+      logger.error('Failed to read sync fast save:', error);
+    }
+  }
+
   webgalStore.dispatch(saveActions.setFastSave(save as ISaveData));
-  logger.info(`快速存档读取自本地存储`);
+  logger.info('Fast save loaded from storage');
 }

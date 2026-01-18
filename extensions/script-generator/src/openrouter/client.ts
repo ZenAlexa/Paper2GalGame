@@ -41,7 +41,7 @@ export class OpenRouterClient {
   }
 
   /**
-   * Make chat completion request
+   * Make chat completion request with timeout handling
    */
   async chatCompletion(request: ChatCompletionRequest): Promise<ChatCompletionResponse> {
     const url = `${this.config.baseURL}/chat/completions`;
@@ -63,6 +63,12 @@ export class OpenRouterClient {
       body.reasoning = { effort: 'medium' };
     }
 
+    // Create AbortController for timeout handling
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
+      controller.abort();
+    }, this.config.timeout);
+
     try {
       const response = await fetch(url, {
         method: 'POST',
@@ -72,8 +78,12 @@ export class OpenRouterClient {
           'HTTP-Referer': this.config.httpReferer,
           'X-Title': this.config.appTitle
         },
-        body: JSON.stringify(body)
+        body: JSON.stringify(body),
+        signal: controller.signal
       });
+
+      // Clear timeout on successful response
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -91,7 +101,14 @@ export class OpenRouterClient {
       return result;
 
     } catch (error) {
+      // Clear timeout on error
+      clearTimeout(timeoutId);
+
       if (error instanceof Error) {
+        // Handle abort/timeout specifically
+        if (error.name === 'AbortError') {
+          throw new Error(`OpenRouter API request timed out after ${this.config.timeout / 1000} seconds`);
+        }
         throw new Error(`OpenRouter API request failed: ${error.message}`);
       }
       throw new Error('Unknown error occurred during API request');

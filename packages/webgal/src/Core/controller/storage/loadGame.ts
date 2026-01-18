@@ -33,45 +33,50 @@ export function loadGameFromStageData(stageData: ISaveData) {
     return;
   }
   const loadFile = stageData;
-  // 重新获取并同步场景状态
+
+  // Force stop all performances first
+  stopAllPerform();
+
+  // Fetch scene and restore state only after scene is loaded
   sceneFetcher(loadFile.sceneData.sceneUrl).then((rawScene) => {
+    // Parse scene data
     WebGAL.sceneManager.sceneData.currentScene = sceneParser(
       rawScene,
       loadFile.sceneData.sceneName,
       loadFile.sceneData.sceneUrl,
     );
-    // 开始场景的预加载
+
+    // Set scene state AFTER scene is parsed
+    WebGAL.sceneManager.sceneData.currentSentenceId = loadFile.sceneData.currentSentenceId;
+    WebGAL.sceneManager.sceneData.sceneStack = cloneDeep(loadFile.sceneData.sceneStack);
+
+    // Start scene prefetching
     const subSceneList = WebGAL.sceneManager.sceneData.currentScene.subSceneList;
-    WebGAL.sceneManager.settledScenes.push(WebGAL.sceneManager.sceneData.currentScene.sceneUrl); // 放入已加载场景列表，避免递归加载相同场景
-    const subSceneListUniq = uniqWith(subSceneList); // 去重
+    WebGAL.sceneManager.settledScenes.push(WebGAL.sceneManager.sceneData.currentScene.sceneUrl);
+    const subSceneListUniq = uniqWith(subSceneList);
     scenePrefetcher(subSceneListUniq);
+
+    // Restore backlog
+    const newBacklog = loadFile.backlog;
+    WebGAL.backlogManager.getBacklog().splice(0, WebGAL.backlogManager.getBacklog().length);
+    for (const e of newBacklog) {
+      WebGAL.backlogManager.getBacklog().push(e);
+    }
+
+    // Restore stage state
+    const newStageState = cloneDeep(loadFile.nowStageState);
+    const dispatch = webgalStore.dispatch;
+    dispatch(resetStageState(newStageState));
+
+    // Restore performances after state is set
+    setTimeout(restorePerform, 0);
+
+    dispatch(setVisibility({ component: 'showTitle', visibility: false }));
+    dispatch(setVisibility({ component: 'showMenuPanel', visibility: false }));
+
+    // Restore blurred background
+    setEbg(webgalStore.getState().stage.bgName);
+  }).catch((error) => {
+    logger.error('Failed to load game scene:', error);
   });
-  WebGAL.sceneManager.sceneData.currentSentenceId = loadFile.sceneData.currentSentenceId;
-  WebGAL.sceneManager.sceneData.sceneStack = cloneDeep(loadFile.sceneData.sceneStack);
-
-  // 强制停止所有演出
-  stopAllPerform();
-
-  // 恢复backlog
-  const newBacklog = loadFile.backlog;
-  WebGAL.backlogManager.getBacklog().splice(0, WebGAL.backlogManager.getBacklog().length); // 清空原backlog
-  for (const e of newBacklog) {
-    WebGAL.backlogManager.getBacklog().push(e);
-  }
-
-  // 恢复舞台状态
-  const newStageState = cloneDeep(loadFile.nowStageState);
-  const dispatch = webgalStore.dispatch;
-  dispatch(resetStageState(newStageState));
-
-  // 恢复演出
-  setTimeout(restorePerform, 0);
-  // restorePerform();
-
-  dispatch(setVisibility({ component: 'showTitle', visibility: false }));
-  dispatch(setVisibility({ component: 'showMenuPanel', visibility: false }));
-  /**
-   * 恢复模糊背景
-   */
-  setEbg(webgalStore.getState().stage.bgName);
 }

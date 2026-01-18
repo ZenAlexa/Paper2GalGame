@@ -6,7 +6,7 @@ import { generateCurrentStageData } from '@/Core/controller/storage/saveGame';
 import cloneDeep from 'lodash/cloneDeep';
 import { WebGAL } from '@/Core/WebGAL';
 import { saveActions } from '@/store/savesReducer';
-import { dumpFastSaveToStorage, getFastSaveFromStorage } from '@/Core/controller/storage/savesController';
+import { dumpFastSaveToStorage, dumpFastSaveToStorageSync, getFastSaveFromStorage } from '@/Core/controller/storage/savesController';
 
 export let fastSaveGameKey = '';
 export let isFastSaveKey = '';
@@ -19,13 +19,24 @@ export function initKey() {
 }
 
 /**
- * 用于紧急回避时的数据存储 & 快速保存
+ * Async fast save for regular use
  */
 export async function fastSaveGame() {
   const saveData: ISaveData = generateCurrentStageData(-1, false);
   const newSaveData = cloneDeep(saveData);
   webgalStore.dispatch(saveActions.setFastSave(newSaveData));
   await dumpFastSaveToStorage();
+}
+
+/**
+ * Sync fast save for beforeunload event
+ * Uses localStorage since async operations won't complete during page unload
+ */
+export function fastSaveGameSync() {
+  const saveData: ISaveData = generateCurrentStageData(-1, false);
+  const newSaveData = cloneDeep(saveData);
+  webgalStore.dispatch(saveActions.setFastSave(newSaveData));
+  dumpFastSaveToStorageSync();
 }
 
 /**

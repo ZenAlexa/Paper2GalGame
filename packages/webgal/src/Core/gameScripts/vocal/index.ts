@@ -63,18 +63,35 @@ export const playVocal = (sentence: ISentence) => {
 
   return {
     arrangePerformPromise: new Promise((resolve) => {
-      // 播放语音
-      setTimeout(() => {
-        let VocalControl: any = document.getElementById('currentVocal');
-        // 设置语音音量
-        webgalStore.dispatch(setStage({ key: 'vocalVolume', value: volume }));
-        // 设置语音
-        if (VocalControl !== null) {
-          VocalControl.currentTime = 0;
-          // 播放并作为一个特别演出加入
+      // Set vocal volume immediately
+      webgalStore.dispatch(setStage({ key: 'vocalVolume', value: volume }));
+
+      // Wait for audio element to be ready using requestAnimationFrame polling
+      const waitForAudioElement = (retries = 0) => {
+        const VocalControl: HTMLAudioElement | null = document.getElementById('currentVocal') as HTMLAudioElement;
+
+        if (!VocalControl) {
+          // Element not yet rendered, retry with exponential backoff (max 10 retries = ~1s)
+          if (retries < 10) {
+            setTimeout(() => waitForAudioElement(retries + 1), Math.min(100, 10 * Math.pow(2, retries)));
+          } else {
+            logger.error('Audio element not found after retries');
+          }
+          return;
+        }
+
+        VocalControl.currentTime = 0;
+
+        // Get actual audio duration when metadata is loaded
+        const setupPerformance = (audioDuration: number) => {
+          // Use actual duration or fallback to 5 minutes (reasonable max)
+          const safeDuration = audioDuration > 0 && isFinite(audioDuration)
+            ? audioDuration * 1000
+            : 1000 * 60 * 5;
+
           const perform = {
             performName: performInitName,
-            duration: 1000 * 60 * 60,
+            duration: safeDuration,
             isOver: false,
             isHoldOn: false,
             stopFunction: () => {
@@ -99,23 +116,20 @@ export const playVocal = (sentence: ISentence) => {
               return !isOver;
             },
             skipNextCollect: true,
-            stopTimeout: undefined, // 暂时不用，后面会交给自动清除
+            stopTimeout: undefined,
           };
           WebGAL.gameplay.performController.arrangeNewPerform(perform, sentence, false);
+
           key = key ? key : `fig-${pos}`;
           const animationItem = figureAssociatedAnimation.find((tid) => tid.targetId === key);
           if (animationItem) {
-            let maxAudioLevel = 0;
-
             const foundFigure = freeFigure.find((figure) => figure.key === key);
-
             if (foundFigure) {
               pos = foundFigure.basePosition;
             }
 
             if (!audioContextWrapper.audioContext) {
-              let audioContext: AudioContext | null;
-              audioContext = new AudioContext();
+              const audioContext = new AudioContext();
               audioContextWrapper.analyser = audioContext.createAnalyser();
               audioContextWrapper.analyser.fftSize = 256;
               audioContextWrapper.dataArray = new Uint8Array(audioContextWrapper.analyser.frequencyBinCount);
@@ -128,7 +142,7 @@ export const playVocal = (sentence: ISentence) => {
 
             bufferLength = audioContextWrapper.analyser.frequencyBinCount;
             audioContextWrapper.dataArray = new Uint8Array(bufferLength);
-            let vocalControl = document.getElementById('currentVocal') as HTMLMediaElement;
+            const vocalControl = document.getElementById('currentVocal') as HTMLMediaElement;
 
             if (!audioContextWrapper.source) {
               audioContextWrapper.source = audioContextWrapper.audioContext.createMediaElementSource(vocalControl);
@@ -137,7 +151,7 @@ export const playVocal = (sentence: ISentence) => {
 
             audioContextWrapper.analyser.connect(audioContextWrapper.audioContext.destination);
 
-            // Lip-snc Animation
+            // Lip-sync Animation
             audioContextWrapper.audioLevelInterval = setInterval(() => {
               const audioLevel = getAudioLevel(
                 audioContextWrapper.analyser!,
@@ -158,32 +172,49 @@ export const playVocal = (sentence: ISentence) => {
               });
             }, 50);
 
-            // blinkAnimation
-            let animationEndTime: number;
-
-            // 10sec
-            animationEndTime = Date.now() + 10000;
+            // Blink animation (10sec)
+            const animationEndTime = Date.now() + 10000;
             performBlinkAnimation({ key, animationItem, pos, animationEndTime });
 
-            // 10sec
             setTimeout(() => {
               clearTimeout(audioContextWrapper.blinkTimerID);
             }, 10000);
           }
+        };
 
-          VocalControl?.play();
-
-          VocalControl.onended = () => {
-            for (const e of WebGAL.gameplay.performController.performList) {
-              if (e.performName === performInitName) {
-                isOver = true;
-                e.stopFunction();
-                WebGAL.gameplay.performController.unmountPerform(e.performName);
-              }
+        // Handle audio end event
+        VocalControl.onended = () => {
+          for (const e of WebGAL.gameplay.performController.performList) {
+            if (e.performName === performInitName) {
+              isOver = true;
+              e.stopFunction();
+              WebGAL.gameplay.performController.unmountPerform(e.performName);
             }
+          }
+        };
+
+        // Handle audio error
+        VocalControl.onerror = (e) => {
+          logger.error('Audio playback error:', e);
+          isOver = true;
+        };
+
+        // Wait for audio to be ready before playing
+        if (VocalControl.readyState >= 2) {
+          // HAVE_CURRENT_DATA or higher - can play
+          setupPerformance(VocalControl.duration);
+          VocalControl.play().catch((e) => logger.error('Audio play failed:', e));
+        } else {
+          // Wait for canplay event
+          VocalControl.oncanplay = () => {
+            setupPerformance(VocalControl.duration);
+            VocalControl.play().catch((e) => logger.error('Audio play failed:', e));
           };
         }
-      }, 1);
+      };
+
+      // Start waiting for audio element on next frame
+      requestAnimationFrame(() => waitForAudioElement());
     }),
   };
 };

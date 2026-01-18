@@ -55,13 +55,15 @@ export const startPaperGame = async (sessionId: string) => {
       `/api/generate/script/${sessionId}`,
     );
 
+    // Hide title screen BEFORE starting script execution
+    // This prevents nextSentence() from early-returning due to showTitle check
+    webgalStore.dispatch(setVisibility({ component: 'showTitle', visibility: false }));
+
     // Start first sentence
     nextSentence();
   } catch (error) {
     console.error('[startPaperGame] Error:', error);
   }
-
-  webgalStore.dispatch(setVisibility({ component: 'showTitle', visibility: false }));
 };
 
 export async function continueGame() {

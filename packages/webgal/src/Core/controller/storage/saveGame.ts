@@ -28,19 +28,29 @@ export function generateCurrentStageData(index: number, isSavePreviewImage = tru
   const saveBacklog = cloneDeep(WebGAL.backlogManager.getBacklog());
 
   /**
-   * 生成缩略图
+   * Generate preview thumbnail with error handling
    */
-
   let urlToSave = '';
   if (isSavePreviewImage) {
-    const canvas: HTMLCanvasElement = document.getElementById('pixiCanvas')! as HTMLCanvasElement;
-    const canvas2 = document.createElement('canvas');
-    const context = canvas2.getContext('2d');
-    canvas2.width = 480;
-    canvas2.height = 270;
-    context!.drawImage(canvas, 0, 0, 480, 270);
-    urlToSave = canvas2.toDataURL('image/webp', 0.5);
-    canvas2.remove();
+    try {
+      const canvas = document.getElementById('pixiCanvas') as HTMLCanvasElement | null;
+      if (canvas) {
+        const canvas2 = document.createElement('canvas');
+        const context = canvas2.getContext('2d');
+        if (context) {
+          canvas2.width = 480;
+          canvas2.height = 270;
+          context.drawImage(canvas, 0, 0, 480, 270);
+          urlToSave = canvas2.toDataURL('image/webp', 0.5);
+        }
+        canvas2.remove();
+      } else {
+        logger.warn('Preview canvas not found, saving without preview image');
+      }
+    } catch (error) {
+      logger.error('Failed to generate preview image:', error);
+      // Continue without preview image
+    }
   }
   const saveData: ISaveData = {
     nowStageState: cloneDeep(stageState),

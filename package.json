@@ -7,7 +7,7 @@
   "scripts": {
     "build": "yarn parser:build && yarn webgal:build",
     "build-ci": "yarn parser:build-ci && yarn webgal:build",
-    "dev": "yarn parser:build && concurrently \"yarn api:dev\" \"yarn webgal:dev\"",
+    "dev": "yarn ext:build && yarn api:build && concurrently \"yarn api:dev\" \"yarn webgal:dev\"",
     "dev:frontend": "yarn parser:build && yarn webgal:dev",
     "webgal:dev": "cd packages/webgal && yarn dev",
     "webgal:build": "cd packages/webgal && yarn build",

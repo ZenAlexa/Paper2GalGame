@@ -10,9 +10,9 @@ import type { ISentence } from '@/Core/controller/scene/sceneInterface';
  * Segment status in the game
  */
 export type SegmentStatus =
-  | 'available'    // Ready to play
-  | 'loading'      // Currently loading
-  | 'generating'   // Being generated in background
+  | 'available' // Ready to play
+  | 'loading' // Currently loading
+  | 'generating' // Being generated in background
   | 'unavailable'; // Not yet available
 
 /**

@@ -8,24 +8,23 @@
 import type { Character } from '../types';
 
 /**
- * Complete character configurations for all four characters
- * Based on detailed research from official sources
+ * Complete character configurations for development testing
+ * Uses WebGAL default assets for local development
  */
 export const CHARACTER_CONFIGS: Record<string, Character> = {
-  nene: {
-    id: 'nene',
+  host: {
+    id: 'host',
     name: {
-      zh: '绫地宁宁',
-      jp: 'あやち ねね',
-      en: 'Ayachi Nene'
+      zh: '小樱',
+      jp: 'さくら',
+      en: 'Sakura'
     },
-    source: '魔女の夜宴 (サノバウィッチ)',
+    source: 'Development Character',
     personality: [
       '温柔体贴的大姐姐性格',
       '善于倾听和引导他人',
       '对学术有浓厚兴趣',
       '略带天然呆，但很有条理',
-      '因秘密身份保持一定距离感',
       '内心细腻，善于察言观色'
     ],
     speakingStyle: [
@@ -33,8 +32,7 @@ export const CHARACTER_CONFIGS: Record<string, Character> = {
       '经常用"呢"、"哦"等语气词',
       '善于总结和归纳要点',
       '提出启发性问题',
-      '说话有条理，逻辑清晰',
-      '偶尔流露出魔女身份的神秘感'
+      '说话有条理，逻辑清晰'
     ],
     paperRole: '主持人和总结者',
     voiceSettings: {
@@ -56,31 +54,27 @@ export const CHARACTER_CONFIGS: Record<string, Character> = {
       '嗯嗯，我明白了',
       '接下来我们看看...'
     ],
-    description: '超自然研究部部长，实际上是魔女。温柔善良但因身份秘密而与人保持距离。',
-    sprite: 'nene.webp'
+    description: '温柔善良的主持人角色，善于总结和引导讨论。',
+    sprite: 'stand.webp'
   },
 
-  murasame: {
-    id: 'murasame',
+  energizer: {
+    id: 'energizer',
     name: {
-      zh: '丛雨',
-      jp: 'むらさめ',
-      en: 'Murasame'
+      zh: '小雪',
+      jp: 'ゆき',
+      en: 'Yuki'
     },
-    source: '千恋＊万花',
+    source: 'Development Character',
     personality: [
       '活泼开朗的元气少女',
       '好奇心强，喜欢提问',
       '思维跳跃，反应敏捷',
-      '偶尔展现500年的成熟',
-      '内心深处有孤独感',
-      '对温暖的渴望很强烈',
-      '害怕鬼怪等超自然现象'
+      '对温暖的渴望很强烈'
     ],
     speakingStyle: [
       '语调活泼，感叹词丰富',
       '经常用"诶"、"哇"、"唔"',
-      '古风语调与现代表达混合',
       '时常提出意想不到的问题',
       '用比喻和形象化表达',
       '情绪表达直率而丰富'
@@ -106,34 +100,29 @@ export const CHARACTER_CONFIGS: Record<string, Character> = {
       '那个...那个...',
       '真是不可思议呀'
     ],
-    description: '神刀"丛雨丸"的管理者，存在了500年的刀魂。活泼但内心孤独，渴望温暖。',
-    sprite: 'murasame.webp'
+    description: '活泼开朗的元气少女，用有趣的比喻让内容生动。',
+    sprite: 'stand2.webp'
   },
 
-  nanami: {
-    id: 'nanami',
+  analyst: {
+    id: 'analyst',
     name: {
-      zh: '在原七海',
-      jp: 'ありはら ななみ',
-      en: 'Arihara Nanami'
+      zh: '小雨',
+      jp: 'あめ',
+      en: 'Ame'
     },
-    source: 'Riddle Joker',
+    source: 'Development Character',
     personality: [
       '理性严谨的学者型',
       '逻辑思维极强',
       '追求精确和深度理解',
-      '对初次见面的人会紧张',
-      '稍有中二病倾向',
-      '是个隐藏的阿宅',
-      '做事认真负责，家事万能'
+      '做事认真负责'
     ],
     speakingStyle: [
       '用词精准，逻辑清晰',
       '喜欢使用专业术语',
       '进行严密的逻辑推理',
-      '语调相对严肃但温和',
-      '偶尔冒出中二式表达',
-      '说话时可能有些结巴（面对生人）'
+      '语调相对严肃但温和'
     ],
     paperRole: '深度分析者和质疑者',
     voiceSettings: {
@@ -156,34 +145,29 @@ export const CHARACTER_CONFIGS: Record<string, Character> = {
       '按照理论框架',
       '嗯...这个结论还需要验证'
     ],
-    description: '秘密组织成员，代号Levy9。认真严谨的技术专家，擅长黑客技术。',
-    sprite: 'nanami.webp'
+    description: '理性严谨的学者型，深入分析论文的逻辑结构。',
+    sprite: 'stand.webp'
   },
 
-  meguru: {
-    id: 'meguru',
+  interpreter: {
+    id: 'interpreter',
     name: {
-      zh: '因幡巡',
-      jp: 'いなば めぐる',
-      en: 'Inaba Meguru'
+      zh: '小风',
+      jp: 'かぜ',
+      en: 'Kaze'
     },
-    source: '魔女の夜宴 (サノバウィッチ)',
+    source: 'Development Character',
     personality: [
-      '表面华丽时尚，内心是宅女',
-      '努力想要融入集体',
-      '对人际关系有些不安',
-      '真实的自己喜欢独处游戏',
-      '开朗活力但略显勉强',
-      '内心善良但缺乏自信',
+      '博学睿智的知识者',
+      '善于联想和扩展知识',
+      '内心善良',
       '有着独特的价值观'
     ],
     speakingStyle: [
       '表面开朗健谈',
-      '偶尔流露出不安情绪',
       '使用现代流行语汇',
       '创造性的表达方式',
-      '用"ciallo"作为招呼语',
-      '时而展现宅女本色'
+      '善于用类比解释概念'
     ],
     paperRole: '生活化解释者和共鸣者',
     voiceSettings: {
@@ -199,15 +183,15 @@ export const CHARACTER_CONFIGS: Record<string, Character> = {
       }
     },
     phrases: [
-      'ciallo～大家好！',
-      '这就像游戏里的...',
+      '大家好！',
+      '这就像我们生活中的...',
       '嗯嗯，我觉得',
       '简单来说就是',
       '啊，我懂这种感觉',
       '用我们的话来说就是'
     ],
-    description: '新转学的一年级学生，努力适应新环境。外表时尚但实际是喜欢游戏的宅女。',
-    sprite: 'meguru.webp'
+    description: '博学睿智的知识渊博者，善于联想和扩展知识。',
+    sprite: 'stand2.webp'
   }
 };
 
@@ -221,25 +205,25 @@ export const CHARACTER_INTERACTIONS: Record<string, Array<{
 }>> = {
   explanation_flow: [
     {
-      participants: ['nene', 'murasame'],
-      pattern: 'nene引导话题 → murasame好奇提问 → nene耐心解答',
+      participants: ['host', 'energizer'],
+      pattern: 'host引导话题 → energizer好奇提问 → host耐心解答',
       context: '学术概念介绍'
     },
     {
-      participants: ['nanami', 'meguru'],
-      pattern: 'nanami技术分析 → meguru生活化类比 → nanami补充细节',
+      participants: ['analyst', 'interpreter'],
+      pattern: 'analyst技术分析 → interpreter生活化类比 → analyst补充细节',
       context: '方法论讨论'
     }
   ],
   discussion_flow: [
     {
-      participants: ['nene', 'nanami', 'murasame'],
-      pattern: 'nene提出观点 → nanami逻辑分析 → murasame感性回应',
+      participants: ['host', 'analyst', 'energizer'],
+      pattern: 'host提出观点 → analyst逻辑分析 → energizer感性回应',
       context: '结果解读'
     },
     {
-      participants: ['meguru', 'murasame', 'nanami'],
-      pattern: 'meguru提出疑问 → murasame活跃响应 → nanami严谨回答',
+      participants: ['interpreter', 'energizer', 'analyst'],
+      pattern: 'interpreter提出疑问 → energizer活跃响应 → analyst严谨回答',
       context: '概念澄清'
     }
   ]

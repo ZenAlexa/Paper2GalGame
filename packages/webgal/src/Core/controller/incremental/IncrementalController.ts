@@ -13,7 +13,7 @@ import type {
   DynamicContentListener,
   WaitingDialogue,
   IncrementalControllerConfig,
-  MultiLanguageText
+  MultiLanguageText,
 } from './types';
 
 /**
@@ -26,14 +26,14 @@ const DEFAULT_WAITING_DIALOGUES: Record<string, { name: MultiLanguageText; texts
       {
         zh: '让我想想这个部分该怎么解释...',
         jp: 'この部分をどう説明すればいいか考えてみますね...',
-        en: 'Let me think about how to explain this part...'
+        en: 'Let me think about how to explain this part...',
       },
       {
         zh: '请稍等一下，我整理一下思路。',
         jp: '少々お待ちください、考えを整理させてください。',
-        en: 'Please wait a moment, let me organize my thoughts.'
-      }
-    ]
+        en: 'Please wait a moment, let me organize my thoughts.',
+      },
+    ],
   },
   murasame: {
     name: { zh: '丛雨', jp: '叢雨', en: 'Murasame' },
@@ -41,14 +41,14 @@ const DEFAULT_WAITING_DIALOGUES: Record<string, { name: MultiLanguageText; texts
       {
         zh: '诶诶！这里有些复杂的概念呢，稍等一下！',
         jp: 'えぇ！ここは少し複雑な概念がありますね、ちょっと待ってください！',
-        en: 'Wow! There are some complex concepts here, just a moment!'
+        en: 'Wow! There are some complex concepts here, just a moment!',
       },
       {
         zh: '等我一下，我去准备一些有趣的内容！',
         jp: 'ちょっと待ってね、面白い内容を準備してくるから！',
-        en: "Wait for me, I'll prepare some interesting content!"
-      }
-    ]
+        en: "Wait for me, I'll prepare some interesting content!",
+      },
+    ],
   },
   nanami: {
     name: { zh: '在原七海', jp: '在原七海', en: 'Arihara Nanami' },
@@ -56,14 +56,14 @@ const DEFAULT_WAITING_DIALOGUES: Record<string, { name: MultiLanguageText; texts
       {
         zh: '这部分内容需要仔细分析，请稍候...',
         jp: 'この部分は慎重に分析する必要があります、少々お待ちください...',
-        en: 'This part requires careful analysis, please wait...'
+        en: 'This part requires careful analysis, please wait...',
       },
       {
         zh: '让我确认一下接下来的内容是否准确。',
         jp: '次の内容が正確かどうか確認させてください。',
-        en: 'Let me verify if the next content is accurate.'
-      }
-    ]
+        en: 'Let me verify if the next content is accurate.',
+      },
+    ],
   },
   meguru: {
     name: { zh: '因幡巡', jp: '因幡めぐる', en: 'Inaba Meguru' },
@@ -71,15 +71,15 @@ const DEFAULT_WAITING_DIALOGUES: Record<string, { name: MultiLanguageText; texts
       {
         zh: '让我整理一下接下来要讲解的内容。',
         jp: '次に説明する内容を整理させてください。',
-        en: 'Let me organize the content for the next section.'
+        en: 'Let me organize the content for the next section.',
       },
       {
         zh: '这里涉及一些专业知识，稍等片刻。',
         jp: 'ここには専門知識が含まれています、少々お待ちください。',
-        en: 'This involves some specialized knowledge, just a moment.'
-      }
-    ]
-  }
+        en: 'This involves some specialized knowledge, just a moment.',
+      },
+    ],
+  },
 };
 
 /**
@@ -91,10 +91,10 @@ const DEFAULT_CONFIG: IncrementalControllerConfig = {
   transition: {
     showWaitingDialogue: true,
     waitingTimeout: 2000,
-    allowSkip: false
+    allowSkip: false,
   },
   preloadNext: true,
-  autoContinue: true
+  autoContinue: true,
 };
 
 /**
@@ -115,7 +115,7 @@ export class IncrementalController {
       segmentInfoMap: new Map(),
       loadingSegment: null,
       isBackgroundGenerating: false,
-      listeners: new Set()
+      listeners: new Set(),
     };
 
     this.segmentScripts = new Map();
@@ -138,7 +138,7 @@ export class IncrementalController {
     }
 
     // Set first available segment as current
-    const firstAvailable = segments.find(s => s.status === 'available');
+    const firstAvailable = segments.find((s) => s.status === 'available');
     if (firstAvailable) {
       this.state.currentSegmentId = firstAvailable.id;
     }
@@ -172,7 +172,7 @@ export class IncrementalController {
     this.emitEvent({
       type: 'segment_available',
       segmentId,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 
@@ -187,10 +187,9 @@ export class IncrementalController {
    * Get next segment ID
    */
   getNextSegmentId(currentSegmentId: string): string | null {
-    const segments = Array.from(this.state.segmentInfoMap.values())
-      .sort((a, b) => a.priority - b.priority);
+    const segments = Array.from(this.state.segmentInfoMap.values()).sort((a, b) => a.priority - b.priority);
 
-    const currentIndex = segments.findIndex(s => s.id === currentSegmentId);
+    const currentIndex = segments.findIndex((s) => s.id === currentSegmentId);
     if (currentIndex >= 0 && currentIndex < segments.length - 1) {
       return segments[currentIndex + 1].id;
     }
@@ -224,7 +223,7 @@ export class IncrementalController {
     this.emitEvent({
       type: 'segment_loading',
       segmentId: nextSegmentId,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     // Get waiting dialogue
@@ -243,7 +242,7 @@ export class IncrementalController {
     this.emitEvent({
       type: 'segment_ready',
       segmentId: nextSegmentId,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     return { success: true, nextSegmentId, waitingDialogue };
@@ -276,7 +275,7 @@ export class IncrementalController {
       characterId: randomChar,
       sprite: `${randomChar}.webp`,
       name: charData.name[this.config.language],
-      text: randomText[this.config.language]
+      text: randomText[this.config.language],
     };
   }
 
@@ -287,11 +286,11 @@ export class IncrementalController {
     const charData = DEFAULT_WAITING_DIALOGUES[characterId];
     if (!charData) return [];
 
-    return charData.texts.map(text => ({
+    return charData.texts.map((text) => ({
       characterId,
       sprite: `${characterId}.webp`,
       name: charData.name[this.config.language],
-      text: text[this.config.language]
+      text: text[this.config.language],
     }));
   }
 
@@ -306,8 +305,7 @@ export class IncrementalController {
    * Get all segment info
    */
   getAllSegments(): SegmentInfo[] {
-    return Array.from(this.state.segmentInfoMap.values())
-      .sort((a, b) => a.priority - b.priority);
+    return Array.from(this.state.segmentInfoMap.values()).sort((a, b) => a.priority - b.priority);
   }
 
   /**
@@ -327,7 +325,7 @@ export class IncrementalController {
       total,
       available,
       percentage,
-      canStart: percentage >= 50
+      canStart: percentage >= 50,
     };
   }
 
@@ -395,7 +393,7 @@ export class IncrementalController {
       type: 'generation_progress',
       segmentId,
       progress,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 
@@ -412,7 +410,7 @@ export class IncrementalController {
       type: 'segment_error',
       segmentId,
       error,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 
@@ -431,7 +429,7 @@ export class IncrementalController {
 
     this.emitEvent({
       type: 'all_complete',
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 
@@ -459,7 +457,7 @@ export class IncrementalController {
       segmentInfoMap: new Map(),
       loadingSegment: null,
       isBackgroundGenerating: false,
-      listeners: new Set()
+      listeners: new Set(),
     };
 
     this.segmentScripts.clear();
@@ -485,9 +483,7 @@ export function getIncrementalController(): IncrementalController {
 /**
  * Initialize incremental controller with config
  */
-export function initIncrementalController(
-  config?: Partial<IncrementalControllerConfig>
-): IncrementalController {
+export function initIncrementalController(config?: Partial<IncrementalControllerConfig>): IncrementalController {
   globalController = new IncrementalController(config);
   return globalController;
 }

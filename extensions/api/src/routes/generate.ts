@@ -262,6 +262,69 @@ router.post('/', async (req: Request, res: Response) => {
 });
 
 /**
+ * GET /api/generate/script/:sessionId
+ * Get generated WebGAL script for a session
+ */
+router.get('/script/:sessionId', async (req: Request, res: Response) => {
+  try {
+    const { sessionId } = req.params;
+
+    const session = sessionStore.get(sessionId);
+    if (!session) {
+      const response: ApiResponse = {
+        success: false,
+        error: {
+          code: 'SESSION_NOT_FOUND',
+          message: 'Session not found or expired'
+        },
+        timestamp: new Date().toISOString()
+      };
+      return res.status(404).json(response);
+    }
+
+    if (!session.script) {
+      const response: ApiResponse = {
+        success: false,
+        error: {
+          code: 'NO_SCRIPT',
+          message: 'Script not generated yet'
+        },
+        timestamp: new Date().toISOString()
+      };
+      return res.status(400).json(response);
+    }
+
+    const response: ApiResponse<{
+      script: string;
+      metadata: {
+        totalDialogues: number;
+        characters: string[];
+        estimatedDuration: number;
+      };
+    }> = {
+      success: true,
+      data: {
+        script: session.script.webgalScript,
+        metadata: session.script.metadata
+      },
+      timestamp: new Date().toISOString()
+    };
+
+    return res.json(response);
+  } catch (error) {
+    const response: ApiResponse = {
+      success: false,
+      error: {
+        code: 'ERROR',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      },
+      timestamp: new Date().toISOString()
+    };
+    return res.status(500).json(response);
+  }
+});
+
+/**
  * GET /api/generate/characters
  * Get available characters
  */

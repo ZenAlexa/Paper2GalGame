@@ -8,7 +8,22 @@
  * - Session management
  */
 
-import 'dotenv/config';
+import dotenv from 'dotenv';
+import path from 'path';
+
+// Load environment variables from project root
+// When running from extensions/api, root is ../../..
+// When running from project root, we also check current dir
+const possiblePaths = [
+  path.resolve(process.cwd(), '.env.local'),
+  path.resolve(process.cwd(), '.env'),
+  path.resolve(process.cwd(), '../../.env.local'),
+  path.resolve(process.cwd(), '../../.env'),
+];
+
+for (const envPath of possiblePaths) {
+  dotenv.config({ path: envPath });
+}
 import express from 'express';
 import cors from 'cors';
 

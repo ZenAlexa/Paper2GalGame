@@ -12,19 +12,55 @@ import { hasFastSaveRecord, loadFastSaveGame } from '@/Core/controller/storage/f
 import { WebGAL } from '@/Core/WebGAL';
 
 /**
- * 从头开始游戏
+ * Start game from scratch (default start.txt)
  */
 export const startGame = () => {
   resetStage(true);
 
-  // 重新获取初始场景
+  // Fetch initial scene
   const sceneUrl: string = assetSetter('start.txt', fileType.scene);
-  // 场景写入到运行时
+  // Load scene to runtime
   sceneFetcher(sceneUrl).then((rawScene) => {
     WebGAL.sceneManager.sceneData.currentScene = sceneParser(rawScene, 'start.txt', sceneUrl);
-    // 开始第一条语句
+    // Start first sentence
     nextSentence();
   });
+  webgalStore.dispatch(setVisibility({ component: 'showTitle', visibility: false }));
+};
+
+/**
+ * Start paper game with dynamically generated script
+ * @param sessionId Session ID from API
+ */
+export const startPaperGame = async (sessionId: string) => {
+  resetStage(true);
+
+  try {
+    // Fetch generated script from API
+    const response = await fetch(`/api/generate/script/${sessionId}`);
+    const result = await response.json();
+
+    if (!result.success || !result.data?.script) {
+      console.error('[startPaperGame] Failed to fetch script:', result.error);
+      return;
+    }
+
+    const rawScript = result.data.script;
+    console.log(`[startPaperGame] Loaded script with ${result.data.metadata?.totalDialogues || 0} dialogues`);
+
+    // Parse script and load to runtime
+    WebGAL.sceneManager.sceneData.currentScene = sceneParser(
+      rawScript,
+      `paper_${sessionId}.txt`,
+      `/api/generate/script/${sessionId}`,
+    );
+
+    // Start first sentence
+    nextSentence();
+  } catch (error) {
+    console.error('[startPaperGame] Error:', error);
+  }
+
   webgalStore.dispatch(setVisibility({ component: 'showTitle', visibility: false }));
 };
 

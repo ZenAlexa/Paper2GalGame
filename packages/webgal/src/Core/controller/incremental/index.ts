@@ -16,12 +16,8 @@ export type {
   IncrementalControllerConfig,
   MultiLanguageText,
   SegmentMarker,
-  TransitionOptions
+  TransitionOptions,
 } from './types';
 
 // Controller
-export {
-  IncrementalController,
-  getIncrementalController,
-  initIncrementalController
-} from './IncrementalController';
+export { IncrementalController, getIncrementalController, initIncrementalController } from './IncrementalController';

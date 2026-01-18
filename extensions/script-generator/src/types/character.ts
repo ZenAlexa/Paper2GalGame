@@ -62,6 +62,19 @@ export interface Character {
 
   /** Character avatar/sprite filename */
   sprite?: string;
+
+  /** Relationship to other characters (e.g., 前輩, 学弟, 学生, 表哥) */
+  relationship?: {
+    role: string;
+    jp: string;
+    description: string;
+  };
+
+  /** Assigned phase in the 4-phase paper structure (1-4) */
+  assignedPhase?: number;
+
+  /** Common Japanese phrases for TTS */
+  jpPhrases?: string[];
 }
 
 /**

@@ -31,7 +31,7 @@ export class OpenRouterClient {
       httpReferer: 'https://paper2galgame.com',
       appTitle: 'Paper2GalGame',
       defaultModel: 'google/gemini-3-flash-preview',
-      timeout: 30000,
+      timeout: 60000,
       ...config
     };
 
@@ -119,7 +119,7 @@ export class OpenRouterClient {
           { role: 'user', content: userPrompt }
         ],
         temperature: 0.8,
-        max_tokens: 6000,
+        max_tokens: 20000, // Support 90-130 dialogues (each ~50-100 tokens)
         reasoning: true // Enable reasoning for better script quality
       };
 
@@ -164,114 +164,248 @@ export class OpenRouterClient {
 
   /**
    * Build system prompt for script generation
-   * Includes correct asset file mappings to prevent 404 errors
+   * Implements 4-phase paper structure with character assignments
    */
   private buildSystemPrompt(characters: string[]): string {
-    // Map character IDs to actual sprite files
-    const characterSpriteMap: Record<string, string> = {
-      host: 'stand.webp',
-      energizer: 'stand2.webp',
-      analyst: 'stand.webp',
-      interpreter: 'stand2.webp'
-    };
+    return `# Paper2GalGame 論文解説スクリプト生成エキスパート
 
-    // Build character-sprite mapping for prompt
-    const characterMappings = characters.map(char => {
-      const sprite = characterSpriteMap[char] || 'stand.webp';
-      return `- ${char}: use "${sprite}"`;
-    }).join('\n');
+あなたは学術論文をWebGAL形式の教育的ビジュアルノベルスクリプトに変換する専門AIです。
 
-    return `# Paper2GalGame Script Generation Expert
+## 四人のキャラクター設定
 
-You are an AI assistant specialized in generating high-quality WebGAL scripts for Paper2GalGame.
+### 1. 小樱 (Sakura) - ID: host - 前輩
+- **役割**: 司会進行・全体まとめ
+- **性格**: 穏やかで面倒見が良い、知的で落ち着いている
+- **口調**: 丁寧語、「〜ですね」「〜でしょうか」を多用
+- **関係**: 他の3人の前輩として議論をリード
+- **立ち絵**: stand.webp
+- **担当フェーズ**: フェーズ1（背景・導入）
 
-## Character Configuration
-Available characters: ${characters.join(', ')}
+### 2. 小雪 (Yuki) - ID: energizer - 学弟
+- **役割**: 場を盛り上げる・素朴な質問
+- **性格**: 元気で好奇心旺盛、純粋で熱心
+- **口調**: 「わぁ！」「すごい！」「なるほど〜」など感嘆詞多め
+- **関係**: 一番年下の後輩、何でも質問する
+- **立ち絵**: stand2.webp
+- **担当フェーズ**: フェーズ4（結論・応用）
 
-Each character has unique personality and speaking style. Follow character settings strictly.
+### 3. 小雨 (Ame) - ID: analyst - 学生
+- **役割**: 深い分析・批判的思考
+- **性格**: 真面目で論理的、細部にこだわる
+- **口調**: 「論理的に考えると」「データによると」など学術的表現
+- **関係**: 勉強熱心な学生、分析が得意
+- **立ち絵**: stand.webp
+- **担当フェーズ**: フェーズ2（方法論）
 
-## CRITICAL: Asset File Requirements
-You MUST use ONLY these exact file names:
+### 4. 小风 (Kaze) - ID: interpreter - 表哥
+- **役割**: 日常生活との関連付け・わかりやすい説明
+- **性格**: 親しみやすく、例え話が上手
+- **口調**: 「これって日常で言うと」「身近な例で言えば」
+- **関係**: いとこ（表哥）として親しみやすい存在
+- **立ち絵**: stand2.webp
+- **担当フェーズ**: フェーズ3（実験・結果）
 
-### Available Backgrounds (use ONLY these):
-- bg.webp (main classroom/meeting room)
+## 四段階構成（CRITICAL - 必ず従うこと）
 
-### Character Sprite Mapping (MUST follow exactly):
-${characterMappings}
+論文は以下の4つのフェーズに分けて解説します：
 
-### Position Options:
-- -left (left side)
-- -center (center)
-- -right (right side)
+### フェーズ1: 背景と導入 (20-30対話)
+- **主担当**: 小樱 (host/前輩)
+- **内容**: Abstract、Introduction、研究背景
+- **目的**: 読者に論文の文脈と重要性を理解させる
+- 他のキャラクターは質問や反応で参加
 
-## WebGAL Script Format
-- Background: changeBg:bg.webp;
-- Character: changeFigure:stand.webp -center; (use sprite from mapping above)
-- Dialogue: say:dialogue content -speaker=character_id;
-- Wait: wait:1000;
-- BGM: playBgm:bgm.mp3;
+### フェーズ2: 方法論とアプローチ (25-35対話)
+- **主担当**: 小雨 (analyst/学生)
+- **内容**: Methods、提案手法、技術的詳細
+- **目的**: 研究がどのように行われたかを詳しく解説
+- 小樱が補足、小雪が素朴な疑問を投げかける
 
-## Script Structure
-1. **Opening** (2-3 lines): Set background, introduce characters
-2. **Main Content** (15-25 lines): Explain paper content with character interactions
-3. **Analysis** (5-8 lines): Deep analysis of key findings
-4. **Summary** (3-5 lines): Summarize key points
-5. **Closing** (1-2 lines): Farewell
+### フェーズ3: 実験と結果 (25-35対話)
+- **主担当**: 小风 (interpreter/表哥)
+- **内容**: Experiments、Results、図表の解釈
+- **目的**: 結果を日常的な視点から分かりやすく説明
+- 小雨が詳細分析、小雪が感想を述べる
 
-## Example Script Format:
+### フェーズ4: 結論と応用 (20-30対話)
+- **主担当**: 小雪 (energizer/学弟)
+- **内容**: Discussion、Conclusion、Future Work、応用可能性
+- **目的**: 研究の意義と今後の展望を熱意を持って伝える
+- 全員で議論しながらまとめる
+
+## アセット要件（厳守）
+
+### 背景（これのみ使用可能）:
+- bg.webp (教室/会議室)
+
+### 立ち絵マッピング:
+- host → stand.webp (-center または -left)
+- energizer → stand2.webp (-right)
+- analyst → stand.webp (-left)
+- interpreter → stand2.webp (-right)
+
+## WebGALスクリプト形式
+
 \`\`\`
 changeBg:bg.webp;
 changeFigure:stand.webp -center;
-say:Welcome everyone, today we'll discuss this paper. -speaker=host;
+say:皆さん、今日はこの論文について一緒に学びましょう。 -speaker=host;
 changeFigure:stand2.webp -right;
-say:I'm excited to learn about this topic! -speaker=energizer;
+say:わぁ、楽しみです！どんな内容ですか？ -speaker=energizer;
 \`\`\`
 
-## Language
-Generate dialogues in Japanese for natural voice synthesis. Include educational content accurately.
+## 生成要件
 
-Generate a complete WebGAL script following the above requirements exactly.`;
+1. **総対話数**: 90-130対話（各フェーズで適切に配分）
+2. **言語**: 日本語（自然なTTS音声合成のため）
+3. **キャラクター性**: 各キャラクターの口調と性格を厳守
+4. **教育性**: 論文の内容を正確に、かつ分かりやすく伝える
+5. **インタラクション**: キャラクター間の自然な会話と議論
+
+完全なWebGALスクリプトを生成してください。`;
   }
 
   /**
    * Build user prompt with paper data
-   * Reinforces asset requirements to prevent 404 errors
+   * Implements detailed 4-phase paper content extraction
    */
   private buildUserPrompt(paperData: any, options: any): string {
     const { educationalWeight, style } = options;
 
-    return `# Paper Conversion Task
+    // Extract paper content organized by phases
+    const phaseContent = this.extractPaperByPhases(paperData);
 
-## Paper Information
-**Title**: ${paperData.metadata?.title || 'Unknown Title'}
-**Authors**: ${paperData.metadata?.authors?.join(', ') || 'Unknown Authors'}
+    return `# 論文変換タスク
 
-## Paper Summary
-${this.extractPaperSummary(paperData)}
+## 論文情報
+**タイトル**: ${paperData.metadata?.title || '不明なタイトル'}
+**著者**: ${paperData.metadata?.authors?.join(', ') || '不明な著者'}
+**キーワード**: ${paperData.metadata?.keywords?.join(', ') || ''}
 
-## Generation Requirements
-- **Language**: Japanese (for natural TTS voice synthesis)
-- **Educational Focus**: ${(educationalWeight * 100).toFixed(0)}%
-- **Complexity**: ${style}
+## 論文内容（フェーズ別）
 
-## CRITICAL REMINDERS:
-1. Use ONLY bg.webp for changeBg commands
-2. Use ONLY stand.webp or stand2.webp for changeFigure commands
-3. Start the script with: changeBg:bg.webp;
-4. Each changeFigure must use the correct sprite from the mapping
+### フェーズ1用コンテンツ: 背景と導入
+${phaseContent.phase1}
 
-## Script Structure:
-1. **Opening** (2-3 dialogues): Set bg.webp, introduce characters with their sprites
-2. **Main Content** (15-25 dialogues): Explain paper content, switch characters
-3. **Analysis** (5-8 dialogues): Deep dive into key findings
-4. **Summary** (3-5 dialogues): Key takeaways
-5. **Closing** (1-2 dialogues): Farewell
+### フェーズ2用コンテンツ: 方法論とアプローチ
+${phaseContent.phase2}
 
-Generate the complete WebGAL script now. Remember:
-- Follow each character's personality
-- Accurately convey the paper's core content
-- Natural dialogue flow with educational value
-- STRICTLY follow WebGAL script format with correct asset filenames`;
+### フェーズ3用コンテンツ: 実験と結果
+${phaseContent.phase3}
+
+### フェーズ4用コンテンツ: 結論と応用
+${phaseContent.phase4}
+
+## 生成設定
+- **教育重視度**: ${(educationalWeight * 100).toFixed(0)}%
+- **難易度**: ${style}
+
+## 重要なリマインダー（厳守）
+
+### アセット要件:
+1. changeBg: **bg.webp のみ** 使用可能
+2. changeFigure: **stand.webp** または **stand2.webp のみ**
+3. スクリプト開始: changeBg:bg.webp;
+
+### キャラクター立ち絵:
+- host (小樱/前輩) → stand.webp -center/-left
+- energizer (小雪/学弟) → stand2.webp -right
+- analyst (小雨/学生) → stand.webp -left
+- interpreter (小风/表哥) → stand2.webp -right
+
+## 対話数の目標
+
+| フェーズ | 主担当 | 目標対話数 |
+|---------|--------|-----------|
+| フェーズ1: 導入 | host (前輩) | 20-30対話 |
+| フェーズ2: 方法論 | analyst (学生) | 25-35対話 |
+| フェーズ3: 結果 | interpreter (表哥) | 25-35対話 |
+| フェーズ4: 結論 | energizer (学弟) | 20-30対話 |
+| **合計** | | **90-130対話** |
+
+## キャラクター間の会話例
+
+**前輩から学弟への呼びかけ**: 「小雪くん、何か質問ある？」
+**学弟の反応**: 「わぁ！それすごいですね、前輩！」
+**学生の分析**: 「論理的に考えると、このアプローチは...」
+**表哥の例え**: 「身近な例で言えば、これって料理のレシピみたいなもので...」
+
+## スクリプト開始
+
+今すぐ完全なWebGALスクリプトを生成してください。
+- 4つのフェーズすべてを含める
+- 各フェーズの主担当キャラクターを中心に
+- 他のキャラクターも積極的に会話に参加
+- 90-130対話を目標に詳細なスクリプトを生成`;
+  }
+
+  /**
+   * Extract paper content organized by 4 phases
+   */
+  private extractPaperByPhases(paperData: any): {
+    phase1: string;
+    phase2: string;
+    phase3: string;
+    phase4: string;
+  } {
+    const sections = paperData.sections || [];
+    const rawText = paperData.rawText || '';
+
+    // Helper to find section by type
+    const findSection = (types: string[]): string => {
+      for (const type of types) {
+        const section = sections.find((s: any) =>
+          s.type?.toLowerCase() === type.toLowerCase() ||
+          s.title?.toLowerCase().includes(type.toLowerCase())
+        );
+        if (section) {
+          return `**${section.title}**\n${section.content.substring(0, 1500)}`;
+        }
+      }
+      return '';
+    };
+
+    // Phase 1: Background & Introduction
+    const phase1Parts = [
+      findSection(['abstract']),
+      findSection(['introduction', 'background', 'overview'])
+    ].filter(Boolean);
+    const phase1 = phase1Parts.length > 0
+      ? phase1Parts.join('\n\n')
+      : `**論文冒頭部分**\n${rawText.substring(0, 2000)}`;
+
+    // Phase 2: Methods & Approach
+    const phase2Parts = [
+      findSection(['methods', 'methodology', 'approach']),
+      findSection(['model', 'architecture', 'framework']),
+      findSection(['proposed', 'technique', 'algorithm'])
+    ].filter(Boolean);
+    const phase2 = phase2Parts.length > 0
+      ? phase2Parts.join('\n\n')
+      : `**方法論部分**\n${rawText.substring(2000, 4500)}`;
+
+    // Phase 3: Experiments & Results
+    const phase3Parts = [
+      findSection(['experiments', 'experimental']),
+      findSection(['results', 'findings', 'evaluation']),
+      findSection(['analysis', 'comparison'])
+    ].filter(Boolean);
+    const phase3 = phase3Parts.length > 0
+      ? phase3Parts.join('\n\n')
+      : `**実験・結果部分**\n${rawText.substring(4500, 7000)}`;
+
+    // Phase 4: Conclusion & Applications
+    const phase4Parts = [
+      findSection(['discussion']),
+      findSection(['conclusion', 'conclusions']),
+      findSection(['future', 'future work', 'limitations']),
+      findSection(['applications', 'implications'])
+    ].filter(Boolean);
+    const phase4 = phase4Parts.length > 0
+      ? phase4Parts.join('\n\n')
+      : `**結論部分**\n${rawText.substring(Math.max(0, rawText.length - 2500))}`;
+
+    return { phase1, phase2, phase3, phase4 };
   }
 
   /**

@@ -56,8 +56,37 @@ export {
 export { LanguageSwitcher } from './utils';
 import { LanguageSwitcher } from './utils';
 
-// Type definitions
-export type * from './types';
+// Type definitions - re-export all types from types module
+export type {
+  // Character types
+  Character,
+  CharacterName,
+  VoiceSettings,
+  CharacterInteraction,
+  DialogueLine,
+  MultiLanguageContent,
+  // Script types
+  WebGALCommand,
+  WebGALLine,
+  WebGALScene,
+  WebGALScript,
+  GenerationOptions,
+  MultiLanguageOptions,
+  ValidationConfig,
+  // OpenRouter types
+  OpenRouterConfig,
+  OpenRouterModel,
+  ChatMessage,
+  ChatCompletionRequest,
+  ChatCompletionResponse,
+  OpenRouterError,
+  ScriptGenerationRequest,
+  ScriptGenerationResponse,
+  // Paper types
+  ParsedPaper,
+  PaperSection,
+  PaperMetadata
+} from './types';
 
 // Validation results
 export type {

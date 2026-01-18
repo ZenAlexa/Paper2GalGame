@@ -458,20 +458,22 @@ export class ScriptValidator {
             };
           }
 
-          characterStats[speaker].appearances++;
+          // Use local reference to satisfy TypeScript after null check
+          const speakerStats = characterStats[speaker]!;
+          speakerStats.appearances++;
 
           // Check if character should be in expected list
           if (characterId && !expectedCharacters.has(characterId)) {
-            characterStats[speaker].issues.push('Character not in expected list');
-            characterStats[speaker].consistencyScore -= 0.2;
+            speakerStats.issues.push('Character not in expected list');
+            speakerStats.consistencyScore -= 0.2;
           }
 
           // Validate character voice file naming
           if (line.options?.vocal && characterId) {
             const vocal = String(line.options.vocal);
             if (!vocal.startsWith(characterId)) {
-              characterStats[speaker].issues.push('Voice file name doesn\'t match character ID');
-              characterStats[speaker].consistencyScore -= 0.1;
+              speakerStats.issues.push('Voice file name doesn\'t match character ID');
+              speakerStats.consistencyScore -= 0.1;
             }
           }
         }
@@ -488,7 +490,10 @@ export class ScriptValidator {
           character.name.en
         ];
 
-        const hasAppearances = speakerNames.some(name => characterStats[name] && characterStats[name].appearances > 0);
+        const hasAppearances = speakerNames.some(name => {
+          const stats = characterStats[name];
+          return stats !== undefined && stats.appearances > 0;
+        });
 
         if (!hasAppearances) {
           // Add missing character to stats
@@ -515,7 +520,10 @@ export class ScriptValidator {
         const character = CHARACTER_CONFIGS[charId];
         if (!character) return false;
         const speakerNames = [character.name.zh, character.name.jp, character.name.en];
-        return speakerNames.some(name => characterStats[name] && characterStats[name].appearances > 0);
+        return speakerNames.some(name => {
+          const stats = characterStats[name];
+          return stats !== undefined && stats.appearances > 0;
+        });
       });
 
     return {

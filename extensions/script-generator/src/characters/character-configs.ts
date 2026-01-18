@@ -54,8 +54,21 @@ export const CHARACTER_CONFIGS: Record<string, Character> = {
       'I understand',
       'Let us look at the next part'
     ],
+    jpPhrases: [
+      '皆さん、一緒にこの論文について学びましょう',
+      'それは興味深い質問ですね',
+      '皆さんはどう思いますか？',
+      'なるほど、分かりました',
+      '次の部分を見てみましょう'
+    ],
     description: 'Gentle host who summarizes and guides discussion',
-    sprite: 'stand.webp'
+    sprite: 'stand.webp',
+    relationship: {
+      role: 'senpai',
+      jp: '前輩',
+      description: 'Senior who leads discussions with warmth and patience'
+    },
+    assignedPhase: 1
   },
 
   energizer: {
@@ -99,8 +112,21 @@ export const CHARACTER_CONFIGS: Record<string, Character> = {
       'Oh, I see!',
       'That is amazing!'
     ],
+    jpPhrases: [
+      'わぁ！それすごいですね！',
+      'なるほど〜、分かりました！',
+      'あ、ちょっと質問があります！',
+      'えっ、本当ですか？',
+      'すごい！面白いですね！'
+    ],
     description: 'Energetic character who makes content engaging',
-    sprite: 'stand2.webp'
+    sprite: 'stand2.webp',
+    relationship: {
+      role: 'kouhai',
+      jp: '学弟',
+      description: 'Youngest junior who asks innocent questions with enthusiasm'
+    },
+    assignedPhase: 4
   },
 
   analyst: {
@@ -144,8 +170,22 @@ export const CHARACTER_CONFIGS: Record<string, Character> = {
       'According to the theoretical framework',
       'This conclusion needs verification'
     ],
+    jpPhrases: [
+      '論理的に考えると、この点は重要ですね',
+      'ここに興味深い問題があります',
+      'もう少し詳しく見てみましょう',
+      'データによると...',
+      '理論的枠組みから見れば',
+      'この結論は検証が必要です'
+    ],
     description: 'Rigorous analyst who examines logical structure',
-    sprite: 'stand.webp'
+    sprite: 'stand.webp',
+    relationship: {
+      role: 'student',
+      jp: '学生',
+      description: 'Dedicated student who approaches problems with analytical rigor'
+    },
+    assignedPhase: 2
   },
 
   interpreter: {
@@ -189,8 +229,22 @@ export const CHARACTER_CONFIGS: Record<string, Character> = {
       'I understand that feeling',
       'In other words...'
     ],
+    jpPhrases: [
+      'これって日常で言うと...',
+      '身近な例で言えば...',
+      '簡単に言うと、こういうことですね',
+      '皆さんの生活で考えてみると...',
+      'つまり、こういうイメージですね',
+      '例えば料理で言うと...'
+    ],
     description: 'Wise interpreter who connects concepts to daily life',
-    sprite: 'stand2.webp'
+    sprite: 'stand2.webp',
+    relationship: {
+      role: 'cousin',
+      jp: '表哥',
+      description: 'Friendly cousin who explains things with relatable examples'
+    },
+    assignedPhase: 3
   }
 };
 

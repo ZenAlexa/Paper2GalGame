@@ -1,0 +1,53 @@
+.FigureContainer_main {
+  z-index: 4;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  display: flex;
+}
+
+.figurePic {
+  max-height: 100%;
+  max-width: 100%;
+  width: auto;
+  height: auto;
+  object-fit: cover;
+  animation: centerIn 0.5s ease-in-out forwards;
+}
+
+.figContainer {
+  width: 98%;
+  left: 1%;
+  right: 1%;
+  position: absolute;
+  display: flex;
+  top: 5px;
+  bottom: 0;
+  z-index: 4;
+  animation: fig_default_animation 0.3s;
+}
+
+.figContainerLeft {
+  justify-content: left;
+}
+
+.figContainerCenter {
+  justify-content: center;
+}
+
+.figContainerRight {
+  justify-content: right;
+}
+
+@keyframes fig_default_animation {
+  0% {
+    opacity: 0;
+  }
+  30% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}

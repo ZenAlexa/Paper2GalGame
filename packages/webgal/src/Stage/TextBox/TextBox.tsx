@@ -1,0 +1,320 @@
+import { ReactNode, useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/store/store';
+import { useFontFamily } from '@/hooks/useFontFamily';
+import { useTextAnimationDuration, useTextDelay } from '@/hooks/useTextOptions';
+import { getTextSize } from '@/UI/getTextSize';
+import { match } from '@/Core/util/match';
+import { textSize } from '@/store/userDataInterface';
+import IMSSTextbox from '@/Stage/TextBox/IMSSTextbox';
+import { SCREEN_CONSTANTS } from '@/Core/util/constants';
+import useEscape from '@/hooks/useEscape';
+
+const userAgent = navigator.userAgent;
+const isFirefox = /firefox/i.test(userAgent);
+const isSafari = /^((?!chrome|android).)*safari/i.test(userAgent);
+
+export interface EnhancedNode {
+  reactNode: ReactNode;
+  enhancedValue?: { key: string; value: string }[];
+}
+
+export const TextBox = () => {
+  const stageState = useSelector((state: RootState) => state.stage);
+  const guiState = useSelector((state: RootState) => state.GUI);
+  const userDataState = useSelector((state: RootState) => state.userData);
+  const textDelay = useTextDelay(userDataState.optionData.textSpeed);
+  const textDuration = useTextAnimationDuration(userDataState.optionData.textSpeed);
+  let size = getTextSize(userDataState.optionData.textSize) + '%';
+  const font = useFontFamily();
+  const isText = stageState.showText !== '' || stageState.showName !== '';
+  let textSizeState = userDataState.optionData.textSize;
+  if (isText && stageState.showTextSize !== -1) {
+    size = getTextSize(stageState.showTextSize) + '%';
+    textSizeState = stageState.showTextSize;
+  }
+  const MaxTextLine = Number(userDataState.globalGameVar.Max_line); // congfig定义字体行数
+  const lineLimit = Number.isNaN(MaxTextLine)
+    ? match(textSizeState)
+        .with(textSize.small, () => 3)
+        .with(textSize.medium, () => 2)
+        .with(textSize.large, () => 2)
+        .default(() => 2)
+    : MaxTextLine;
+  // 拆字
+  const textArray = compileSentence(stageState.showText, lineLimit);
+  const isHasName = stageState.showName !== '';
+  const showName = compileSentence(stageState.showName, lineLimit);
+  const currentConcatDialogPrev = stageState.currentConcatDialogPrev;
+  const currentDialogKey = stageState.currentDialogKey;
+  const miniAvatar = stageState.miniAvatar;
+  const textboxOpacity = userDataState.optionData.textboxOpacity;
+  const Textbox = IMSSTextbox;
+  const fontOptimization = guiState.fontOptimization;
+
+  const [isShowStroke, setIsShowStroke] = useState(true);
+
+  useEffect(() => {
+    if (!fontOptimization) {
+      setIsShowStroke(true);
+      return;
+    }
+
+    const handleResize = () => {
+      const targetHeight = SCREEN_CONSTANTS.height;
+      const targetWidth = SCREEN_CONSTANTS.width;
+
+      const h = window.innerHeight; // 窗口高度
+      const w = window.innerWidth; // 窗口宽度
+      const zoomH = h / targetHeight; // 以窗口高度为基准的变换比
+      const zoomW = w / targetWidth; // 以窗口宽度为基准的变换比
+      const zoomH2 = w / targetHeight; // 竖屏时以窗口高度为基础的变换比
+      const zoomW2 = h / targetWidth; // 竖屏时以窗口宽度为基础的变换比
+      [zoomH, zoomW, zoomH2, zoomW2].forEach((e) => {
+        if (e <= 0.2) {
+          setIsShowStroke(false);
+        } else {
+          setIsShowStroke(true);
+        }
+      });
+    };
+    window.addEventListener('resize', handleResize);
+    handleResize();
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [fontOptimization]);
+
+  return (
+    <Textbox
+      textArray={textArray}
+      isText={isText}
+      textDelay={textDelay}
+      showName={showName}
+      isHasName={isHasName}
+      currentConcatDialogPrev={currentConcatDialogPrev}
+      fontSize={size}
+      currentDialogKey={currentDialogKey}
+      isSafari={isSafari}
+      isFirefox={isFirefox}
+      miniAvatar={miniAvatar}
+      textDuration={textDuration}
+      font={font}
+      textSizeState={textSizeState}
+      lineLimit={lineLimit}
+      isUseStroke={isShowStroke}
+      textboxOpacity={textboxOpacity}
+    />
+  );
+};
+
+function isCJK(character: string) {
+  return !!character.match(/[\u4e00-\u9fa5]|[\u0800-\u4e00]|[\uac00-\ud7ff]/);
+}
+
+/**
+ * 编译文本拓展语法到增强版节点
+ * @param sentence 原始文本
+ * @param lineLimit 行数限制
+ * @param ignoreLineLimit 是否忽略行数限制
+ * @param replace_space_with_nbsp 是否将空格替换为不间断空格
+ */
+// eslint-disable-next-line max-params
+export function compileSentence(
+  sentence: string,
+  lineLimit: number,
+  ignoreLineLimit?: boolean,
+  replace_space_with_nbsp = true,
+): EnhancedNode[][] {
+  // 先拆行
+  const lines = sentence.split(/(?<!\\)\|/).map((val: string) => useEscape(val));
+  // 对每一行进行注音处理
+  const rubyLines = lines.map((line) => parseString(line));
+  const nodeLines = rubyLines.map((line) => {
+    const ln: EnhancedNode[] = [];
+    line.forEach((node, index) => {
+      match(node.type)
+        .with(SegmentType.String, () => {
+          const chars = splitChars(node.value as string, replace_space_with_nbsp);
+          // eslint-disable-next-line max-nested-callbacks
+          ln.push(...chars.map((c) => ({ reactNode: c })));
+        })
+        .endsWith(SegmentType.Link, () => {
+          const val = node.value as EnhancedValue;
+          // 检查是否是注音文本（通过检查是否有ruby值）
+          if (val.ruby) {
+            // 注音文本作为整体处理
+            const enhancedNode = (
+              <span className="__enhanced_text" key={val.text + `${index}`}>
+                <ruby key={index + val.text}>
+                  {val.text}
+                  <rt>{val.ruby}</rt>
+                </ruby>
+              </span>
+            );
+            ln.push({ reactNode: enhancedNode, enhancedValue: val.values });
+          } else {
+            // 样式文本逐字处理
+            const chars = splitChars(val.text, replace_space_with_nbsp);
+            // eslint-disable-next-line max-nested-callbacks
+            chars.forEach((char, charIndex) => {
+              const enhancedNode = (
+                <span className="__enhanced_text" key={val.text + `${index}-${charIndex}`}>
+                  {char}
+                </span>
+              );
+              ln.push({ reactNode: enhancedNode, enhancedValue: val.values });
+            });
+          }
+        });
+    });
+    return ln;
+  });
+  return nodeLines.slice(0, ignoreLineLimit ? undefined : lineLimit);
+}
+
+/**
+ * @param sentence
+ * @param replace_space_with_nbsp
+ */
+export function splitChars(sentence: string, replace_space_with_nbsp = true) {
+  if (!sentence) return [''];
+  const words: string[] = [];
+  let word = '';
+  let cjkFlag = isCJK(sentence[0]);
+
+  const isPunctuation = (ch: string): boolean => {
+    const regex = /[!-\/:-@\[-`{-~\u2000-\u206F\u3000-\u303F\uff00-\uffef]/g;
+    return regex.test(ch);
+  };
+
+  for (const character of sentence) {
+    // if (character === '|') {
+    //   if (word) {
+    //     words.push(word);
+    //     word = '';
+    //   }
+    //   words.push('<br />');
+    //   cjkFlag = false;
+    //   continue;
+    // }
+    if (character === ' ' || character === '\u00a0') {
+      // Space
+      if (word) {
+        words.push(word);
+        word = '';
+      }
+      if (replace_space_with_nbsp) {
+        words.push('\u00a0');
+      } else words.push(character);
+      cjkFlag = false;
+    } else if (isCJK(character) && !isPunctuation(character)) {
+      if (!cjkFlag && word) {
+        words.push(word);
+        word = '';
+      }
+      words.push(character);
+      cjkFlag = true;
+    } else {
+      if (isPunctuation(character)) {
+        if (word) {
+          // If it is a punctuation and there is a preceding word, add it to the word
+          word += character;
+          words.push(word);
+          word = '';
+        } else if (words.length > 0) {
+          // If no preceding word in the current iteration, but there are already words in the array, append to the last word
+          words[words.length - 1] += character;
+        } else {
+          // If no preceding word, still add the punctuation as a new word
+          words.push(character);
+        }
+        continue;
+      }
+
+      if (cjkFlag && word) {
+        words.push(word);
+        word = '';
+      }
+      word += character;
+      cjkFlag = false;
+    }
+  }
+
+  if (word) {
+    words.push(word);
+  }
+
+  return words;
+}
+
+enum SegmentType {
+  String = 'SegmentType.String',
+  Link = 'SegmentType.Link',
+}
+
+interface EnhancedValue {
+  text: string;
+  ruby: string;
+  values: { key: string; value: string }[];
+}
+
+interface Segment {
+  type: SegmentType;
+  value?: string | EnhancedValue;
+}
+
+function parseString(input: string): Segment[] {
+  const regex = /(\[(.*?)\]\((.*?)\))|([^\[\]]+)/g;
+  const result: Segment[] = [];
+  let match: RegExpExecArray | null;
+
+  while ((match = regex.exec(input)) !== null) {
+    if (match[1]) {
+      // 链接部分
+      const text = match[2];
+      const enhance = match[3];
+      let parsedEnhanced: KeyValuePair[] = [];
+      let ruby = '';
+      if (enhance.match(/style=|tips=|ruby=|style-alltext=/)) {
+        parsedEnhanced = parseEnhancedString(enhance);
+        const rubyKvPair = parsedEnhanced.find((e) => e.key === 'ruby');
+        if (rubyKvPair) {
+          ruby = rubyKvPair.value;
+        }
+      } else {
+        ruby = enhance;
+      }
+      result.push({ type: SegmentType.Link, value: { text, ruby, values: parsedEnhanced } });
+    } else {
+      // 普通文本
+      const text = match[0];
+      result.push({ type: SegmentType.String, value: text });
+    }
+  }
+
+  // 我也不知道为什么，不加这个就会导致在 Enhanced Value 处于行首时故障
+  // 你可以认为这个代码不明所以，但是不要删除
+  result.unshift({ type: SegmentType.String, value: '' });
+  return result;
+}
+
+interface KeyValuePair {
+  key: string;
+  value: string;
+}
+
+function parseEnhancedString(enhanced: string): KeyValuePair[] {
+  const result: KeyValuePair[] = [];
+  const regex = /(\S+)=(.*?)(?=\s+\S+=|\s*$)/g;
+  let match: RegExpExecArray | null;
+
+  while ((match = regex.exec(enhanced)) !== null) {
+    result.push({
+      key: match[1],
+      value: match[2].replace(/~/g, ':').trim(),
+    });
+  }
+
+  return result;
+}

@@ -1,0 +1,29 @@
+{
+  "name": "paper2galgame",
+  "version": "1.0.0",
+  "description": "Transform academic papers into visual novel experience",
+  "repository": "https://github.com/AdrianWang/Paper2GalGame.git",
+  "author": "Adrian Wang <https://x.com/Adrian_Z_Wang>",
+  "scripts": {
+    "build": "yarn parser:build && yarn webgal:build",
+    "build-ci": "yarn parser:build-ci && yarn webgal:build",
+    "dev": "yarn parser:build && yarn webgal:dev",
+    "webgal:dev": "cd packages/webgal && yarn dev",
+    "webgal:build": "cd packages/webgal && yarn build",
+    "parser:test": "cd packages/parser && yarn test",
+    "parser:test-coverage": "cd packages/parser && yarn coverage",
+    "parser:build": "cd packages/parser && yarn build",
+    "parser:build-ci": "cd packages/parser && yarn build-ci"
+  },
+  "license": "MPL-2.0",
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ]
+  },
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  },
+  "packageManager": "yarn@1.22.22"
+}

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- 简洁的书本/论文图标 - 受 Vercel 风格启发 -->
+  <rect width="512" height="512" fill="#000"/>
+
+  <!-- 打开的书本抽象 - 两个倾斜的平行四边形 -->
+  <path d="M128 140 L248 160 L248 380 L128 360 Z" fill="#fff"/>
+  <path d="M384 140 L264 160 L264 380 L384 360 Z" fill="#fff"/>
+
+  <!-- 中间的分隔线 -->
+  <line x1="256" y1="155" x2="256" y2="385" stroke="#000" stroke-width="4"/>
+</svg>

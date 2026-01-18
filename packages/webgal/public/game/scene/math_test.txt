@@ -1,0 +1,45 @@
+// LaTeX Math Formula Rendering Test Scene for Paper2GalGame
+// Demonstrates mathematical notation rendering capabilities
+
+bgm:s_Title.mp3 -volume=80 -enter=3000;
+intro:Mathematical Formula Test|Welcome to Paper2GalGame LaTeX formula rendering;
+changeBg:bg.webp -next;
+changeFigure:stand.webp -left -enter=enter-from-left -next;
+miniAvatar:miniavatar.webp;
+
+// Basic inline formula test
+WebGAL:Hello! Let's test the mathematical formula functionality. Here's an inline formula: $E = mc^2$;
+WebGAL:This is Einstein's mass-energy equivalence $E = mc^2$, showing the relationship between mass and energy.;
+
+// Display formula test
+WebGAL:Next is a display formula, like the famous Euler's formula: $$e^{i\pi} + 1 = 0$$;
+WebGAL:This formula is considered one of the most beautiful equations in mathematics.;
+
+// Complex formula test
+WebGAL:We can also display more complex formulas, such as the quadratic formula: $$x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$$;
+
+// Fractions and radicals test
+WebGAL:Here's an example with fractions: we know that $\frac{1}{2} + \frac{1}{3} = \frac{5}{6}$, and $\sqrt{x^2 + y^2}$ represents vector magnitude.;
+
+// Greek letters test
+WebGAL:Mathematics frequently uses Greek letters, such as $\alpha$, $\beta$, $\gamma$, $\delta$, $\pi$, $\theta$, $\lambda$, etc.;
+
+// Calculus test
+WebGAL:Calculus is an important branch of mathematics, featuring integrals like $\int_0^1 x^2 dx = \frac{1}{3}$ and derivatives like $\frac{d}{dx}(x^2) = 2x$.;
+
+// Matrix test
+WebGAL:We can also display matrices: $$\begin{pmatrix} a & b \\ c & d \end{pmatrix}$$;
+
+// Series and limits test
+WebGAL:Mathematical series and limits: $\sum_{n=1}^{\infty} \frac{1}{n^2} = \frac{\pi^2}{6}$ and $\lim_{x \to 0} \frac{\sin x}{x} = 1$;
+
+// Mixed text and formula test
+WebGAL:Mixing text and formulas in one sentence: when $a = 1$, $b = 2$, $c = 3$, then $a + b + c = 6$.;
+
+// Error handling test
+WebGAL:Here's a formula with syntax error: $\invalid{syntax}$ should display an error message.;
+
+// End
+WebGAL:Mathematical formula rendering test complete! Paper2GalGame now fully supports LaTeX mathematical notation.;
+
+choose:Return to Main Menu:start.txt|Continue Testing:math_test.txt;

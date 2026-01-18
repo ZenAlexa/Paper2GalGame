@@ -1,0 +1,85 @@
+/**
+ * Mathematical formula styling for WebGAL visual novel engine
+ * Provides optimized display styling for LaTeX mathematical notation
+ */
+
+/* Inline mathematical formula styling */
+.katex {
+  color: #2c3e50 !important; /* Dark text for better readability */
+  font-size: 1em !important;
+  line-height: 1.4 !important;
+}
+
+/* Display mathematical formula styling */
+.katex-display {
+  color: #2c3e50 !important; /* Dark text */
+  margin: 0.5em 0 !important;
+  text-align: center !important;
+}
+
+/* WebGAL textbox inline math styling */
+.webgal-math-inline {
+  color: #2c3e50 !important;
+  vertical-align: baseline !important;
+  display: inline !important;
+}
+
+.webgal-math-display {
+  color: #2c3e50 !important;
+  margin: 0.8em 0 !important;
+  text-align: center !important;
+  display: block !important;
+}
+
+/* Error message styling */
+.webgal-math-error {
+  color: #e74c3c !important;
+  background-color: #fdf2f2 !important;
+  padding: 2px 4px !important;
+  border-radius: 3px !important;
+  font-size: 0.9em !important;
+  border: 1px solid #fadbd8 !important;
+}
+
+/* Ensure readability in textbox content */
+.textbox-content .katex,
+.textbox-content .katex-display,
+.textbox-content .webgal-math-inline,
+.textbox-content .webgal-math-display {
+  color: #2c3e50 !important; /* Dark blue-gray for high contrast */
+}
+
+/* Text size adaptations */
+.text-size-small .katex {
+  font-size: 0.9em !important;
+}
+
+.text-size-medium .katex {
+  font-size: 1em !important;
+}
+
+.text-size-large .katex {
+  font-size: 1.1em !important;
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+  .katex {
+    font-size: 0.95em !important;
+  }
+
+  .katex-display {
+    margin: 0.4em 0 !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .katex,
+  .katex-display,
+  .webgal-math-inline,
+  .webgal-math-display {
+    color: #000000 !important;
+    font-weight: 500 !important;
+  }
+}

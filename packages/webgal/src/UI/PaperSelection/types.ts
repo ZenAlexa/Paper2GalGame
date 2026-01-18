@@ -102,13 +102,7 @@ export interface GameCardInfo {
 /**
  * Generation status
  */
-export type GenerationStatus =
-  | 'idle'
-  | 'uploading'
-  | 'parsing'
-  | 'generating'
-  | 'ready'
-  | 'error';
+export type GenerationStatus = 'idle' | 'uploading' | 'parsing' | 'generating' | 'ready' | 'error';
 
 /**
  * Component props
@@ -125,6 +119,9 @@ export interface PaperSelectionProps {
 
   /** Callback when load save */
   onLoadSave?: (paperId: string, slotIndex: number) => void;
+
+  /** Callback when user wants to go back */
+  onBack?: () => void;
 }
 
 /**

@@ -14,285 +14,295 @@ export const UI_LABELS: UILabels = {
   appTitle: {
     zh: 'Paper2GalGame',
     jp: 'Paper2GalGame',
-    en: 'Paper2GalGame'
+    en: 'Paper2GalGame',
   },
   appSubtitle: {
     zh: '将学术论文转化为视觉小说体验',
     jp: '学術論文をビジュアルノベル体験に変換',
-    en: 'Transform Academic Papers into Visual Novel Experience'
+    en: 'Transform Academic Papers into Visual Novel Experience',
   },
 
   // New game section
   newGame: {
     zh: '开始新游戏',
     jp: '新しいゲームを始める',
-    en: 'Start New Game'
+    en: 'Start New Game',
   },
   uploadPaper: {
     zh: '上传论文',
     jp: '論文をアップロード',
-    en: 'Upload Paper'
+    en: 'Upload Paper',
   },
   selectFile: {
     zh: '选择文件',
     jp: 'ファイルを選択',
-    en: 'Select File'
+    en: 'Select File',
   },
   dragDropHint: {
     zh: '将文件拖放到此处，或点击选择',
     jp: 'ファイルをここにドラッグ&ドロップ、またはクリックして選択',
-    en: 'Drag & drop files here, or click to select'
+    en: 'Drag & drop files here, or click to select',
   },
   supportedFormats: {
     zh: '支持格式：PDF、Word、TXT',
     jp: '対応形式：PDF、Word、TXT',
-    en: 'Supported formats: PDF, Word, TXT'
+    en: 'Supported formats: PDF, Word, TXT',
   },
 
   // Character selection
   selectCharacters: {
     zh: '选择角色',
     jp: 'キャラクターを選択',
-    en: 'Select Characters'
+    en: 'Select Characters',
   },
   characterRequired: {
     zh: '请至少选择2位角色',
     jp: '2人以上のキャラクターを選択してください',
-    en: 'Please select at least 2 characters'
+    en: 'Please select at least 2 characters',
   },
   minCharactersHint: {
     zh: '选择2-4位角色为你讲解论文内容',
     jp: '論文内容を説明する2〜4人のキャラクターを選択',
-    en: 'Select 2-4 characters to explain the paper'
+    en: 'Select 2-4 characters to explain the paper',
   },
 
   // Language selection
   selectLanguage: {
     zh: '选择语言',
     jp: '言語を選択',
-    en: 'Select Language'
+    en: 'Select Language',
   },
   languageHint: {
     zh: '游戏文本语言（语音始终为日语）',
     jp: 'ゲームテキスト言語（音声は常に日本語）',
-    en: 'Game text language (voice is always Japanese)'
+    en: 'Game text language (voice is always Japanese)',
   },
 
   // Generation
   startGeneration: {
     zh: '开始生成',
     jp: '生成開始',
-    en: 'Start Generation'
+    en: 'Start Generation',
   },
   generating: {
     zh: '生成中...',
     jp: '生成中...',
-    en: 'Generating...'
+    en: 'Generating...',
   },
   generationProgress: {
     zh: '生成进度',
     jp: '生成進捗',
-    en: 'Generation Progress'
+    en: 'Generation Progress',
   },
   readyToPlay: {
     zh: '准备就绪！',
     jp: '準備完了！',
-    en: 'Ready to Play!'
+    en: 'Ready to Play!',
   },
 
   // Continue game section
   continueGame: {
     zh: '继续游戏',
     jp: 'ゲームを続ける',
-    en: 'Continue Game'
+    en: 'Continue Game',
   },
   noSavedGames: {
     zh: '没有已保存的游戏',
     jp: '保存されたゲームはありません',
-    en: 'No saved games'
+    en: 'No saved games',
   },
   lastPlayed: {
     zh: '最后游玩',
     jp: '最終プレイ',
-    en: 'Last Played'
+    en: 'Last Played',
   },
   progress: {
     zh: '进度',
     jp: '進捗',
-    en: 'Progress'
+    en: 'Progress',
   },
   loadSave: {
     zh: '读取存档',
     jp: 'セーブデータを読込',
-    en: 'Load Save'
+    en: 'Load Save',
   },
   deleteGame: {
     zh: '删除',
     jp: '削除',
-    en: 'Delete'
+    en: 'Delete',
   },
 
   // Save/Load
   saveSlots: {
     zh: '存档位',
     jp: 'セーブスロット',
-    en: 'Save Slots'
+    en: 'Save Slots',
   },
   quickSave: {
     zh: '快速存档',
     jp: 'クイックセーブ',
-    en: 'Quick Save'
+    en: 'Quick Save',
   },
   autoSave: {
     zh: '自动存档',
     jp: 'オートセーブ',
-    en: 'Auto Save'
+    en: 'Auto Save',
   },
   emptySlot: {
     zh: '空',
     jp: '空き',
-    en: 'Empty'
+    en: 'Empty',
   },
 
   // Buttons
   play: {
     zh: '开始游戏',
     jp: 'ゲーム開始',
-    en: 'Play Game'
+    en: 'Play Game',
   },
   cancel: {
     zh: '取消',
     jp: 'キャンセル',
-    en: 'Cancel'
+    en: 'Cancel',
   },
   confirm: {
     zh: '确认',
     jp: '確認',
-    en: 'Confirm'
+    en: 'Confirm',
   },
   back: {
     zh: '返回',
     jp: '戻る',
-    en: 'Back'
+    en: 'Back',
   },
 
   // Status messages
   uploading: {
     zh: '上传中...',
     jp: 'アップロード中...',
-    en: 'Uploading...'
+    en: 'Uploading...',
   },
   parsing: {
     zh: '解析论文中...',
     jp: '論文を解析中...',
-    en: 'Parsing paper...'
+    en: 'Parsing paper...',
   },
   error: {
     zh: '发生错误',
     jp: 'エラーが発生しました',
-    en: 'An error occurred'
+    en: 'An error occurred',
   },
   success: {
     zh: '成功',
     jp: '成功',
-    en: 'Success'
+    en: 'Success',
   },
 
   // Confirmations
   deleteConfirm: {
     zh: '确定要删除这个游戏吗？所有存档将被清除。',
     jp: 'このゲームを削除してもよろしいですか？すべてのセーブデータが削除されます。',
-    en: 'Are you sure you want to delete this game? All saves will be removed.'
+    en: 'Are you sure you want to delete this game? All saves will be removed.',
   },
   overwriteConfirm: {
     zh: '此存档位已有数据，是否覆盖？',
     jp: 'このスロットには既にデータがあります。上書きしますか？',
-    en: 'This slot already has data. Overwrite?'
-  }
+    en: 'This slot already has data. Overwrite?',
+  },
 };
 
 /**
  * Get label text for current language
  */
-export function getLabel(
-  labelKey: keyof UILabels,
-  language: 'zh' | 'jp' | 'en'
-): string {
+export function getLabel(labelKey: keyof UILabels, language: 'zh' | 'jp' | 'en'): string {
   return UI_LABELS[labelKey][language];
 }
 
 /**
- * Character role descriptions (tri-language)
+ * Character role descriptions with sprite mapping (tri-language)
+ * Uses WebGAL default assets for development
  */
-export const CHARACTER_ROLES: Record<string, { name: import('./types').MultiLanguageText; role: import('./types').MultiLanguageText; description: import('./types').MultiLanguageText }> = {
-  nene: {
+export const CHARACTER_ROLES: Record<
+  string,
+  {
+    name: import('./types').MultiLanguageText;
+    role: import('./types').MultiLanguageText;
+    description: import('./types').MultiLanguageText;
+    sprite: string;
+  }
+> = {
+  host: {
     name: {
-      zh: '绫地宁宁',
-      jp: '綾地寧々',
-      en: 'Ayachi Nene'
+      zh: '小樱',
+      jp: 'さくら',
+      en: 'Sakura',
     },
     role: {
       zh: '主持人',
       jp: '司会者',
-      en: 'Host'
+      en: 'Host',
     },
     description: {
       zh: '温柔体贴的大姐姐，善于总结和引导讨论',
       jp: '優しくて思いやりのある先輩、議論をまとめて導くのが得意',
-      en: 'Gentle and caring, good at summarizing and guiding discussions'
-    }
+      en: 'Gentle and caring, good at summarizing and guiding discussions',
+    },
+    sprite: 'stand.webp',
   },
-  murasame: {
+  energizer: {
     name: {
-      zh: '丛雨',
-      jp: '叢雨',
-      en: 'Murasame'
+      zh: '小雪',
+      jp: 'ゆき',
+      en: 'Yuki',
     },
     role: {
       zh: '活跃者',
       jp: '盛り上げ役',
-      en: 'Energizer'
+      en: 'Energizer',
     },
     description: {
       zh: '活泼开朗的元气少女，用有趣的比喻让内容生动',
       jp: '元気いっぱいの明るい少女、面白い例えで内容を分かりやすく',
-      en: 'Cheerful and energetic, makes content vivid with fun analogies'
-    }
+      en: 'Cheerful and energetic, makes content vivid with fun analogies',
+    },
+    sprite: 'stand2.webp',
   },
-  nanami: {
+  analyst: {
     name: {
-      zh: '在原七海',
-      jp: '在原七海',
-      en: 'Arihara Nanami'
+      zh: '小雨',
+      jp: 'あめ',
+      en: 'Ame',
     },
     role: {
       zh: '分析者',
       jp: '分析者',
-      en: 'Analyst'
+      en: 'Analyst',
     },
     description: {
       zh: '理性严谨的学者型，深入分析论文的逻辑结构',
       jp: '理性的で厳密な学者タイプ、論文の論理構造を深く分析',
-      en: 'Rational and rigorous, deeply analyzes logical structure'
-    }
+      en: 'Rational and rigorous, deeply analyzes logical structure',
+    },
+    sprite: 'stand.webp',
   },
-  meguru: {
+  interpreter: {
     name: {
-      zh: '因幡巡',
-      jp: '因幡めぐる',
-      en: 'Inaba Meguru'
+      zh: '小风',
+      jp: 'かぜ',
+      en: 'Kaze',
     },
     role: {
       zh: '解读者',
       jp: '解説者',
-      en: 'Interpreter'
+      en: 'Interpreter',
     },
     description: {
       zh: '博学睿智的知识渊博者，善于联想和扩展知识',
       jp: '博識で知恵深い、知識を関連づけて広げるのが得意',
-      en: 'Knowledgeable and wise, good at connecting and expanding knowledge'
-    }
-  }
+      en: 'Knowledgeable and wise, good at connecting and expanding knowledge',
+    },
+    sprite: 'stand2.webp',
+  },
 };
 
 /**
@@ -300,7 +310,7 @@ export const CHARACTER_ROLES: Record<string, { name: import('./types').MultiLang
  */
 export function getCharacterInfo(
   characterId: string,
-  language: 'zh' | 'jp' | 'en'
+  language: 'zh' | 'jp' | 'en',
 ): { name: string; role: string; description: string } | undefined {
   const char = CHARACTER_ROLES[characterId];
   if (!char) return undefined;
@@ -308,7 +318,7 @@ export function getCharacterInfo(
   return {
     name: char.name[language],
     role: char.role[language],
-    description: char.description[language]
+    description: char.description[language],
   };
 }
 
@@ -330,7 +340,7 @@ export function formatDate(date: Date, language: 'zh' | 'jp' | 'en'): string {
     return {
       zh: `${diffMins}分钟前`,
       jp: `${diffMins}分前`,
-      en: `${diffMins} min ago`
+      en: `${diffMins} min ago`,
     }[language];
   }
 
@@ -338,7 +348,7 @@ export function formatDate(date: Date, language: 'zh' | 'jp' | 'en'): string {
     return {
       zh: `${diffHours}小时前`,
       jp: `${diffHours}時間前`,
-      en: `${diffHours} hours ago`
+      en: `${diffHours} hours ago`,
     }[language];
   }
 
@@ -346,7 +356,7 @@ export function formatDate(date: Date, language: 'zh' | 'jp' | 'en'): string {
     return {
       zh: `${diffDays}天前`,
       jp: `${diffDays}日前`,
-      en: `${diffDays} days ago`
+      en: `${diffDays} days ago`,
     }[language];
   }
 
@@ -354,13 +364,13 @@ export function formatDate(date: Date, language: 'zh' | 'jp' | 'en'): string {
   const options: Intl.DateTimeFormatOptions = {
     year: 'numeric',
     month: 'short',
-    day: 'numeric'
+    day: 'numeric',
   };
 
   const locale = {
     zh: 'zh-CN',
     jp: 'ja-JP',
-    en: 'en-US'
+    en: 'en-US',
   }[language];
 
   return date.toLocaleDateString(locale, options);

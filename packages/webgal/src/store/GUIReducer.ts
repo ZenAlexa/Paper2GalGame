@@ -18,6 +18,7 @@ const initState: IGuiState = {
   showBacklog: false,
   showStarter: true,
   showTitle: true,
+  showPaperSelection: false,
   showMenuPanel: false,
   showTextBox: true,
   showControls: true,

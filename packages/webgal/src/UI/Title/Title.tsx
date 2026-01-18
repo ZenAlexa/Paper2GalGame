@@ -9,8 +9,9 @@ import useApplyStyle from '@/hooks/useApplyStyle';
 import { keyboard } from '@/hooks/useHotkey';
 import useConfigData from '@/hooks/useConfigData';
 import { playBgm } from '@/Core/controller/stage/playBgm';
-import { continueGame, startGame } from '@/Core/controller/gamePlay/startContinueGame';
+import { continueGame, startGame, startPaperGame } from '@/Core/controller/gamePlay/startContinueGame';
 import { showGlogalDialog } from '../GlobalDialog/GlobalDialog';
+import { PaperSelection } from '../PaperSelection';
 import styles from './title.module.scss';
 
 /** 标题页 */
@@ -30,6 +31,26 @@ export default function Title() {
 
   const appreciationItems = useSelector((state: RootState) => state.userData.appreciationData);
   const hasAppreciationItems = appreciationItems.bgm.length > 0 || appreciationItems.cg.length > 0;
+
+  // Handle game start after paper generation is ready
+  const handleGameStart = async (sessionId: string) => {
+    console.log('[Title] Starting paper game with session:', sessionId);
+    dispatch(setVisibility({ component: 'showPaperSelection', visibility: false }));
+    await startPaperGame(sessionId);
+  };
+
+  // Handle continue game from saved paper
+  const handleGameContinue = (paperId: string) => {
+    console.log('[Title] Continuing game for paper:', paperId);
+    dispatch(setVisibility({ component: 'showPaperSelection', visibility: false }));
+    dispatch(setVisibility({ component: 'showTitle', visibility: false }));
+    continueGame();
+  };
+
+  // Handle back from PaperSelection
+  const handlePaperSelectionBack = () => {
+    dispatch(setVisibility({ component: 'showPaperSelection', visibility: false }));
+  };
 
   return (
     <>
@@ -58,8 +79,8 @@ export default function Title() {
             <div
               className={applyStyle('Title_button', styles.Title_button)}
               onClick={() => {
-                startGame();
                 playSeClick();
+                dispatch(setVisibility({ component: 'showPaperSelection', visibility: true }));
               }}
               onMouseEnter={playSeEnter}
             >
@@ -134,6 +155,14 @@ export default function Title() {
             </div>
           </div>
         </div>
+      )}
+      {/* Paper Selection overlay */}
+      {GUIState.showPaperSelection && (
+        <PaperSelection
+          onGameStart={handleGameStart}
+          onGameContinue={handleGameContinue}
+          onBack={handlePaperSelectionBack}
+        />
       )}
     </>
   );

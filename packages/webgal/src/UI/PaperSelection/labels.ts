@@ -310,7 +310,7 @@ export const CHARACTER_ROLES: Record<
  */
 export function getCharacterInfo(
   characterId: string,
-  language: 'zh' | 'jp' | 'en',
+  language: 'zh' | 'jp' | 'en'
 ): { name: string; role: string; description: string } | undefined {
   const char = CHARACTER_ROLES[characterId];
   if (!char) return undefined;

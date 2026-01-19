@@ -3,12 +3,13 @@
  * Uses WebGAL's existing UI patterns for seamless integration
  */
 
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import type React from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { RootState } from '@/store/store';
-import useTrans from '@/hooks/useTrans';
-import useSoundEffect from '@/hooks/useSoundEffect';
 import useApplyStyle from '@/hooks/useApplyStyle';
+import useSoundEffect from '@/hooks/useSoundEffect';
+import useTrans from '@/hooks/useTrans';
+import type { RootState } from '@/store/store';
 import styles from './paperSelection.module.scss';
 
 interface PaperSelectionProps {
@@ -33,7 +34,7 @@ export function PaperSelection({ onGameStart, onBack }: PaperSelectionProps) {
   const background = GUIState.titleBg;
   const showBackground = background === '' ? 'rgba(0,0,0,1)' : `url("${background}")`;
 
-  const t = useTrans('title.');
+  const _t = useTrans('title.');
   const { playSeEnter, playSeClick } = useSoundEffect();
   const applyStyle = useApplyStyle('UI/Title/title.scss');
 
@@ -77,7 +78,7 @@ export function PaperSelection({ onGameStart, onBack }: PaperSelectionProps) {
       const file = e.dataTransfer.files[0];
       if (file) handleFileSelect(file);
     },
-    [handleFileSelect],
+    [handleFileSelect]
   );
 
   // Ref for tracking polling state
@@ -101,41 +102,37 @@ export function PaperSelection({ onGameStart, onBack }: PaperSelectionProps) {
 
   // Poll session status
   const pollSessionStatus = useCallback(async (sid: string): Promise<boolean> => {
-    try {
-      const response = await fetch(`/api/session/${sid}`);
-      if (!response.ok) {
-        throw new Error('Failed to get session status');
-      }
-      const result = await response.json();
-      if (!result.success) {
-        throw new Error(result.error?.message || 'Session error');
-      }
-
-      const sessionStatus = result.data.status;
-
-      // Check for completion states
-      if (sessionStatus === 'generated' || sessionStatus === 'ready') {
-        setProgress(100);
-        setStatus('ready');
-        return true; // Stop polling
-      }
-
-      if (sessionStatus === 'error') {
-        throw new Error(result.data.error || 'Generation failed');
-      }
-
-      // Update progress based on status
-      if (sessionStatus === 'parsing') {
-        setProgress(30);
-      } else if (sessionStatus === 'generating') {
-        // Increment progress slowly during generation
-        setProgress(prev => Math.min(prev + 2, 90));
-      }
-
-      return false; // Continue polling
-    } catch (error) {
-      throw error;
+    const response = await fetch(`/api/session/${sid}`);
+    if (!response.ok) {
+      throw new Error('Failed to get session status');
     }
+    const result = await response.json();
+    if (!result.success) {
+      throw new Error(result.error?.message || 'Session error');
+    }
+
+    const sessionStatus = result.data.status;
+
+    // Check for completion states
+    if (sessionStatus === 'generated' || sessionStatus === 'ready') {
+      setProgress(100);
+      setStatus('ready');
+      return true; // Stop polling
+    }
+
+    if (sessionStatus === 'error') {
+      throw new Error(result.data.error || 'Generation failed');
+    }
+
+    // Update progress based on status
+    if (sessionStatus === 'parsing') {
+      setProgress(30);
+    } else if (sessionStatus === 'generating') {
+      // Increment progress slowly during generation
+      setProgress((prev) => Math.min(prev + 2, 90));
+    }
+
+    return false; // Continue polling
   }, []);
 
   // Handle generation

@@ -1,17 +1,17 @@
-import { FC, useEffect } from 'react';
-import styles from './options.module.scss';
+import { type FC, useEffect } from 'react';
 import { getStorage } from '@/Core/controller/storage/storageController';
+import useSoundEffect from '@/hooks/useSoundEffect';
+import useTrans from '@/hooks/useTrans';
 import { useValue } from '@/hooks/useValue';
-import { System } from '@/UI/Menu/Options/System/System';
 import { Display } from '@/UI/Menu/Options/Display/Display';
 import { Sound } from '@/UI/Menu/Options/Sound/Sound';
-import useTrans from '@/hooks/useTrans';
-import useSoundEffect from '@/hooks/useSoundEffect';
+import { System } from '@/UI/Menu/Options/System/System';
+import styles from './options.module.scss';
 
 enum optionPage {
-  'System',
-  'Display',
-  'Sound',
+  System,
+  Display,
+  Sound,
 }
 
 export const Options: FC = () => {
@@ -21,7 +21,7 @@ export const Options: FC = () => {
 
   function getClassName(page: optionPage) {
     if (page === currentOptionPage.value) {
-      return styles.Options_page_button + ' ' + styles.Options_page_button_active;
+      return `${styles.Options_page_button} ${styles.Options_page_button_active}`;
     } else return styles.Options_page_button;
   }
 

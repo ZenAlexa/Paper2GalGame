@@ -1,16 +1,3 @@
-import { switchAuto } from '@/Core/controller/gamePlay/autoPlay';
-import { backToTitle } from '@/Core/controller/gamePlay/backToTitle';
-import { switchFast } from '@/Core/controller/gamePlay/fastSkip';
-import { loadGame } from '@/Core/controller/storage/loadGame';
-import { saveGame } from '@/Core/controller/storage/saveGame';
-import { showGlogalDialog, switchControls } from '@/UI/GlobalDialog/GlobalDialog';
-import { easyCompile } from '@/UI/Menu/SaveAndLoad/Save/Save';
-import useFullScreen from '@/hooks/useFullScreen';
-import useSoundEffect from '@/hooks/useSoundEffect';
-import useTrans from '@/hooks/useTrans';
-import { setMenuPanelTag, setVisibility } from '@/store/GUIReducer';
-import { componentsVisibility, MenuPanelTag } from '@/store/guiInterface';
-import { RootState } from '@/store/store';
 import {
   AlignTextLeftOne,
   DoubleDown,
@@ -31,6 +18,19 @@ import {
 } from '@icon-park/react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
+import { switchAuto } from '@/Core/controller/gamePlay/autoPlay';
+import { backToTitle } from '@/Core/controller/gamePlay/backToTitle';
+import { switchFast } from '@/Core/controller/gamePlay/fastSkip';
+import { loadGame } from '@/Core/controller/storage/loadGame';
+import { saveGame } from '@/Core/controller/storage/saveGame';
+import useFullScreen from '@/hooks/useFullScreen';
+import useSoundEffect from '@/hooks/useSoundEffect';
+import useTrans from '@/hooks/useTrans';
+import { setMenuPanelTag, setVisibility } from '@/store/GUIReducer';
+import { type componentsVisibility, MenuPanelTag } from '@/store/guiInterface';
+import type { RootState } from '@/store/store';
+import { showGlogalDialog, switchControls } from '@/UI/GlobalDialog/GlobalDialog';
+import { easyCompile } from '@/UI/Menu/SaveAndLoad/Save/Save';
 import styles from './bottomControlPanel.module.scss';
 
 export const BottomControlPanel = () => {
@@ -146,7 +146,7 @@ export const BottomControlPanel = () => {
             className={styles.singleButton}
             style={{ fontSize }}
             onClick={() => {
-              let VocalControl: any = document.getElementById('currentVocal');
+              const VocalControl: any = document.getElementById('currentVocal');
               if (VocalControl !== null) {
                 VocalControl.currentTime = 0;
                 VocalControl.pause();
@@ -198,7 +198,7 @@ export const BottomControlPanel = () => {
             <span className={styles.button_text}>{t('buttons.forward')}</span>
           </span>
           <span
-            className={styles.singleButton + ' ' + styles.fastsave}
+            className={`${styles.singleButton} ${styles.fastsave}`}
             style={{ fontSize }}
             onClick={() => {
               saveGame(0);
@@ -214,10 +214,10 @@ export const BottomControlPanel = () => {
               strokeWidth={strokeWidth}
             />
             <span className={styles.button_text}>{t('buttons.quicklySave')}</span>
-            <div className={styles.fastSlPreview + ' ' + styles.fastSPreview}>{fastSlPreview}</div>
+            <div className={`${styles.fastSlPreview} ${styles.fastSPreview}`}>{fastSlPreview}</div>
           </span>
           <span
-            className={styles.singleButton + ' ' + styles.fastload}
+            className={`${styles.singleButton} ${styles.fastload}`}
             style={{ fontSize }}
             onClick={() => {
               loadGame(0);
@@ -227,7 +227,7 @@ export const BottomControlPanel = () => {
           >
             <DoubleUp className={styles.button} theme="outline" size={size} fill="#f5f5f7" strokeWidth={strokeWidth} />
             <span className={styles.button_text}>{t('buttons.quicklyLoad')}</span>
-            <div className={styles.fastSlPreview + ' ' + styles.fastLPreview}>{fastSlPreview}</div>
+            <div className={`${styles.fastSlPreview} ${styles.fastLPreview}`}>{fastSlPreview}</div>
           </span>
           <span
             className={styles.singleButton}

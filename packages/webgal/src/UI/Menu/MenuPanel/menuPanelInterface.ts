@@ -1,4 +1,4 @@
-import { CSSProperties } from 'react';
+import type { CSSProperties } from 'react';
 
 /**
  * @interface IMenuPanel Menu页面的按钮的参数接口

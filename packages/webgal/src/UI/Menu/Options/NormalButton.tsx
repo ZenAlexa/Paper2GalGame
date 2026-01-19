@@ -1,7 +1,7 @@
-import { ReactElement } from 'react';
-import { INormalButton } from '@/UI/Menu/Options/OptionInterface';
-import styles from './normalButton.module.scss';
+import type { ReactElement } from 'react';
 import useSoundEffect from '@/hooks/useSoundEffect';
+import type { INormalButton } from '@/UI/Menu/Options/OptionInterface';
+import styles from './normalButton.module.scss';
 
 export const NormalButton = (props: INormalButton) => {
   const len: number = props.textList.length;
@@ -12,7 +12,7 @@ export const NormalButton = (props: INormalButton) => {
       const t = (
         <div
           key={props.textList[i] + i + props}
-          className={styles.NormalButton + ' ' + styles.NormalButtonChecked}
+          className={`${styles.NormalButton} ${styles.NormalButtonChecked}`}
           onClick={() => {
             playSeSwitch();
             props.functionList[i]();

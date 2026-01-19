@@ -1,14 +1,13 @@
-import styles from './menuPanel.module.scss';
-import { MenuPanelButton } from './MenuPanelButton';
-import { playBgm } from '@/Core/controller/stage/playBgm';
-import { MenuPanelTag } from '@/store/guiInterface';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '@/store/store';
-import { setMenuPanelTag, setVisibility } from '@/store/GUIReducer';
 import { backToTitle } from '@/Core/controller/gamePlay/backToTitle';
-import useTrans from '@/hooks/useTrans';
 import useSoundEffect from '@/hooks/useSoundEffect';
+import useTrans from '@/hooks/useTrans';
+import { setMenuPanelTag, setVisibility } from '@/store/GUIReducer';
+import { MenuPanelTag } from '@/store/guiInterface';
+import type { RootState } from '@/store/store';
 import { showGlogalDialog } from '@/UI/GlobalDialog/GlobalDialog';
+import { MenuPanelButton } from './MenuPanelButton';
+import styles from './menuPanel.module.scss';
 
 /**
  * Menu页的底栏

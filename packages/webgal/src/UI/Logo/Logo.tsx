@@ -1,8 +1,8 @@
-import { FC, useEffect, useRef } from 'react';
-import styles from './logo.module.scss';
+import { type FC, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { RootState } from '@/store/store';
 import { useValue } from '@/hooks/useValue';
+import type { RootState } from '@/store/store';
+import styles from './logo.module.scss';
 
 /**
  * 标识
@@ -34,17 +34,23 @@ const Logo: FC = () => {
       currentLogoIndex.set(0);
       currentTimeOutId.set(setTimeout(nextImg, animationDuration));
     }
-  }, [isEnterGame]);
+  }, [
+    isEnterGame /**
+     * 启动 Enter Logo
+     */,
+    currentLogoIndex.set,
+    currentTimeOutId.set,
+    logoImage.length,
+    nextImg,
+  ]);
 
   const currentLogoUrl = currentLogoIndex.value === -1 ? '' : logoImage[currentLogoIndex.value];
   return (
     <>
       {currentLogoIndex.value !== -1 && (
         <div
-          key={currentLogoIndex.value + 'wh'}
-          className={
-            styles.Logo_Back + ' ' + (currentLogoIndex.value === logoImage.length - 1 ? styles.animationActive : '')
-          }
+          key={`${currentLogoIndex.value}wh`}
+          className={`${styles.Logo_Back} ${currentLogoIndex.value === logoImage.length - 1 ? styles.animationActive : ''}`}
           style={{
             animationDuration: `${animationDuration}ms`,
           }}
@@ -53,7 +59,7 @@ const Logo: FC = () => {
       {currentLogoUrl !== '' && (
         <div
           className={styles.Logo_main}
-          key={currentLogoIndex.value + 'bg'}
+          key={`${currentLogoIndex.value}bg`}
           onClick={nextImg}
           style={{ backgroundImage: `url("${currentLogoUrl}")`, animationDuration: `${animationDuration}ms` }}
         />

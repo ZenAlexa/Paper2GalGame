@@ -1,15 +1,15 @@
-import styles from './backlog.module.scss';
 import { CloseSmall, Return, VolumeNotice } from '@icon-park/react';
-import { jumpFromBacklog } from '@/Core/controller/storage/jumpFromBacklog';
+import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState, webgalStore } from '@/store/store';
-import { setVisibility } from '@/store/GUIReducer';
+import { jumpFromBacklog } from '@/Core/controller/storage/jumpFromBacklog';
 import { logger } from '@/Core/util/logger';
-import { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
-import useTrans from '@/hooks/useTrans';
-import { compileSentence, EnhancedNode } from '@/Stage/TextBox/TextBox';
-import useSoundEffect from '@/hooks/useSoundEffect';
 import { WebGAL } from '@/Core/WebGAL';
+import useSoundEffect from '@/hooks/useSoundEffect';
+import useTrans from '@/hooks/useTrans';
+import { compileSentence } from '@/Stage/TextBox/TextBox';
+import { setVisibility } from '@/store/GUIReducer';
+import { type RootState, webgalStore } from '@/store/store';
+import styles from './backlog.module.scss';
 
 export const Backlog = () => {
   const t = useTrans('gaming.');
@@ -26,13 +26,13 @@ export const Backlog = () => {
     if (!isBacklogOpen) {
       return;
     }
-    let options = {
+    const options = {
       root: null,
       rootMargin: '0px',
       threshold: [1.0],
     };
 
-    let observer = new IntersectionObserver((entries) => {
+    const observer = new IntersectionObserver((entries) => {
       if ((entries?.[0]?.intersectionRatio ?? 0) <= 0) return;
       setLimit(limit + 20);
     }, options);
@@ -53,10 +53,10 @@ export const Backlog = () => {
     }
   }, [isBacklogOpen]);
 
-  let timeRef = useRef<ReturnType<typeof setTimeout>>();
+  const timeRef = useRef<ReturnType<typeof setTimeout>>();
   // 缓存一下vdom
   const backlogList = useMemo<any>(() => {
-    let backlogs = [];
+    const backlogs = [];
     const current_backlog_len = WebGAL.backlogManager.getBacklog().length;
     // logger.info('backlogList render');
     for (let i = 0; i < Math.min(current_backlog_len, limit); i++) {
@@ -107,7 +107,7 @@ export const Backlog = () => {
           className={styles.backlog_item}
           id={`backlog_item_${i}`}
           style={{ animationDelay: `${20 * ((i - 1) % 20)}ms` }}
-          key={'backlogItem' + backlogItem.currentStageState.showText + backlogItem.saveScene.currentSentenceId}
+          key={`backlogItem${backlogItem.currentStageState.showText}${backlogItem.saveScene.currentSentenceId}`}
         >
           <div className={styles.backlog_func_area}>
             <div className={styles.backlog_item_button_list}>
@@ -129,7 +129,7 @@ export const Backlog = () => {
                     playSeClick();
                     // 获取到播放 backlog 语音的元素
                     const backlog_audio_element: any = document.getElementById(
-                      'backlog_audio_play_element_' + indexOfBacklog,
+                      `backlog_audio_play_element_${indexOfBacklog}`
                     );
                     if (backlog_audio_element) {
                       backlog_audio_element.currentTime = 0;
@@ -151,17 +151,13 @@ export const Backlog = () => {
           <div className={styles.backlog_item_content}>
             <span className={styles.backlog_item_content_text}>{showTextElementList}</span>
           </div>
-          <audio id={'backlog_audio_play_element_' + indexOfBacklog} src={backlogItem.currentStageState.vocal} />
+          <audio id={`backlog_audio_play_element_${indexOfBacklog}`} src={backlogItem.currentStageState.vocal} />
         </div>
       );
       backlogs.push(singleBacklogView);
     }
     return backlogs;
-  }, [
-    WebGAL.backlogManager.getBacklog()[WebGAL.backlogManager.getBacklog().length - 1]?.saveScene?.currentSentenceId ??
-      0,
-    limit,
-  ]);
+  }, [limit, playSeClick, playSeEnter]);
   useEffect(() => {
     /* 切换为展示历史记录时触发 */
     if (GUIStore.showBacklog) {
@@ -237,7 +233,7 @@ export const Backlog = () => {
 };
 
 export function mergeStringsAndKeepObjects(arr: ReactNode[]): ReactNode[][] {
-  let result = [];
+  const result = [];
   let currentString = '';
 
   // eslint-disable-next-line @typescript-eslint/prefer-for-of

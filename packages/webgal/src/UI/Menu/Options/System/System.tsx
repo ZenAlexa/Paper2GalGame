@@ -1,25 +1,25 @@
-import styles from '@/UI/Menu/Options/options.module.scss';
-import { NormalOption } from '@/UI/Menu/Options/NormalOption';
-import { NormalButton } from '@/UI/Menu/Options/NormalButton';
-import { resetAllData, resetOptionSet, setOptionData } from '@/store/userDataReducer';
-import { IUserData, playSpeed } from '@/store/userDataInterface';
-import { getStorage, setStorage, dumpToStorageFast } from '@/Core/controller/storage/storageController';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState, webgalStore } from '@/store/store';
-import { showGlogalDialog } from '@/UI/GlobalDialog/GlobalDialog';
-import localforage from 'localforage';
-import { logger } from '@/Core/util/logger';
-import useTrans from '@/hooks/useTrans';
-import useLanguage from '@/hooks/useLanguage';
-import languages, { language } from '@/config/language';
-import { useState } from 'react';
-import About from '@/UI/Menu/Options/System/About';
-import { WebGAL } from '@/Core/WebGAL';
-import useSoundEffect from '@/hooks/useSoundEffect';
-import savesReducer, { ISavesData, saveActions } from '@/store/savesReducer';
-import { dumpFastSaveToStorage, dumpSavesToStorage } from '@/Core/controller/storage/savesController';
-import { OptionSlider } from '@/UI/Menu/Options/OptionSlider';
 import { Info } from '@icon-park/react';
+import localforage from 'localforage';
+import { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { dumpFastSaveToStorage, dumpSavesToStorage } from '@/Core/controller/storage/savesController';
+import { dumpToStorageFast, getStorage, setStorage } from '@/Core/controller/storage/storageController';
+import { logger } from '@/Core/util/logger';
+import { WebGAL } from '@/Core/WebGAL';
+import languages, { language } from '@/config/language';
+import useLanguage from '@/hooks/useLanguage';
+import useSoundEffect from '@/hooks/useSoundEffect';
+import useTrans from '@/hooks/useTrans';
+import { type ISavesData, saveActions } from '@/store/savesReducer';
+import { type RootState, webgalStore } from '@/store/store';
+import type { IUserData } from '@/store/userDataInterface';
+import { resetAllData, resetOptionSet, setOptionData } from '@/store/userDataReducer';
+import { showGlogalDialog } from '@/UI/GlobalDialog/GlobalDialog';
+import { NormalButton } from '@/UI/Menu/Options/NormalButton';
+import { NormalOption } from '@/UI/Menu/Options/NormalOption';
+import { OptionSlider } from '@/UI/Menu/Options/OptionSlider';
+import styles from '@/UI/Menu/Options/options.module.scss';
+import About from '@/UI/Menu/Options/System/About';
 
 interface IExportGameData {
   userData: IUserData;
@@ -42,7 +42,6 @@ export function System() {
 
     const saves = JSON.stringify(gameData);
     if (saves !== null) {
-      // @ts-ignore
       const blob = new Blob([saves], { type: 'application/json' });
       const blobUrl = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -59,7 +58,7 @@ export function System() {
     const file = ev.target.files[0];
     const reader = new FileReader();
     reader.onload = (evR) => {
-      const saves = evR!.target!.result as string;
+      const saves = evR?.target?.result as string;
       try {
         const saveAsObj: IExportGameData = JSON.parse(saves);
         playSeDialogOpen();
@@ -121,7 +120,7 @@ export function System() {
               currentChecked={userDataState.optionData.language}
               textList={Object.values(languages)}
               functionList={Object.keys(languages).map(
-                (k) => () => setLanguage(language[k as unknown as number] as unknown as language),
+                (k) => () => setLanguage(language[k as unknown as number] as unknown as language)
               )}
             />
           </NormalOption>
@@ -130,7 +129,7 @@ export function System() {
               textList={t(
                 'resetData.options.clearGameSave',
                 'resetData.options.resetSettings',
-                'resetData.options.clearAll',
+                'resetData.options.clearAll'
               )}
               functionList={[
                 () => {

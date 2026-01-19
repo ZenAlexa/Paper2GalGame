@@ -1,12 +1,12 @@
-import { FC } from 'react';
-import styles from './menu.module.scss';
-import { MenuPanel } from './MenuPanel/MenuPanel';
-import { Save } from './SaveAndLoad/Save/Save';
-import { Load } from './SaveAndLoad/Load/Load';
-import { Options } from './Options/Options';
+import type { FC } from 'react';
 import { useSelector } from 'react-redux';
-import { RootState } from '@/store/store';
 import { MenuPanelTag } from '@/store/guiInterface';
+import type { RootState } from '@/store/store';
+import { MenuPanel } from './MenuPanel/MenuPanel';
+import styles from './menu.module.scss';
+import { Options } from './Options/Options';
+import { Load } from './SaveAndLoad/Load/Load';
+import { Save } from './SaveAndLoad/Save/Save';
 
 /**
  * Menu 页面，包括存读档、选项等

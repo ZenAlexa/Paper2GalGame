@@ -1,14 +1,14 @@
+import { useDispatch, useSelector } from 'react-redux';
 import { setStorage } from '@/Core/controller/storage/storageController';
-import { NormalButton } from '@/UI/Menu/Options/NormalButton';
-import { NormalOption } from '@/UI/Menu/Options/NormalOption';
-import { TextPreview } from '@/UI/Menu/Options/TextPreview/TextPreview';
-import styles from '@/UI/Menu/Options/options.module.scss';
 import useFullScreen from '@/hooks/useFullScreen';
 import useTrans from '@/hooks/useTrans';
-import { RootState } from '@/store/store';
+import type { RootState } from '@/store/store';
 import { textSize } from '@/store/userDataInterface';
 import { setOptionData } from '@/store/userDataReducer';
-import { useDispatch, useSelector } from 'react-redux';
+import { NormalButton } from '@/UI/Menu/Options/NormalButton';
+import { NormalOption } from '@/UI/Menu/Options/NormalOption';
+import styles from '@/UI/Menu/Options/options.module.scss';
+import { TextPreview } from '@/UI/Menu/Options/TextPreview/TextPreview';
 import { OptionSlider } from '../OptionSlider';
 
 export function Display() {

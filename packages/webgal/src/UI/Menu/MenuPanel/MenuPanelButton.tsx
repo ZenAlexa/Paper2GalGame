@@ -1,7 +1,7 @@
-import styles from './menuPanel.module.scss';
-import { MenuIconMap } from './MenuIconMap';
-import { IMenuPanel } from '@/UI/Menu/MenuPanel/menuPanelInterface';
 import useSoundEffect from '@/hooks/useSoundEffect';
+import type { IMenuPanel } from '@/UI/Menu/MenuPanel/menuPanelInterface';
+import { MenuIconMap } from './MenuIconMap';
+import styles from './menuPanel.module.scss';
 
 /**
  * 菜单标签页切换按钮
@@ -11,7 +11,7 @@ import useSoundEffect from '@/hooks/useSoundEffect';
 export const MenuPanelButton = (props: IMenuPanel) => {
   const { playSePageChange, playSeEnter } = useSoundEffect();
   let buttonClassName = styles.MenuPanel_button;
-  if (props.hasOwnProperty('buttonOnClassName')) {
+  if (Object.hasOwn(props, 'buttonOnClassName')) {
     buttonClassName = buttonClassName + props.buttonOnClassName;
   }
   return (

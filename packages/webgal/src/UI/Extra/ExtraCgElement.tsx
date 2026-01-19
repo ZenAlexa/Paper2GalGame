@@ -1,7 +1,7 @@
+import { useMemo } from 'react';
+import useSoundEffect from '@/hooks/useSoundEffect';
 import { useValue } from '@/hooks/useValue';
 import styles from '@/UI/Extra/extra.module.scss';
-import React, { useMemo } from 'react';
-import useSoundEffect from '@/hooks/useSoundEffect';
 
 interface IProps {
   name: string;
@@ -27,7 +27,7 @@ export function ExtraCgElement(props: IProps) {
   }, [props.resourceUrl]);
 
   // Render media content based on resource type
-  const renderMedia = (fullScreen: boolean) => {
+  const renderMedia = (_fullScreen: boolean) => {
     if (isVideo) {
       return (
         <video

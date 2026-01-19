@@ -1,12 +1,11 @@
-import styles from './devPanel.module.scss';
-import { useValue } from '@/hooks/useValue';
-import { getPixiSscreenshot } from '@/UI/DevPanel/devFunctions/getPixiSscreenshot';
 import { useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import { RootState } from '@/store/store';
 import { useTranslation } from 'react-i18next';
-
+import { useSelector } from 'react-redux';
 import { WebGAL } from '@/Core/WebGAL';
+import { useValue } from '@/hooks/useValue';
+import type { RootState } from '@/store/store';
+import { getPixiSscreenshot } from '@/UI/DevPanel/devFunctions/getPixiSscreenshot';
+import styles from './devPanel.module.scss';
 
 export default function DevPanel() {
   // 控制显隐
@@ -21,7 +20,7 @@ export default function DevPanel() {
     window.onhashchange = () => {
       hash.set(window.location.hash);
     };
-  }, []);
+  }, [hash.set]);
   const isShow = isShowDevPanel();
 
   const { t, i18n } = useTranslation();

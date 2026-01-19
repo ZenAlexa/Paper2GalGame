@@ -2,7 +2,7 @@
  * Session Route - Handle session status and management
  */
 
-import { Router, Request, Response } from 'express';
+import { type Request, type Response, Router } from 'express';
 import { sessionStore } from '../services/session-store.js';
 import type { ApiResponse, Session } from '../types/index.js';
 
@@ -22,19 +22,19 @@ router.get('/:id', async (req: Request, res: Response) => {
         success: false,
         error: {
           code: 'SESSION_NOT_FOUND',
-          message: 'Session not found or expired'
+          message: 'Session not found or expired',
         },
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
       return res.status(404).json(response);
     }
 
     // Build response with available data
-    const sessionData: Partial<Session> & { id: string; status: string } = {
+    const sessionData: Partial<Session> & { id: string; status: string; error?: string } = {
       id: session.id,
       status: session.status,
       createdAt: session.createdAt,
-      updatedAt: session.updatedAt
+      updatedAt: session.updatedAt,
     };
 
     // Include paper info if available
@@ -42,10 +42,10 @@ router.get('/:id', async (req: Request, res: Response) => {
       sessionData.paper = {
         title: session.paper.title,
         authors: session.paper.authors,
-        abstract: session.paper.abstract.substring(0, 200) + '...',
-        sections: session.paper.sections.map(s => ({ title: s.title, type: s.type, content: '' })),
+        abstract: `${session.paper.abstract.substring(0, 200)}...`,
+        sections: session.paper.sections.map((s) => ({ title: s.title, type: s.type, content: '' })),
         rawText: '',
-        metadata: session.paper.metadata
+        metadata: session.paper.metadata,
       };
     }
 
@@ -54,7 +54,7 @@ router.get('/:id', async (req: Request, res: Response) => {
       sessionData.script = {
         dialogues: [],
         webgalScript: '',
-        metadata: session.script.metadata
+        metadata: session.script.metadata,
       };
     }
 
@@ -65,25 +65,24 @@ router.get('/:id', async (req: Request, res: Response) => {
 
     // Include error if any
     if (session.error) {
-      (sessionData as any).error = session.error;
+      sessionData.error = session.error;
     }
 
     const response: ApiResponse<typeof sessionData> = {
       success: true,
       data: sessionData,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     return res.json(response);
-
   } catch (error) {
     const response: ApiResponse = {
       success: false,
       error: {
         code: 'ERROR',
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       },
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
     return res.status(500).json(response);
   }
@@ -103,9 +102,9 @@ router.get('/:id/script', async (req: Request, res: Response) => {
         success: false,
         error: {
           code: 'SESSION_NOT_FOUND',
-          message: 'Session not found or expired'
+          message: 'Session not found or expired',
         },
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
       return res.status(404).json(response);
     }
@@ -115,9 +114,9 @@ router.get('/:id/script', async (req: Request, res: Response) => {
         success: false,
         error: {
           code: 'NO_SCRIPT',
-          message: 'Script not generated yet'
+          message: 'Script not generated yet',
         },
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
       return res.status(400).json(response);
     }
@@ -131,21 +130,20 @@ router.get('/:id/script', async (req: Request, res: Response) => {
       data: {
         webgalScript: session.script.webgalScript,
         dialogues: session.script.dialogues,
-        metadata: session.script.metadata
+        metadata: session.script.metadata,
       },
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     return res.json(response);
-
   } catch (error) {
     const response: ApiResponse = {
       success: false,
       error: {
         code: 'ERROR',
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       },
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
     return res.status(500).json(response);
   }
@@ -165,9 +163,9 @@ router.delete('/:id', async (req: Request, res: Response) => {
         success: false,
         error: {
           code: 'SESSION_NOT_FOUND',
-          message: 'Session not found'
+          message: 'Session not found',
         },
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
       return res.status(404).json(response);
     }
@@ -175,19 +173,18 @@ router.delete('/:id', async (req: Request, res: Response) => {
     const response: ApiResponse<{ deleted: boolean }> = {
       success: true,
       data: { deleted: true },
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     return res.json(response);
-
   } catch (error) {
     const response: ApiResponse = {
       success: false,
       error: {
         code: 'ERROR',
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       },
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
     return res.status(500).json(response);
   }

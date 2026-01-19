@@ -2,7 +2,7 @@
  * Upload Route - Handle file uploads and paper parsing
  */
 
-import { Router, Request, Response } from 'express';
+import { type Request, type RequestHandler, type Response, Router } from 'express';
 import multer from 'multer';
 import { sessionStore } from '../services/session-store.js';
 import type { ApiResponse, ParsedPaperData } from '../types/index.js';
@@ -20,7 +20,7 @@ const upload = multer({
     const allowedTypes = [
       'application/pdf',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'text/plain'
+      'text/plain',
     ];
     const allowedExtensions = ['.pdf', '.docx', '.txt'];
 
@@ -31,15 +31,15 @@ const upload = multer({
     } else {
       cb(new Error(`Unsupported file type: ${file.mimetype}`));
     }
-  }
+  },
 });
 
 /**
  * POST /api/upload
  * Upload a paper and parse it
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-router.post('/', upload.single('file') as any, async (req: Request, res: Response) => {
+// Multer middleware type is complex, use explicit cast to RequestHandler
+router.post('/', upload.single('file') as unknown as RequestHandler, async (req: Request, res: Response) => {
   try {
     const file = req.file;
 
@@ -48,9 +48,9 @@ router.post('/', upload.single('file') as any, async (req: Request, res: Respons
         success: false,
         error: {
           code: 'NO_FILE',
-          message: 'No file uploaded'
+          message: 'No file uploaded',
         },
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
       return res.status(400).json(response);
     }
@@ -75,7 +75,7 @@ router.post('/', upload.single('file') as any, async (req: Request, res: Respons
       // Parse the paper
       const result = await parser.parse(arrayBuffer, {
         filename: file.originalname,
-        mimeType: file.mimetype
+        mimeType: file.mimetype,
       });
 
       // Convert to our format - result is ParsedPaper with metadata
@@ -83,17 +83,18 @@ router.post('/', upload.single('file') as any, async (req: Request, res: Respons
         title: result.metadata?.title || 'Untitled Paper',
         authors: result.metadata?.authors || [],
         abstract: result.metadata?.abstract || '',
-        sections: result.sections?.map((s: { title?: string; content?: string; type?: string }) => ({
-          title: s.title || '',
-          content: s.content || '',
-          type: s.type || 'body'
-        })) || [],
+        sections:
+          result.sections?.map((s: { title?: string; content?: string; type?: string }) => ({
+            title: s.title || '',
+            content: s.content || '',
+            type: s.type || 'body',
+          })) || [],
         rawText: result.rawText || '',
         metadata: {
           language: result.metadata?.language || result.stats?.detectedLanguage,
           wordCount: result.stats?.wordCount || result.rawText?.split(/\s+/).length || 0,
-          parseTime: new Date().toISOString()
-        }
+          parseTime: new Date().toISOString(),
+        },
       };
 
       sessionStore.setPaperData(session.id, paperData);
@@ -118,14 +119,13 @@ router.post('/', upload.single('file') as any, async (req: Request, res: Respons
             authors: paperData.authors,
             abstract: paperData.abstract.substring(0, 500) + (paperData.abstract.length > 500 ? '...' : ''),
             sectionCount: paperData.sections.length,
-            wordCount: paperData.metadata.wordCount as number
-          }
+            wordCount: paperData.metadata.wordCount as number,
+          },
         },
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
 
       return res.json(response);
-
     } catch (parseError) {
       console.error('[Upload] Parse error:', parseError);
       sessionStore.updateStatus(session.id, 'error', String(parseError));
@@ -134,13 +134,12 @@ router.post('/', upload.single('file') as any, async (req: Request, res: Respons
         success: false,
         error: {
           code: 'PARSE_ERROR',
-          message: `Failed to parse paper: ${parseError instanceof Error ? parseError.message : 'Unknown error'}`
+          message: `Failed to parse paper: ${parseError instanceof Error ? parseError.message : 'Unknown error'}`,
         },
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
       return res.status(500).json(response);
     }
-
   } catch (error) {
     console.error('[Upload] Error:', error);
 
@@ -148,9 +147,9 @@ router.post('/', upload.single('file') as any, async (req: Request, res: Respons
       success: false,
       error: {
         code: 'UPLOAD_ERROR',
-        message: error instanceof Error ? error.message : 'Upload failed'
+        message: error instanceof Error ? error.message : 'Upload failed',
       },
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
     return res.status(500).json(response);
   }
@@ -168,18 +167,18 @@ router.get('/supported', async (_req: Request, res: Response) => {
     const response: ApiResponse<typeof types> = {
       success: true,
       data: types,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     return res.json(response);
-  } catch (error) {
+  } catch (_error) {
     const response: ApiResponse = {
       success: false,
       error: {
         code: 'ERROR',
-        message: 'Failed to get supported types'
+        message: 'Failed to get supported types',
       },
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
     return res.status(500).json(response);
   }

@@ -2,7 +2,7 @@
  * Generate Route - Handle script generation with AI
  */
 
-import { Router, Request, Response } from 'express';
+import { type Request, type Response, Router } from 'express';
 import { sessionStore } from '../services/session-store.js';
 import type { ApiResponse, GeneratedScriptData, GenerateRequest } from '../types/index.js';
 
@@ -21,9 +21,9 @@ router.post('/', async (req: Request, res: Response) => {
         success: false,
         error: {
           code: 'MISSING_SESSION',
-          message: 'Session ID is required'
+          message: 'Session ID is required',
         },
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
       return res.status(400).json(response);
     }
@@ -33,9 +33,9 @@ router.post('/', async (req: Request, res: Response) => {
         success: false,
         error: {
           code: 'MISSING_CHARACTERS',
-          message: 'At least one character must be selected'
+          message: 'At least one character must be selected',
         },
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
       return res.status(400).json(response);
     }
@@ -46,9 +46,9 @@ router.post('/', async (req: Request, res: Response) => {
         success: false,
         error: {
           code: 'SESSION_NOT_FOUND',
-          message: 'Session not found or expired'
+          message: 'Session not found or expired',
         },
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
       return res.status(404).json(response);
     }
@@ -58,9 +58,9 @@ router.post('/', async (req: Request, res: Response) => {
         success: false,
         error: {
           code: 'NO_PAPER',
-          message: 'Paper not uploaded yet'
+          message: 'Paper not uploaded yet',
         },
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
       return res.status(400).json(response);
     }
@@ -83,9 +83,7 @@ router.post('/', async (req: Request, res: Response) => {
       const generator = new PaperScriptGenerator(apiKey);
 
       // Validate characters - CHARACTER_CONFIGS is a Record<string, Character>
-      const validCharacters = characters.filter((c: string) =>
-        Object.keys(CHARACTER_CONFIGS).includes(c)
-      );
+      const validCharacters = characters.filter((c: string) => Object.keys(CHARACTER_CONFIGS).includes(c));
 
       if (validCharacters.length === 0) {
         throw new Error('No valid characters selected');
@@ -97,14 +95,22 @@ router.post('/', async (req: Request, res: Response) => {
           title: session.paper.title,
           authors: session.paper.authors,
           abstract: session.paper.abstract,
-          keywords: []
+          keywords: [],
         },
-        sections: session.paper.sections.map(s => ({
-          type: s.type as 'abstract' | 'introduction' | 'methods' | 'results' | 'discussion' | 'conclusion' | 'references' | 'other',
+        sections: session.paper.sections.map((s) => ({
+          type: s.type as
+            | 'abstract'
+            | 'introduction'
+            | 'methods'
+            | 'results'
+            | 'discussion'
+            | 'conclusion'
+            | 'references'
+            | 'other',
           title: s.title,
           content: s.content,
           level: 1,
-          position: 0
+          position: 0,
         })),
         rawText: session.paper.rawText,
         references: [],
@@ -118,15 +124,15 @@ router.post('/', async (req: Request, res: Response) => {
           equationCount: 0,
           citationCount: 0,
           processingTimeMs: 0,
-          confidence: 1
+          confidence: 1,
         },
         timestamp: new Date(),
         parserVersion: '1.0.0',
         sourceFile: {
           name: 'uploaded.pdf',
           size: 0,
-          type: 'application/pdf'
-        }
+          type: 'application/pdf',
+        },
       };
 
       // Generate script with multi-language support
@@ -136,23 +142,23 @@ router.post('/', async (req: Request, res: Response) => {
           generateAll: true,
           primaryLanguage: language === 'jp' ? 'jp' : language === 'en' ? 'en' : 'zh',
           qualityThreshold: 0.8,
-          verifyTranslations: true
+          verifyTranslations: true,
         },
         style: {
           educationalWeight: style === 'educational' ? 0.8 : 0.5,
           complexity: 'intermediate' as const,
           interactive: true,
-          audience: 'general' as const
+          audience: 'general' as const,
         },
         content: {
           includeMethodology: true,
           includeResults: true,
-          includeConclusions: true
+          includeConclusions: true,
         },
         voice: {
           generateVoice: true,
-          provider: 'minimax' as const
-        }
+          provider: 'minimax' as const,
+        },
       });
 
       if (!result.success || !result.script) {
@@ -184,8 +190,8 @@ router.post('/', async (req: Request, res: Response) => {
             // Extract text content by removing all WebGAL options
             // Handles various spacing: "text -speaker=x", "text-speaker=x", "text  -speaker=x"
             let textContent = rawContent
-              .replace(/;$/, '')           // Remove trailing semicolon
-              .replace(/\s*-\w+=[^\s;]*/g, '')  // Remove all -option=value patterns
+              .replace(/;$/, '') // Remove trailing semicolon
+              .replace(/\s*-\w+=[^\s;]*/g, '') // Remove all -option=value patterns
               .trim();
 
             // If text is empty after extraction, use raw content without options
@@ -199,7 +205,7 @@ router.post('/', async (req: Request, res: Response) => {
               text: textContent,
               textJp: textContent,
               textEn: '',
-              emotion: 'normal'
+              emotion: 'normal',
             });
           }
         }
@@ -209,21 +215,33 @@ router.post('/', async (req: Request, res: Response) => {
       // CRITICAL: Reconstruct lines from validated params/options, NOT from raw
       const webgalLines: string[] = [];
       // Use lowercase for case-insensitive command matching
-      const validCommands = ['changebg', 'changefigure', 'say', 'bgm', 'playbgm', 'playse', 'wait', 'choose', 'label', 'end', 'jump'];
+      const validCommands = [
+        'changebg',
+        'changefigure',
+        'say',
+        'bgm',
+        'playbgm',
+        'playse',
+        'wait',
+        'choose',
+        'label',
+        'end',
+        'jump',
+      ];
 
       // Map lowercase commands to proper camelCase for WebGAL
       const commandCaseMap: Record<string, string> = {
-        'changebg': 'changeBg',
-        'changefigure': 'changeFigure',
-        'say': 'say',
-        'bgm': 'bgm',
-        'playbgm': 'playBGM',
-        'playse': 'playSE',
-        'wait': 'wait',
-        'choose': 'choose',
-        'label': 'label',
-        'end': 'end',
-        'jump': 'jump'
+        changebg: 'changeBg',
+        changefigure: 'changeFigure',
+        say: 'say',
+        bgm: 'bgm',
+        playbgm: 'playBGM',
+        playse: 'playSE',
+        wait: 'wait',
+        choose: 'choose',
+        label: 'label',
+        end: 'end',
+        jump: 'jump',
       };
 
       // Helper to format options for WebGAL syntax
@@ -291,8 +309,7 @@ router.post('/', async (req: Request, res: Response) => {
 
       // CRITICAL: Ensure script starts with changeBg command
       // Without this, the game will show no background
-      const hasChangeBgAtStart = webgalLines.length > 0 &&
-        webgalLines[0].toLowerCase().startsWith('changebg:');
+      const hasChangeBgAtStart = webgalLines.length > 0 && webgalLines[0].toLowerCase().startsWith('changebg:');
 
       if (!hasChangeBgAtStart) {
         console.log('[Generate] No changeBg at start, inserting default background');
@@ -302,8 +319,8 @@ router.post('/', async (req: Request, res: Response) => {
       // CRITICAL: Ensure only ONE bgm command at the start of the script
       // Multiple bgm commands or bgm in the middle causes audio restart issues
       // Remove all existing bgm commands first
-      const bgmLines = webgalLines.filter(line => line.toLowerCase().startsWith('bgm:'));
-      const nonBgmLines = webgalLines.filter(line => !line.toLowerCase().startsWith('bgm:'));
+      const bgmLines = webgalLines.filter((line) => line.toLowerCase().startsWith('bgm:'));
+      const nonBgmLines = webgalLines.filter((line) => !line.toLowerCase().startsWith('bgm:'));
 
       // Determine which bgm to use (first found or default)
       let bgmCommand = 'bgm:s_Title.mp3 -volume=80;';
@@ -311,7 +328,7 @@ router.post('/', async (req: Request, res: Response) => {
         // Use the first bgm command found, but ensure it has volume
         const firstBgm = bgmLines[0];
         if (!firstBgm.includes('-volume=')) {
-          bgmCommand = firstBgm.replace(/;$/, '') + ' -volume=80;';
+          bgmCommand = `${firstBgm.replace(/;$/, '')} -volume=80;`;
         } else {
           bgmCommand = firstBgm;
         }
@@ -323,19 +340,19 @@ router.post('/', async (req: Request, res: Response) => {
       // Rebuild webgalLines with single bgm at position 1 (after changeBg)
       webgalLines.length = 0;
       webgalLines.push(nonBgmLines[0]); // changeBg at index 0
-      webgalLines.push(bgmCommand);       // bgm at index 1
+      webgalLines.push(bgmCommand); // bgm at index 1
       webgalLines.push(...nonBgmLines.slice(1)); // Rest of the script
 
       console.log(`[Generate] After BGM processing: ${webgalLines.length} lines`);
 
       // Speaker to sprite mapping (4 characters sharing 2 sprites)
       const speakerSpriteMap: Record<string, { sprite: string; position: string }> = {
-        'host': { sprite: 'stand.webp', position: '-center' },        // Main host, center
-        'energizer': { sprite: 'stand2.webp', position: '-right' },   // Energetic, right
-        'analyst': { sprite: 'stand.webp', position: '-left' },       // Analyst, left
-        'interpreter': { sprite: 'stand2.webp', position: '-right' }, // Interpreter, right
+        host: { sprite: 'stand.webp', position: '-center' }, // Main host, center
+        energizer: { sprite: 'stand2.webp', position: '-right' }, // Energetic, right
+        analyst: { sprite: 'stand.webp', position: '-left' }, // Analyst, left
+        interpreter: { sprite: 'stand2.webp', position: '-right' }, // Interpreter, right
         // Fallback for unknown speakers
-        'unknown': { sprite: 'stand.webp', position: '-center' }
+        unknown: { sprite: 'stand.webp', position: '-center' },
       };
 
       // CRITICAL: Insert changeFigure commands when speaker changes
@@ -354,7 +371,7 @@ router.post('/', async (req: Request, res: Response) => {
 
           // If speaker changed, insert changeFigure command
           if (speaker !== currentSpeaker) {
-            const spriteConfig = speakerSpriteMap[speaker] || speakerSpriteMap['unknown'];
+            const spriteConfig = speakerSpriteMap[speaker] || speakerSpriteMap.unknown;
             const changeFigureLine = `changeFigure:${spriteConfig.sprite} ${spriteConfig.position};`;
 
             console.log(`[Generate] Speaker changed: ${currentSpeaker} → ${speaker}, inserting: ${changeFigureLine}`);
@@ -370,7 +387,7 @@ router.post('/', async (req: Request, res: Response) => {
       webgalLines.length = 0;
       webgalLines.push(...processedLines);
 
-      console.log(`[Generate] After speaker processing: ${webgalLines.length} lines`)
+      console.log(`[Generate] After speaker processing: ${webgalLines.length} lines`);
 
       console.log(`[Generate] Reconstructed ${webgalLines.length} WebGAL lines`);
       console.log('[Generate] ========== FULL WEBGAL SCRIPT ==========');
@@ -390,8 +407,8 @@ router.post('/', async (req: Request, res: Response) => {
         metadata: {
           totalDialogues: dialogues.length,
           characters: validCharacters,
-          estimatedDuration: Math.ceil(dialogues.length * 5)
-        }
+          estimatedDuration: Math.ceil(dialogues.length * 5),
+        },
       };
 
       sessionStore.setScriptData(sessionId, scriptData);
@@ -417,17 +434,16 @@ router.post('/', async (req: Request, res: Response) => {
             totalDialogues: scriptData.metadata.totalDialogues,
             characters: scriptData.metadata.characters,
             estimatedDuration: scriptData.metadata.estimatedDuration,
-            preview: scriptData.dialogues.slice(0, 5).map(d => ({
+            preview: scriptData.dialogues.slice(0, 5).map((d) => ({
               character: d.character,
-              text: d.text.substring(0, 100) + (d.text.length > 100 ? '...' : '')
-            }))
-          }
+              text: d.text.substring(0, 100) + (d.text.length > 100 ? '...' : ''),
+            })),
+          },
         },
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
 
       return res.json(response);
-
     } catch (genError) {
       console.error('[Generate] Generation error:', genError);
       sessionStore.updateStatus(sessionId, 'error', String(genError));
@@ -436,13 +452,12 @@ router.post('/', async (req: Request, res: Response) => {
         success: false,
         error: {
           code: 'GENERATION_ERROR',
-          message: genError instanceof Error ? genError.message : 'Generation failed'
+          message: genError instanceof Error ? genError.message : 'Generation failed',
         },
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
       return res.status(500).json(response);
     }
-
   } catch (error) {
     console.error('[Generate] Error:', error);
 
@@ -450,9 +465,9 @@ router.post('/', async (req: Request, res: Response) => {
       success: false,
       error: {
         code: 'ERROR',
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       },
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
     return res.status(500).json(response);
   }
@@ -472,9 +487,9 @@ router.get('/script/:sessionId', async (req: Request, res: Response) => {
         success: false,
         error: {
           code: 'SESSION_NOT_FOUND',
-          message: 'Session not found or expired'
+          message: 'Session not found or expired',
         },
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
       return res.status(404).json(response);
     }
@@ -484,9 +499,9 @@ router.get('/script/:sessionId', async (req: Request, res: Response) => {
         success: false,
         error: {
           code: 'NO_SCRIPT',
-          message: 'Script not generated yet'
+          message: 'Script not generated yet',
         },
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
       return res.status(400).json(response);
     }
@@ -544,9 +559,9 @@ router.get('/script/:sessionId', async (req: Request, res: Response) => {
       success: true,
       data: {
         script: finalScript,
-        metadata: session.script.metadata
+        metadata: session.script.metadata,
       },
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     return res.json(response);
@@ -555,9 +570,9 @@ router.get('/script/:sessionId', async (req: Request, res: Response) => {
       success: false,
       error: {
         code: 'ERROR',
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       },
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
     return res.status(500).json(response);
   }
@@ -578,9 +593,9 @@ router.get('/structured/:sessionId', async (req: Request, res: Response) => {
         success: false,
         error: {
           code: 'SESSION_NOT_FOUND',
-          message: 'Session not found or expired'
+          message: 'Session not found or expired',
         },
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
       return res.status(404).json(response);
     }
@@ -590,9 +605,9 @@ router.get('/structured/:sessionId', async (req: Request, res: Response) => {
         success: false,
         error: {
           code: 'NO_SCRIPT',
-          message: 'Script not generated yet'
+          message: 'Script not generated yet',
         },
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
       return res.status(400).json(response);
     }
@@ -606,7 +621,7 @@ router.get('/structured/:sessionId', async (req: Request, res: Response) => {
       // Get vocal URL if TTS was generated
       let vocal: string | undefined;
       if (session.audio?.files) {
-        const audioFile = session.audio.files.find(f => f.dialogueId === d.id);
+        const audioFile = session.audio.files.find((f) => f.dialogueId === d.id);
         if (audioFile) {
           vocal = audioFile.url;
         }
@@ -631,18 +646,20 @@ router.get('/structured/:sessionId', async (req: Request, res: Response) => {
         generatedAt: new Date().toISOString(),
       },
       dialogues,
-      background: 'bg.webp',  // Default background
-      bgm: 's_Title.mp3',     // Default BGM
+      background: 'bg.webp', // Default background
+      bgm: 's_Title.mp3', // Default BGM
       bgmVolume: 80,
     };
 
     console.log(`[Generate/Structured] Returning AIGeneratedScript for session ${sessionId}`);
-    console.log(`[Generate/Structured] ${dialogues.length} dialogues, ${session.script.metadata.characters.length} characters`);
+    console.log(
+      `[Generate/Structured] ${dialogues.length} dialogues, ${session.script.metadata.characters.length} characters`
+    );
 
     const response: ApiResponse<typeof aiGeneratedScript> = {
       success: true,
       data: aiGeneratedScript,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     return res.json(response);
@@ -652,9 +669,9 @@ router.get('/structured/:sessionId', async (req: Request, res: Response) => {
       success: false,
       error: {
         code: 'ERROR',
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       },
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
     return res.status(500).json(response);
   }
@@ -675,9 +692,9 @@ router.get('/audio/:sessionId', async (req: Request, res: Response) => {
         success: false,
         error: {
           code: 'SESSION_NOT_FOUND',
-          message: 'Session not found or expired'
+          message: 'Session not found or expired',
         },
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
       return res.status(404).json(response);
     }
@@ -687,9 +704,9 @@ router.get('/audio/:sessionId', async (req: Request, res: Response) => {
         success: false,
         error: {
           code: 'NO_AUDIO',
-          message: 'No audio generated for this session'
+          message: 'No audio generated for this session',
         },
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
       return res.status(404).json(response);
     }
@@ -711,9 +728,9 @@ router.get('/audio/:sessionId', async (req: Request, res: Response) => {
       data: {
         files: session.audio.files,
         totalDuration: session.audio.totalDuration,
-        vocalMap
+        vocalMap,
       },
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     return res.json(response);
@@ -723,9 +740,9 @@ router.get('/audio/:sessionId', async (req: Request, res: Response) => {
       success: false,
       error: {
         code: 'ERROR',
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       },
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
     return res.status(500).json(response);
   }
@@ -744,24 +761,24 @@ router.get('/characters', async (_req: Request, res: Response) => {
       name: c.name,
       role: c.paperRole,
       personality: c.personality,
-      sprite: c.sprite
+      sprite: c.sprite,
     }));
 
     const response: ApiResponse<typeof characters> = {
       success: true,
       data: characters,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     return res.json(response);
-  } catch (error) {
+  } catch (_error) {
     const response: ApiResponse = {
       success: false,
       error: {
         code: 'ERROR',
-        message: 'Failed to get characters'
+        message: 'Failed to get characters',
       },
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
     return res.status(500).json(response);
   }

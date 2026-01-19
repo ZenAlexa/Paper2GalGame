@@ -8,8 +8,8 @@
  * - Session management
  */
 
+import path from 'node:path';
 import dotenv from 'dotenv';
-import path from 'path';
 
 // Load environment variables from project root
 // When running from extensions/api, root is ../../..
@@ -24,22 +24,24 @@ const possiblePaths = [
 for (const envPath of possiblePaths) {
   dotenv.config({ path: envPath });
 }
-import express from 'express';
-import cors from 'cors';
 
-import uploadRouter from './routes/upload.js';
+import cors from 'cors';
+import express from 'express';
 import generateRouter from './routes/generate.js';
-import ttsRouter from './routes/tts.js';
 import sessionRouter from './routes/session.js';
+import ttsRouter from './routes/tts.js';
+import uploadRouter from './routes/upload.js';
 
 const app = express();
 const PORT = process.env.API_PORT || 3001;
 
 // Middleware
-app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -61,10 +63,10 @@ app.get('/api/health', (_req, res) => {
         openrouter: !!process.env.OPENROUTER_API_KEY,
         // New Minimax API only requires API key (no GroupID needed)
         minimax: !!process.env.MINIMAX_API_KEY,
-        voicevox: process.env.VOICEVOX_URL || 'http://localhost:50021'
-      }
+        voicevox: process.env.VOICEVOX_URL || 'http://localhost:50021',
+      },
     },
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 });
 
@@ -80,9 +82,9 @@ app.use((_req, res) => {
     success: false,
     error: {
       code: 'NOT_FOUND',
-      message: 'Endpoint not found'
+      message: 'Endpoint not found',
     },
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 });
 
@@ -93,9 +95,9 @@ app.use((err: Error, _req: express.Request, res: express.Response, _next: expres
     success: false,
     error: {
       code: 'INTERNAL_ERROR',
-      message: err.message || 'Internal server error'
+      message: err.message || 'Internal server error',
     },
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 });
 
@@ -115,8 +117,12 @@ app.listen(PORT, () => {
   console.log('║    GET  /api/health      - Health check                  ║');
   console.log('║                                                          ║');
   console.log('║  Configuration:                                          ║');
-  console.log(`║    OpenRouter API: ${process.env.OPENROUTER_API_KEY ? '✓ configured' : '✗ missing'}                        ║`);
-  console.log(`║    Minimax TTS:    ${process.env.MINIMAX_API_KEY ? '✓ configured' : '✗ missing'}                        ║`);
+  console.log(
+    `║    OpenRouter API: ${process.env.OPENROUTER_API_KEY ? '✓ configured' : '✗ missing'}                        ║`
+  );
+  console.log(
+    `║    Minimax TTS:    ${process.env.MINIMAX_API_KEY ? '✓ configured' : '✗ missing'}                        ║`
+  );
   console.log(`║    VOICEVOX URL:   ${process.env.VOICEVOX_URL || 'http://localhost:50021'}               ║`);
   console.log('╚══════════════════════════════════════════════════════════╝');
   console.log('');

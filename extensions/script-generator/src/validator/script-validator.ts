@@ -6,12 +6,7 @@
  */
 
 import { CHARACTER_CONFIGS } from '../characters';
-import type {
-  WebGALScript,
-  WebGALLine,
-  ValidationConfig,
-  Character
-} from '../types';
+import type { ValidationConfig, WebGALLine, WebGALScript } from '../types';
 
 /**
  * Validation result interface
@@ -59,11 +54,14 @@ export interface SyntaxValidationResult {
 export interface CharacterValidationResult {
   isValid: boolean;
   score: number;
-  characterConsistency: Record<string, {
-    appearances: number;
-    consistencyScore: number;
-    issues: string[];
-  }>;
+  characterConsistency: Record<
+    string,
+    {
+      appearances: number;
+      consistencyScore: number;
+      issues: string[];
+    }
+  >;
 }
 
 /**
@@ -103,17 +101,10 @@ export class ScriptValidator {
     'jump',
     'label',
     'setVar',
-    'callScene'
+    'callScene',
   ]);
 
-  private readonly validPositions = new Set([
-    'left',
-    'center',
-    'right',
-    '-left',
-    '-center',
-    '-right'
-  ]);
+  private readonly validPositions = new Set(['left', 'center', 'right', '-left', '-center', '-right']);
 
   /**
    * Validate complete WebGAL script
@@ -126,15 +117,11 @@ export class ScriptValidator {
       syntax: config.checkSyntax ? await this.validateSyntax(script) : this.createEmptyResult(),
       characters: config.checkCharacters ? await this.validateCharacters(script) : this.createEmptyResult(),
       educational: config.checkEducational ? await this.validateEducational(script) : this.createEmptyResult(),
-      flow: config.checkFlow ? await this.validateFlow(script) : this.createEmptyResult()
+      flow: config.checkFlow ? await this.validateFlow(script) : this.createEmptyResult(),
     };
 
-    const overallScore = (
-      results.syntax.score +
-      results.characters.score +
-      results.educational.score +
-      results.flow.score
-    ) / 4;
+    const overallScore =
+      (results.syntax.score + results.characters.score + results.educational.score + results.flow.score) / 4;
 
     const summary = this.createSummary(results);
 
@@ -149,7 +136,7 @@ export class ScriptValidator {
       isValid,
       score: overallScore,
       results,
-      summary
+      summary,
     };
   }
 
@@ -176,7 +163,7 @@ export class ScriptValidator {
             line: lineNumber,
             command: line.command,
             issue: `Unknown command: ${line.command}`,
-            severity: 'error'
+            severity: 'error',
           });
         }
 
@@ -185,15 +172,15 @@ export class ScriptValidator {
       }
     }
 
-    const errorCount = issues.filter(i => i.severity === 'error').length;
-    const warningCount = issues.filter(i => i.severity === 'warning').length;
+    const errorCount = issues.filter((i) => i.severity === 'error').length;
+    const warningCount = issues.filter((i) => i.severity === 'warning').length;
 
-    const score = Math.max(0, 1 - (errorCount * 0.2) - (warningCount * 0.05));
+    const score = Math.max(0, 1 - errorCount * 0.2 - warningCount * 0.05);
 
     return {
       isValid: errorCount === 0,
       score,
-      issues
+      issues,
     };
   }
 
@@ -203,7 +190,7 @@ export class ScriptValidator {
   private async validateSpecificCommand(
     line: WebGALLine,
     lineNumber: number,
-    issues: Array<{ line: number; command: string; issue: string; severity: 'error' | 'warning'; }>
+    issues: Array<{ line: number; command: string; issue: string; severity: 'error' | 'warning' }>
   ): Promise<void> {
     switch (line.command) {
       case 'say':
@@ -235,7 +222,7 @@ export class ScriptValidator {
   private validateSayCommand(
     line: WebGALLine,
     lineNumber: number,
-    issues: Array<{ line: number; command: string; issue: string; severity: 'error' | 'warning'; }>
+    issues: Array<{ line: number; command: string; issue: string; severity: 'error' | 'warning' }>
   ): void {
     // Check if dialogue content exists
     if (!line.params[0] || line.params[0].trim().length === 0) {
@@ -243,7 +230,7 @@ export class ScriptValidator {
         line: lineNumber,
         command: line.command,
         issue: 'Empty dialogue content',
-        severity: 'error'
+        severity: 'error',
       });
     }
 
@@ -253,7 +240,7 @@ export class ScriptValidator {
         line: lineNumber,
         command: line.command,
         issue: 'Missing speaker option',
-        severity: 'warning'
+        severity: 'warning',
       });
     }
 
@@ -264,7 +251,7 @@ export class ScriptValidator {
         line: lineNumber,
         command: line.command,
         issue: 'Dialogue too long (>200 characters)',
-        severity: 'warning'
+        severity: 'warning',
       });
     }
 
@@ -276,7 +263,7 @@ export class ScriptValidator {
           line: lineNumber,
           command: line.command,
           issue: 'Voice file should be .wav or .mp3',
-          severity: 'warning'
+          severity: 'warning',
         });
       }
     }
@@ -288,7 +275,7 @@ export class ScriptValidator {
   private validateChangeFigureCommand(
     line: WebGALLine,
     lineNumber: number,
-    issues: Array<{ line: number; command: string; issue: string; severity: 'error' | 'warning'; }>
+    issues: Array<{ line: number; command: string; issue: string; severity: 'error' | 'warning' }>
   ): void {
     const figureFile = line.params[0];
 
@@ -297,7 +284,7 @@ export class ScriptValidator {
         line: lineNumber,
         command: line.command,
         issue: 'Missing figure file',
-        severity: 'error'
+        severity: 'error',
       });
       return;
     }
@@ -308,7 +295,7 @@ export class ScriptValidator {
         line: lineNumber,
         command: line.command,
         issue: 'Figure file should be .webp, .png, or .jpg',
-        severity: 'warning'
+        severity: 'warning',
       });
     }
 
@@ -321,7 +308,7 @@ export class ScriptValidator {
           line: lineNumber,
           command: line.command,
           issue: `Invalid position: ${position}`,
-          severity: 'error'
+          severity: 'error',
         });
       }
     }
@@ -333,7 +320,7 @@ export class ScriptValidator {
   private validateChangeBgCommand(
     line: WebGALLine,
     lineNumber: number,
-    issues: Array<{ line: number; command: string; issue: string; severity: 'error' | 'warning'; }>
+    issues: Array<{ line: number; command: string; issue: string; severity: 'error' | 'warning' }>
   ): void {
     const bgFile = line.params[0];
 
@@ -342,7 +329,7 @@ export class ScriptValidator {
         line: lineNumber,
         command: line.command,
         issue: 'Missing background file',
-        severity: 'error'
+        severity: 'error',
       });
       return;
     }
@@ -353,7 +340,7 @@ export class ScriptValidator {
         line: lineNumber,
         command: line.command,
         issue: 'Background file should be .webp, .jpg, or .png',
-        severity: 'warning'
+        severity: 'warning',
       });
     }
   }
@@ -364,7 +351,7 @@ export class ScriptValidator {
   private validateWaitCommand(
     line: WebGALLine,
     lineNumber: number,
-    issues: Array<{ line: number; command: string; issue: string; severity: 'error' | 'warning'; }>
+    issues: Array<{ line: number; command: string; issue: string; severity: 'error' | 'warning' }>
   ): void {
     const waitTime = line.params[0];
 
@@ -373,18 +360,18 @@ export class ScriptValidator {
         line: lineNumber,
         command: line.command,
         issue: 'Missing wait time',
-        severity: 'error'
+        severity: 'error',
       });
       return;
     }
 
-    const timeMs = parseInt(waitTime);
-    if (isNaN(timeMs) || timeMs < 0) {
+    const timeMs = parseInt(waitTime, 10);
+    if (Number.isNaN(timeMs) || timeMs < 0) {
       issues.push({
         line: lineNumber,
         command: line.command,
         issue: 'Invalid wait time (must be positive number)',
-        severity: 'error'
+        severity: 'error',
       });
     }
 
@@ -393,7 +380,7 @@ export class ScriptValidator {
         line: lineNumber,
         command: line.command,
         issue: 'Wait time too long (>10 seconds)',
-        severity: 'warning'
+        severity: 'warning',
       });
     }
   }
@@ -404,7 +391,7 @@ export class ScriptValidator {
   private validateAudioCommand(
     line: WebGALLine,
     lineNumber: number,
-    issues: Array<{ line: number; command: string; issue: string; severity: 'error' | 'warning'; }>
+    issues: Array<{ line: number; command: string; issue: string; severity: 'error' | 'warning' }>
   ): void {
     const audioFile = line.params[0];
 
@@ -413,20 +400,20 @@ export class ScriptValidator {
         line: lineNumber,
         command: line.command,
         issue: 'Missing audio file',
-        severity: 'error'
+        severity: 'error',
       });
       return;
     }
 
     const validExtensions = ['.mp3', '.wav', '.ogg'];
-    const hasValidExtension = validExtensions.some(ext => audioFile.endsWith(ext));
+    const hasValidExtension = validExtensions.some((ext) => audioFile.endsWith(ext));
 
     if (!hasValidExtension) {
       issues.push({
         line: lineNumber,
         command: line.command,
         issue: `Audio file should have extension: ${validExtensions.join(', ')}`,
-        severity: 'warning'
+        severity: 'warning',
       });
     }
   }
@@ -435,11 +422,14 @@ export class ScriptValidator {
    * Validate character consistency
    */
   private async validateCharacters(script: WebGALScript): Promise<CharacterValidationResult> {
-    const characterStats: Record<string, {
-      appearances: number;
-      consistencyScore: number;
-      issues: string[];
-    }> = {};
+    const characterStats: Record<
+      string,
+      {
+        appearances: number;
+        consistencyScore: number;
+        issues: string[];
+      }
+    > = {};
 
     const expectedCharacters = new Set(script.metadata.characters);
 
@@ -454,7 +444,7 @@ export class ScriptValidator {
             characterStats[speaker] = {
               appearances: 0,
               consistencyScore: 1.0,
-              issues: []
+              issues: [],
             };
           }
 
@@ -472,7 +462,7 @@ export class ScriptValidator {
           if (line.options?.vocal && characterId) {
             const vocal = String(line.options.vocal);
             if (!vocal.startsWith(characterId)) {
-              speakerStats.issues.push('Voice file name doesn\'t match character ID');
+              speakerStats.issues.push("Voice file name doesn't match character ID");
               speakerStats.consistencyScore -= 0.1;
             }
           }
@@ -484,13 +474,9 @@ export class ScriptValidator {
     for (const charId of expectedCharacters) {
       const character = CHARACTER_CONFIGS[charId];
       if (character) {
-        const speakerNames = [
-          character.name.zh,
-          character.name.jp,
-          character.name.en
-        ];
+        const speakerNames = [character.name.zh, character.name.jp, character.name.en];
 
-        const hasAppearances = speakerNames.some(name => {
+        const hasAppearances = speakerNames.some((name) => {
           const stats = characterStats[name];
           return stats !== undefined && stats.appearances > 0;
         });
@@ -502,7 +488,7 @@ export class ScriptValidator {
             characterStats[mainName] = {
               appearances: 0,
               consistencyScore: 0,
-              issues: ['Character missing from script']
+              issues: ['Character missing from script'],
             };
           }
         }
@@ -511,16 +497,16 @@ export class ScriptValidator {
 
     // Calculate overall score
     const characters = Object.values(characterStats);
-    const averageScore = characters.length > 0 ?
-      characters.reduce((sum, char) => sum + char.consistencyScore, 0) / characters.length :
-      0;
+    const averageScore =
+      characters.length > 0 ? characters.reduce((sum, char) => sum + char.consistencyScore, 0) / characters.length : 0;
 
-    const hasAllExpectedCharacters = expectedCharacters.size === 0 ||
-      Array.from(expectedCharacters).every(charId => {
+    const hasAllExpectedCharacters =
+      expectedCharacters.size === 0 ||
+      Array.from(expectedCharacters).every((charId) => {
         const character = CHARACTER_CONFIGS[charId];
         if (!character) return false;
         const speakerNames = [character.name.zh, character.name.jp, character.name.en];
-        return speakerNames.some(name => {
+        return speakerNames.some((name) => {
           const stats = characterStats[name];
           return stats !== undefined && stats.appearances > 0;
         });
@@ -529,7 +515,7 @@ export class ScriptValidator {
     return {
       isValid: averageScore > 0.7 && hasAllExpectedCharacters,
       score: averageScore,
-      characterConsistency: characterStats
+      characterConsistency: characterStats,
     };
   }
 
@@ -538,11 +524,7 @@ export class ScriptValidator {
    */
   private findCharacterIdBySpeakerName(speakerName: string): string | null {
     for (const [id, character] of Object.entries(CHARACTER_CONFIGS)) {
-      if (
-        character.name.zh === speakerName ||
-        character.name.jp === speakerName ||
-        character.name.en === speakerName
-      ) {
+      if (character.name.zh === speakerName || character.name.jp === speakerName || character.name.en === speakerName) {
         return id;
       }
     }
@@ -559,8 +541,22 @@ export class ScriptValidator {
 
     // Define educational keywords
     const educationalTerms = [
-      '研究', '方法', '结果', '结论', '分析', '实验', '理论', '假设',
-      '数据', '模型', '算法', '发现', '观察', '测试', '验证', '评估'
+      '研究',
+      '方法',
+      '结果',
+      '结论',
+      '分析',
+      '实验',
+      '理论',
+      '假设',
+      '数据',
+      '模型',
+      '算法',
+      '发现',
+      '观察',
+      '测试',
+      '验证',
+      '评估',
     ];
 
     for (const scene of script.scenes) {
@@ -585,8 +581,7 @@ export class ScriptValidator {
     }
 
     // Calculate metrics
-    const educationalDensity = totalDialogueLength > 0 ?
-      educationalKeywords / totalDialogueLength * 1000 : 0; // Keywords per 1000 characters
+    const educationalDensity = totalDialogueLength > 0 ? (educationalKeywords / totalDialogueLength) * 1000 : 0; // Keywords per 1000 characters
 
     const educationalValue = Math.min(1, educationalDensity / 5); // Target: 5 keywords per 1000 chars
     const contentAccuracy = 0.85; // Placeholder - would need more sophisticated analysis
@@ -598,7 +593,7 @@ export class ScriptValidator {
       score,
       educationalValue,
       contentAccuracy,
-      learningObjectives: [...new Set(learningObjectives)] // Remove duplicates
+      learningObjectives: [...new Set(learningObjectives)], // Remove duplicates
     };
   }
 
@@ -615,15 +610,16 @@ export class ScriptValidator {
       sceneFlowScore = 0;
     } else {
       // Check for logical scene order
-      const sceneTypes = script.scenes.map(scene => scene.metadata.type);
+      const sceneTypes = script.scenes.map((scene) => scene.metadata.type);
       if (sceneTypes[0] !== 'introduction') {
         sceneFlowScore -= 0.3;
       }
 
       // Check scene length consistency
-      const sceneLengths = script.scenes.map(scene => scene.lines.length);
+      const sceneLengths = script.scenes.map((scene) => scene.lines.length);
       const avgLength = sceneLengths.reduce((a, b) => a + b, 0) / sceneLengths.length;
-      const lengthVariance = sceneLengths.reduce((sum, len) => sum + Math.abs(len - avgLength), 0) / sceneLengths.length;
+      const lengthVariance =
+        sceneLengths.reduce((sum, len) => sum + Math.abs(len - avgLength), 0) / sceneLengths.length;
 
       if (lengthVariance > avgLength * 0.5) {
         sceneFlowScore -= 0.2;
@@ -669,7 +665,7 @@ export class ScriptValidator {
       score: overallScore,
       sceneFlow: sceneFlowScore,
       dialogueFlow: dialogueFlowScore,
-      pacing: pacingScore
+      pacing: pacingScore,
     };
   }
 
@@ -699,7 +695,7 @@ export class ScriptValidator {
     // Collect character issues
     if (results.characters.characterConsistency) {
       for (const [character, stats] of Object.entries(results.characters.characterConsistency)) {
-        const characterStats = stats as { appearances: number; consistencyScore: number; issues: string[]; };
+        const characterStats = stats as { appearances: number; consistencyScore: number; issues: string[] };
         if (characterStats.appearances === 0) {
           errors.push(`Character "${character}" missing from script`);
         }
@@ -730,7 +726,7 @@ export class ScriptValidator {
       checkCharacters: true,
       checkEducational: true,
       checkFlow: true,
-      maxErrors: 5
+      maxErrors: 5,
     };
   }
 
@@ -740,7 +736,7 @@ export class ScriptValidator {
   private createEmptyResult(): any {
     return {
       isValid: true,
-      score: 1.0
+      score: 1.0,
     };
   }
 }

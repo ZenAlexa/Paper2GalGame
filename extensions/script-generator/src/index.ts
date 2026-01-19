@@ -8,99 +8,97 @@
  * @author Paper2GalGame Team
  */
 
-// Main classes
-export { ScriptGenerator } from './generator';
-export type { GenerationResult } from './generator';
-export { ScriptValidator } from './validator';
-export { OpenRouterClient } from './openrouter';
-
-// Incremental generation system
-export {
-  PaperSegmentationStrategy,
-  createSegmentationStrategy,
-  IncrementalScriptGenerator,
-  createIncrementalGenerator,
-  MultiPaperSaveSystem,
-  createSaveSystem
-} from './incremental';
-
-export type {
-  PaperSegment,
-  SegmentType,
-  SegmentStatus,
-  SegmentProgress,
-  GenerationProgress,
-  BackgroundTask,
-  IncrementalGenerationResult,
-  SegmentEvent,
-  SegmentEventListener,
-  WaitingDialogue,
-  IncrementalConfig,
-  ScriptGeneratorInterface,
-  GameInstance,
-  SaveData,
-  GameProgress,
-  SaveSystemConfig
-} from './incremental';
-
 // Character system
 export {
   CHARACTER_CONFIGS,
   CHARACTER_INTERACTIONS,
-  getCharacter,
   getAvailableCharacters,
-  validateCharacterSelection
+  getCharacter,
+  validateCharacterSelection,
 } from './characters';
+export type { GenerationResult } from './generator';
+// Main classes
+export { ScriptGenerator } from './generator';
+export type {
+  BackgroundTask,
+  GameInstance,
+  GameProgress,
+  GenerationProgress,
+  IncrementalConfig,
+  IncrementalGenerationResult,
+  PaperSegment,
+  SaveData,
+  SaveSystemConfig,
+  ScriptGeneratorInterface,
+  SegmentEvent,
+  SegmentEventListener,
+  SegmentProgress,
+  SegmentStatus,
+  SegmentType,
+  WaitingDialogue,
+} from './incremental';
 
+// Incremental generation system
+export {
+  createIncrementalGenerator,
+  createSaveSystem,
+  createSegmentationStrategy,
+  IncrementalScriptGenerator,
+  MultiPaperSaveSystem,
+  PaperSegmentationStrategy,
+} from './incremental';
+export { OpenRouterClient } from './openrouter';
 // Utilities
 export { LanguageSwitcher } from './utils';
+export { ScriptValidator } from './validator';
+
 import { LanguageSwitcher } from './utils';
 
 // Type definitions - re-export all types from types module
 export type {
   // Character types
   Character,
-  CharacterName,
-  VoiceSettings,
   CharacterInteraction,
+  CharacterName,
+  ChatCompletionRequest,
+  ChatCompletionResponse,
+  ChatMessage,
   DialogueLine,
+  GenerationOptions,
   MultiLanguageContent,
+  MultiLanguageOptions,
+  // OpenRouter types
+  OpenRouterConfig,
+  OpenRouterError,
+  OpenRouterModel,
+  PaperMetadata,
+  PaperSection,
+  // Paper types
+  ParsedPaper,
+  ScriptGenerationRequest,
+  ScriptGenerationResponse,
+  ValidationConfig,
+  VoiceSettings,
   // Script types
   WebGALCommand,
   WebGALLine,
   WebGALScene,
   WebGALScript,
-  GenerationOptions,
-  MultiLanguageOptions,
-  ValidationConfig,
-  // OpenRouter types
-  OpenRouterConfig,
-  OpenRouterModel,
-  ChatMessage,
-  ChatCompletionRequest,
-  ChatCompletionResponse,
-  OpenRouterError,
-  ScriptGenerationRequest,
-  ScriptGenerationResponse,
-  // Paper types
-  ParsedPaper,
-  PaperSection,
-  PaperMetadata
 } from './types';
 
 // Validation results
 export type {
-  ValidationResult,
-  SyntaxValidationResult,
   CharacterValidationResult,
   EducationalValidationResult,
-  FlowValidationResult
+  FlowValidationResult,
+  SyntaxValidationResult,
+  ValidationResult,
 } from './validator';
 
+import { getAvailableCharacters, getCharacter } from './characters';
 // Import needed classes locally for the main class
 import { ScriptGenerator } from './generator';
 import { ScriptValidator } from './validator';
-import { getAvailableCharacters, getCharacter } from './characters';
 
 /**
  * Main class that combines all functionality
@@ -117,7 +115,7 @@ export class PaperScriptGenerator {
       apiKey: openRouterApiKey,
       baseURL: baseURL || 'https://openrouter.ai/api/v1',
       httpReferer: 'https://paper2galgame.com',
-      appTitle: 'Paper2GalGame'
+      appTitle: 'Paper2GalGame',
     });
 
     this.validator = new ScriptValidator();
@@ -141,15 +139,15 @@ export class PaperScriptGenerator {
       generateAll: true,
       primaryLanguage: 'jp' as const, // Default to Japanese for voice consistency
       qualityThreshold: 0.8,
-      verifyTranslations: true
+      verifyTranslations: true,
     };
 
     const finalOptions = {
       ...options,
       multiLanguage: {
         ...defaultMultiLanguage,
-        ...multiLanguageOptions
-      }
+        ...multiLanguageOptions,
+      },
     };
 
     // Generate script
@@ -168,8 +166,8 @@ export class PaperScriptGenerator {
       validation: validationResult,
       script: {
         ...generationResult.script,
-        validation: validationResult
-      }
+        validation: validationResult,
+      },
     };
   }
 

@@ -6,16 +6,18 @@
  */
 
 import type { MultiLanguageContent } from '../types/character';
-import type { GenerationProgress, SegmentProgress } from './types';
+import type { GenerationProgress } from './types';
 
 // Browser localStorage type declaration for cross-environment compatibility
-declare const localStorage: {
-  getItem(key: string): string | null;
-  setItem(key: string, value: string): void;
-  removeItem(key: string): void;
-  key(index: number): string | null;
-  length: number;
-} | undefined;
+declare const localStorage:
+  | {
+      getItem(key: string): string | null;
+      setItem(key: string, value: string): void;
+      removeItem(key: string): void;
+      key(index: number): string | null;
+      length: number;
+    }
+  | undefined;
 
 /**
  * Game progress state
@@ -180,7 +182,7 @@ const DEFAULT_CONFIG: SaveSystemConfig = {
   enableAutoSave: true,
   autoSaveInterval: 10,
   enableQuickSave: true,
-  storagePrefix: 'paper_game_'
+  storagePrefix: 'paper_game_',
 };
 
 /**
@@ -192,7 +194,7 @@ const DEFAULT_SETTINGS: GameInstance['settings'] = {
   autoSpeed: 5,
   bgmVolume: 80,
   voiceVolume: 100,
-  seVolume: 80
+  seVolume: 80,
 };
 
 /**
@@ -203,10 +205,7 @@ export class MultiPaperSaveSystem {
   private instances: Map<string, GameInstance>;
   private storage: StorageInterface;
 
-  constructor(
-    config: Partial<SaveSystemConfig> = {},
-    storage?: StorageInterface
-  ) {
+  constructor(config: Partial<SaveSystemConfig> = {}, storage?: StorageInterface) {
     this.config = { ...DEFAULT_CONFIG, ...config };
     this.instances = new Map();
     this.storage = storage || new LocalStorageAdapter(this.config.storagePrefix);
@@ -218,14 +217,10 @@ export class MultiPaperSaveSystem {
   /**
    * Create a new game instance for a paper
    */
-  createPaperGameInstance(
-    paperId: string,
-    paperTitle: string | MultiLanguageContent
-  ): GameInstance {
+  createPaperGameInstance(paperId: string, paperTitle: string | MultiLanguageContent): GameInstance {
     // Convert string title to multi-language if needed
-    const title: MultiLanguageContent = typeof paperTitle === 'string'
-      ? { zh: paperTitle, jp: paperTitle, en: paperTitle }
-      : paperTitle;
+    const title: MultiLanguageContent =
+      typeof paperTitle === 'string' ? { zh: paperTitle, jp: paperTitle, en: paperTitle } : paperTitle;
 
     const gameInstance: GameInstance = {
       paperId,
@@ -241,14 +236,14 @@ export class MultiPaperSaveSystem {
         completedSegments: [],
         totalProgress: 0,
         currentDialogueIndex: 0,
-        currentScene: 'start'
+        currentScene: 'start',
       },
       settings: { ...DEFAULT_SETTINGS },
       unlocks: {
         cgUnlocked: [],
         musicUnlocked: [],
-        endingsSeen: []
-      }
+        endingsSeen: [],
+      },
     };
 
     // Store in memory and persist
@@ -269,8 +264,7 @@ export class MultiPaperSaveSystem {
    * Get all game instances
    */
   getAllPaperGames(): GameInstance[] {
-    return Array.from(this.instances.values())
-      .sort((a, b) => b.lastPlayedAt.getTime() - a.lastPlayedAt.getTime());
+    return Array.from(this.instances.values()).sort((a, b) => b.lastPlayedAt.getTime() - a.lastPlayedAt.getTime());
   }
 
   /**
@@ -299,7 +293,7 @@ export class MultiPaperSaveSystem {
       gameState,
       progress: { ...instance.gameProgress },
       availableSegments: [...instance.gameProgress.availableSegments],
-      description: this.generateSaveDescription(instance, gameState)
+      description: this.generateSaveDescription(instance, gameState),
     };
 
     // Only set optional properties if they have values
@@ -316,11 +310,7 @@ export class MultiPaperSaveSystem {
   /**
    * Quick save
    */
-  quickSave(
-    paperId: string,
-    gameState: SaveData['gameState'],
-    screenshotUrl?: string
-  ): SaveData {
+  quickSave(paperId: string, gameState: SaveData['gameState'], screenshotUrl?: string): SaveData {
     const instance = this.instances.get(paperId);
     if (!instance) {
       throw new Error(`Game instance not found: ${paperId}`);
@@ -337,8 +327,8 @@ export class MultiPaperSaveSystem {
       description: {
         zh: '快速存档',
         jp: 'クイックセーブ',
-        en: 'Quick Save'
-      }
+        en: 'Quick Save',
+      },
     };
 
     if (screenshotUrl) saveData.screenshotUrl = screenshotUrl;
@@ -353,11 +343,7 @@ export class MultiPaperSaveSystem {
   /**
    * Auto save
    */
-  autoSave(
-    paperId: string,
-    gameState: SaveData['gameState'],
-    screenshotUrl?: string
-  ): SaveData {
+  autoSave(paperId: string, gameState: SaveData['gameState'], screenshotUrl?: string): SaveData {
     const instance = this.instances.get(paperId);
     if (!instance) {
       throw new Error(`Game instance not found: ${paperId}`);
@@ -374,8 +360,8 @@ export class MultiPaperSaveSystem {
       description: {
         zh: '自动存档',
         jp: 'オートセーブ',
-        en: 'Auto Save'
-      }
+        en: 'Auto Save',
+      },
     };
 
     if (screenshotUrl) saveData.screenshotUrl = screenshotUrl;
@@ -484,10 +470,7 @@ export class MultiPaperSaveSystem {
   /**
    * Update game settings
    */
-  updateSettings(
-    paperId: string,
-    settings: Partial<GameInstance['settings']>
-  ): void {
+  updateSettings(paperId: string, settings: Partial<GameInstance['settings']>): void {
     const instance = this.instances.get(paperId);
     if (!instance) {
       throw new Error(`Game instance not found: ${paperId}`);
@@ -531,15 +514,12 @@ export class MultiPaperSaveSystem {
   /**
    * Generate save description
    */
-  private generateSaveDescription(
-    instance: GameInstance,
-    gameState: SaveData['gameState']
-  ): MultiLanguageContent {
+  private generateSaveDescription(instance: GameInstance, gameState: SaveData['gameState']): MultiLanguageContent {
     const progress = instance.gameProgress.totalProgress;
     return {
       zh: `进度 ${progress}% - ${gameState.scene}`,
       jp: `進捗 ${progress}% - ${gameState.scene}`,
-      en: `Progress ${progress}% - ${gameState.scene}`
+      en: `Progress ${progress}% - ${gameState.scene}`,
     };
   }
 
@@ -551,9 +531,7 @@ export class MultiPaperSaveSystem {
     const completedSegments = instance.gameProgress.completedSegments.length;
 
     if (totalSegments > 0) {
-      instance.gameProgress.totalProgress = Math.round(
-        (completedSegments / totalSegments) * 100
-      );
+      instance.gameProgress.totalProgress = Math.round((completedSegments / totalSegments) * 100);
     }
   }
 
@@ -611,7 +589,7 @@ export class MultiPaperSaveSystem {
     let totalSaves = 0;
 
     for (const instance of this.instances.values()) {
-      totalSaves += instance.saveSlots.filter(s => s !== null).length;
+      totalSaves += instance.saveSlots.filter((s) => s !== null).length;
       if (instance.quickSave) totalSaves++;
       if (instance.autoSave) totalSaves++;
     }
@@ -619,7 +597,7 @@ export class MultiPaperSaveSystem {
     return {
       totalInstances: this.instances.size,
       totalSaves,
-      storageUsed: this.storage.getSize()
+      storageUsed: this.storage.getSize(),
     };
   }
 }
@@ -693,9 +671,6 @@ class LocalStorageAdapter implements StorageInterface {
 /**
  * Create save system with default configuration
  */
-export function createSaveSystem(
-  config?: Partial<SaveSystemConfig>,
-  storage?: StorageInterface
-): MultiPaperSaveSystem {
+export function createSaveSystem(config?: Partial<SaveSystemConfig>, storage?: StorageInterface): MultiPaperSaveSystem {
   return new MultiPaperSaveSystem(config, storage);
 }

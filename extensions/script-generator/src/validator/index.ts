@@ -4,11 +4,11 @@
  * Exports script validation functionality
  */
 
-export { ScriptValidator } from './script-validator';
 export type {
-  ValidationResult,
-  SyntaxValidationResult,
   CharacterValidationResult,
   EducationalValidationResult,
-  FlowValidationResult
+  FlowValidationResult,
+  SyntaxValidationResult,
+  ValidationResult,
 } from './script-validator';
+export { ScriptValidator } from './script-validator';

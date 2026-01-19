@@ -8,9 +8,9 @@
  * Multilingual character name
  */
 export interface CharacterName {
-  zh: string;  // Chinese name
-  jp: string;  // Japanese name
-  en: string;  // English name
+  zh: string; // Chinese name
+  jp: string; // Japanese name
+  en: string; // English name
 }
 
 /**
@@ -63,7 +63,7 @@ export interface Character {
   /** Character avatar/sprite filename */
   sprite?: string;
 
-  /** Relationship to other characters (e.g., 前輩, 学弟, 学生, 表哥) */
+  /** Relationship to other characters (e.g., senpai, junior, student, cousin) */
   relationship?: {
     role: string;
     jp: string;

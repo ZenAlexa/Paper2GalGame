@@ -4,7 +4,7 @@
  * Provides functionality to switch between languages in multi-language WebGAL scripts
  */
 
-import type { WebGALScript, WebGALLine, MultiLanguageContent } from '../types';
+import type { MultiLanguageContent, WebGALLine, WebGALScript } from '../types';
 
 /**
  * Language switching utility class
@@ -13,23 +13,20 @@ export class LanguageSwitcher {
   /**
    * Switch script to specific language
    */
-  static switchScriptLanguage(
-    script: WebGALScript,
-    targetLanguage: 'zh' | 'jp' | 'en'
-  ): WebGALScript {
+  static switchScriptLanguage(script: WebGALScript, targetLanguage: 'zh' | 'jp' | 'en'): WebGALScript {
     const switchedScript: WebGALScript = {
       ...script,
       metadata: {
         ...script.metadata,
         multiLanguage: {
           ...script.metadata.multiLanguage,
-          currentLanguage: targetLanguage
-        }
+          currentLanguage: targetLanguage,
+        },
       },
-      scenes: script.scenes.map(scene => ({
+      scenes: script.scenes.map((scene) => ({
         ...scene,
-        lines: scene.lines.map(line => this.switchLineLanguage(line, targetLanguage))
-      }))
+        lines: scene.lines.map((line) => LanguageSwitcher.switchLineLanguage(line, targetLanguage)),
+      })),
     };
 
     return switchedScript;
@@ -38,10 +35,7 @@ export class LanguageSwitcher {
   /**
    * Switch individual line to specific language
    */
-  static switchLineLanguage(
-    line: WebGALLine,
-    targetLanguage: 'zh' | 'jp' | 'en'
-  ): WebGALLine {
+  static switchLineLanguage(line: WebGALLine, targetLanguage: 'zh' | 'jp' | 'en'): WebGALLine {
     if (line.command !== 'say' || !line.metadata?.isMultiLanguage) {
       return line;
     }
@@ -73,17 +67,13 @@ export class LanguageSwitcher {
         params: [finalContent],
         options: {
           ...line.options,
-          speaker: finalSpeaker
+          speaker: finalSpeaker,
         },
-        raw: this.reconstructWebGALLine(
-          finalContent,
-          finalSpeaker,
-          (line.options?.vocal as string) || ''
-        )
+        raw: LanguageSwitcher.reconstructWebGALLine(finalContent, finalSpeaker, (line.options?.vocal as string) || ''),
       };
 
       return switchedLine;
-    } catch (error) {
+    } catch (_error) {
       // Fallback to original line if parsing fails
       return line;
     }
@@ -128,14 +118,14 @@ export class LanguageSwitcher {
   } {
     const expectedLanguages: ('zh' | 'jp' | 'en')[] = ['zh', 'jp', 'en'];
     const supportedLanguages = script.metadata.multiLanguage?.supportedLanguages || [];
-    const missingLanguages = expectedLanguages.filter(lang => !supportedLanguages.includes(lang));
+    const missingLanguages = expectedLanguages.filter((lang) => !supportedLanguages.includes(lang));
     const issues: string[] = [];
 
     // Check each dialogue line
     for (const scene of script.scenes) {
       for (const line of scene.lines) {
         if (line.command === 'say' && line.metadata?.isMultiLanguage) {
-          const multiLangContent = this.extractMultiLanguageContent(line);
+          const multiLangContent = LanguageSwitcher.extractMultiLanguageContent(line);
           if (multiLangContent) {
             for (const lang of expectedLanguages) {
               if (!multiLangContent[lang] || multiLangContent[lang].trim() === '') {
@@ -150,18 +140,15 @@ export class LanguageSwitcher {
     return {
       isComplete: missingLanguages.length === 0 && issues.length === 0,
       missingLanguages,
-      issues
+      issues,
     };
   }
 
   /**
    * Generate language-specific WebGAL script export
    */
-  static exportScriptForLanguage(
-    script: WebGALScript,
-    targetLanguage: 'zh' | 'jp' | 'en'
-  ): string {
-    const switchedScript = this.switchScriptLanguage(script, targetLanguage);
+  static exportScriptForLanguage(script: WebGALScript, targetLanguage: 'zh' | 'jp' | 'en'): string {
+    const switchedScript = LanguageSwitcher.switchScriptLanguage(script, targetLanguage);
 
     let output = '';
 
@@ -169,7 +156,7 @@ export class LanguageSwitcher {
       output += `// Scene: ${scene.title}\n`;
 
       for (const line of scene.lines) {
-        output += line.raw + '\n';
+        output += `${line.raw}\n`;
       }
 
       output += '\n';
@@ -192,7 +179,7 @@ export class LanguageSwitcher {
     const qualityScores: Record<'zh' | 'jp' | 'en', number[]> = {
       zh: [],
       jp: [],
-      en: []
+      en: [],
     };
     const recommendations: string[] = [];
 
@@ -223,12 +210,9 @@ export class LanguageSwitcher {
     }
 
     const averageQuality = {
-      zh: qualityScores.zh.length > 0 ?
-        qualityScores.zh.reduce((a, b) => a + b, 0) / qualityScores.zh.length : 0,
-      jp: qualityScores.jp.length > 0 ?
-        qualityScores.jp.reduce((a, b) => a + b, 0) / qualityScores.jp.length : 0,
-      en: qualityScores.en.length > 0 ?
-        qualityScores.en.reduce((a, b) => a + b, 0) / qualityScores.en.length : 0
+      zh: qualityScores.zh.length > 0 ? qualityScores.zh.reduce((a, b) => a + b, 0) / qualityScores.zh.length : 0,
+      jp: qualityScores.jp.length > 0 ? qualityScores.jp.reduce((a, b) => a + b, 0) / qualityScores.jp.length : 0,
+      en: qualityScores.en.length > 0 ? qualityScores.en.reduce((a, b) => a + b, 0) / qualityScores.en.length : 0,
     };
 
     // Add general recommendations
@@ -244,18 +228,14 @@ export class LanguageSwitcher {
       totalLines,
       multiLanguageLines,
       averageQuality,
-      recommendations
+      recommendations,
     };
   }
 
   /**
    * Reconstruct WebGAL line format
    */
-  private static reconstructWebGALLine(
-    content: string,
-    speaker: string,
-    vocal?: string
-  ): string {
+  private static reconstructWebGALLine(content: string, speaker: string, vocal?: string): string {
     let line = `say:${content}`;
 
     if (speaker) {

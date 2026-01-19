@@ -7,13 +7,12 @@
 
 import fetch from 'node-fetch';
 import type {
-  OpenRouterConfig,
-  OpenRouterModel,
   ChatCompletionRequest,
   ChatCompletionResponse,
+  OpenRouterConfig,
   OpenRouterError,
   ScriptGenerationRequest,
-  ScriptGenerationResponse
+  ScriptGenerationResponse,
 } from '../types';
 
 /**
@@ -32,7 +31,7 @@ export class OpenRouterClient {
       appTitle: 'Paper2GalGame',
       defaultModel: 'google/gemini-3-flash-preview',
       timeout: 60000,
-      ...config
+      ...config,
     };
 
     if (!this.config.apiKey) {
@@ -55,7 +54,7 @@ export class OpenRouterClient {
       frequency_penalty: request.frequency_penalty ?? 0,
       presence_penalty: request.presence_penalty ?? 0,
       ...(request.stop && { stop: request.stop }),
-      ...(request.stream && { stream: request.stream })
+      ...(request.stream && { stream: request.stream }),
     };
 
     // Add reasoning for Gemini 3 models (uses object format)
@@ -73,13 +72,13 @@ export class OpenRouterClient {
       const response = await fetch(url, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.config.apiKey}`,
+          Authorization: `Bearer ${this.config.apiKey}`,
           'Content-Type': 'application/json',
           'HTTP-Referer': this.config.httpReferer,
-          'X-Title': this.config.appTitle
+          'X-Title': this.config.appTitle,
         },
         body: JSON.stringify(body),
-        signal: controller.signal
+        signal: controller.signal,
       });
 
       // Clear timeout on successful response
@@ -97,9 +96,8 @@ export class OpenRouterClient {
         throw new Error(`OpenRouter API error: ${errorMessage}`);
       }
 
-      const result = await response.json() as ChatCompletionResponse;
+      const result = (await response.json()) as ChatCompletionResponse;
       return result;
-
     } catch (error) {
       // Clear timeout on error
       clearTimeout(timeoutId);
@@ -133,11 +131,11 @@ export class OpenRouterClient {
         model: 'google/gemini-3-flash-preview',
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
+          { role: 'user', content: userPrompt },
         ],
         temperature: 0.8,
         max_tokens: 256000, // Gemini 3 supports 1M context, output up to 256K
-        reasoning: true // Enable reasoning for better script quality
+        reasoning: true, // Enable reasoning for better script quality
       };
 
       const response = await this.chatCompletion(completionRequest);
@@ -164,13 +162,12 @@ export class OpenRouterClient {
           model: response.model,
           generationTime: Date.now() - startTime,
           usage: response.usage,
-          qualityScore: this.calculateQualityScore(generatedScript, validation)
+          qualityScore: this.calculateQualityScore(generatedScript, validation),
         },
-        validation
+        validation,
       };
 
       return result;
-
     } catch (error) {
       if (error instanceof Error) {
         throw new Error(`Script generation failed: ${error.message}`);
@@ -183,7 +180,7 @@ export class OpenRouterClient {
    * Build system prompt for script generation
    * Implements 4-phase paper structure with character assignments
    */
-  private buildSystemPrompt(characters: string[]): string {
+  private buildSystemPrompt(_characters: string[]): string {
     return `# Paper2GalGame 論文解説スクリプト生成エキスパート
 
 あなたは学術論文をWebGAL形式の教育的ビジュアルノベルスクリプトに変換する専門AIです。
@@ -376,9 +373,9 @@ ${phaseContent.phase4}
     // Helper to find section by type
     const findSection = (types: string[]): string => {
       for (const type of types) {
-        const section = sections.find((s: any) =>
-          s.type?.toLowerCase() === type.toLowerCase() ||
-          s.title?.toLowerCase().includes(type.toLowerCase())
+        const section = sections.find(
+          (s: any) =>
+            s.type?.toLowerCase() === type.toLowerCase() || s.title?.toLowerCase().includes(type.toLowerCase())
         );
         if (section) {
           return `**${section.title}**\n${section.content.substring(0, 1500)}`;
@@ -388,67 +385,43 @@ ${phaseContent.phase4}
     };
 
     // Phase 1: Background & Introduction
-    const phase1Parts = [
-      findSection(['abstract']),
-      findSection(['introduction', 'background', 'overview'])
-    ].filter(Boolean);
-    const phase1 = phase1Parts.length > 0
-      ? phase1Parts.join('\n\n')
-      : `**論文冒頭部分**\n${rawText.substring(0, 2000)}`;
+    const phase1Parts = [findSection(['abstract']), findSection(['introduction', 'background', 'overview'])].filter(
+      Boolean
+    );
+    const phase1 =
+      phase1Parts.length > 0 ? phase1Parts.join('\n\n') : `**論文冒頭部分**\n${rawText.substring(0, 2000)}`;
 
     // Phase 2: Methods & Approach
     const phase2Parts = [
       findSection(['methods', 'methodology', 'approach']),
       findSection(['model', 'architecture', 'framework']),
-      findSection(['proposed', 'technique', 'algorithm'])
+      findSection(['proposed', 'technique', 'algorithm']),
     ].filter(Boolean);
-    const phase2 = phase2Parts.length > 0
-      ? phase2Parts.join('\n\n')
-      : `**方法論部分**\n${rawText.substring(2000, 4500)}`;
+    const phase2 =
+      phase2Parts.length > 0 ? phase2Parts.join('\n\n') : `**方法論部分**\n${rawText.substring(2000, 4500)}`;
 
     // Phase 3: Experiments & Results
     const phase3Parts = [
       findSection(['experiments', 'experimental']),
       findSection(['results', 'findings', 'evaluation']),
-      findSection(['analysis', 'comparison'])
+      findSection(['analysis', 'comparison']),
     ].filter(Boolean);
-    const phase3 = phase3Parts.length > 0
-      ? phase3Parts.join('\n\n')
-      : `**実験・結果部分**\n${rawText.substring(4500, 7000)}`;
+    const phase3 =
+      phase3Parts.length > 0 ? phase3Parts.join('\n\n') : `**実験・結果部分**\n${rawText.substring(4500, 7000)}`;
 
     // Phase 4: Conclusion & Applications
     const phase4Parts = [
       findSection(['discussion']),
       findSection(['conclusion', 'conclusions']),
       findSection(['future', 'future work', 'limitations']),
-      findSection(['applications', 'implications'])
+      findSection(['applications', 'implications']),
     ].filter(Boolean);
-    const phase4 = phase4Parts.length > 0
-      ? phase4Parts.join('\n\n')
-      : `**結論部分**\n${rawText.substring(Math.max(0, rawText.length - 2500))}`;
+    const phase4 =
+      phase4Parts.length > 0
+        ? phase4Parts.join('\n\n')
+        : `**結論部分**\n${rawText.substring(Math.max(0, rawText.length - 2500))}`;
 
     return { phase1, phase2, phase3, phase4 };
-  }
-
-  /**
-   * Extract paper summary for prompt
-   */
-  private extractPaperSummary(paperData: any): string {
-    if (!paperData.sections || paperData.sections.length === 0) {
-      return paperData.rawText?.substring(0, 1000) || 'No content available';
-    }
-
-    const sections = paperData.sections;
-    let summary = '';
-
-    // Extract key sections
-    for (const section of sections) {
-      if (section.type && ['abstract', 'introduction', 'conclusion'].includes(section.type.toLowerCase())) {
-        summary += `### ${section.title}\n${section.content.substring(0, 300)}...\n\n`;
-      }
-    }
-
-    return summary || paperData.rawText?.substring(0, 1000) || 'No content available';
   }
 
   /**
@@ -459,10 +432,7 @@ ${phaseContent.phase4}
     let sanitized = script;
 
     // Fix background references - only bg.webp is available
-    sanitized = sanitized.replace(
-      /changeBg:([^;]+\.webp)/gi,
-      'changeBg:bg.webp'
-    );
+    sanitized = sanitized.replace(/changeBg:([^;]+\.webp)/gi, 'changeBg:bg.webp');
 
     // Fix figure references - map character names to actual sprites
     const figurePatterns = [
@@ -485,7 +455,10 @@ ${phaseContent.phase4}
   /**
    * Validate generated script
    */
-  private validateGeneratedScript(script: string, characters: string[]): {
+  private validateGeneratedScript(
+    script: string,
+    characters: string[]
+  ): {
     syntaxValid: boolean;
     characterConsistent: boolean;
     educationalAccurate: boolean;
@@ -494,7 +467,7 @@ ${phaseContent.phase4}
     const issues: string[] = [];
 
     // Check basic WebGAL syntax
-    const lines = script.split('\n').filter(line => line.trim());
+    const lines = script.split('\n').filter((line) => line.trim());
     let syntaxValid = true;
 
     for (const line of lines) {
@@ -506,11 +479,11 @@ ${phaseContent.phase4}
 
     // Check character consistency
     const scriptSpeakers = this.extractSpeakers(script);
-    const characterConsistent = characters.length > 0 &&
-      scriptSpeakers.every(speaker => this.isValidSpeaker(speaker, characters));
+    const characterConsistent =
+      characters.length > 0 && scriptSpeakers.every((speaker) => this.isValidSpeaker(speaker, characters));
 
     if (!characterConsistent) {
-      issues.push('Character names in script don\'t match expected characters');
+      issues.push("Character names in script don't match expected characters");
     }
 
     // Basic educational content check (placeholder)
@@ -524,7 +497,7 @@ ${phaseContent.phase4}
       syntaxValid,
       characterConsistent,
       educationalAccurate,
-      issues
+      issues,
     };
   }
 
@@ -542,7 +515,7 @@ ${phaseContent.phase4}
    */
   private extractSpeakers(script: string): string[] {
     const speakerMatches = script.match(/-speaker=([^\\s]+)/g) || [];
-    return speakerMatches.map(match => {
+    return speakerMatches.map((match) => {
       const cleanMatch = match.replace('-speaker=', '');
       return cleanMatch;
     });
@@ -551,7 +524,7 @@ ${phaseContent.phase4}
   /**
    * Check if speaker name is valid for given characters
    */
-  private isValidSpeaker(speaker: string, characters: string[]): boolean {
+  private isValidSpeaker(speaker: string, _characters: string[]): boolean {
     // This would need character name mapping - simplified for now
     return speaker.length > 0;
   }
@@ -581,7 +554,7 @@ ${phaseContent.phase4}
       const response = await this.chatCompletion({
         model: 'google/gemini-3-flash-preview',
         messages: [{ role: 'user', content: 'Hello, this is a test.' }],
-        max_tokens: 10
+        max_tokens: 10,
       });
 
       return response.choices && response.choices.length > 0;

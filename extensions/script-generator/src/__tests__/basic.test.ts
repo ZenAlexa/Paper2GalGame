@@ -2,14 +2,10 @@
  * Basic functionality tests for Script Generator
  */
 
-import { describe, test, expect } from '@jest/globals';
-import {
-  getCharacter,
-  getAvailableCharacters,
-  validateCharacterSelection
-} from '../characters';
-import { ScriptValidator } from '../validator';
+import { describe, expect, test } from '@jest/globals';
+import { getAvailableCharacters, getCharacter, validateCharacterSelection } from '../characters';
 import type { WebGALScript } from '../types';
+import { ScriptValidator } from '../validator';
 
 describe('Character Configuration', () => {
   test('should return available character IDs', () => {
@@ -50,7 +46,7 @@ describe('Script Validator', () => {
         version: '0.1.0',
         language: 'zh',
         characters: ['nene', 'murasame'],
-        totalDuration: 300
+        totalDuration: 300,
       },
       scenes: [
         {
@@ -61,25 +57,25 @@ describe('Script Validator', () => {
               command: 'changeBg',
               params: ['教室.webp'],
               options: {},
-              raw: 'changeBg:教室.webp;'
+              raw: 'changeBg:教室.webp;',
             },
             {
               command: 'say',
               params: ['大家好，今天我们来学习这篇论文。'],
               options: {
                 speaker: '绫地宁宁',
-                vocal: 'nene_001.wav'
+                vocal: 'nene_001.wav',
               },
-              raw: 'say:大家好，今天我们来学习这篇论文。 -speaker=绫地宁宁 -vocal=nene_001.wav;'
-            }
+              raw: 'say:大家好，今天我们来学习这篇论文。 -speaker=绫地宁宁 -vocal=nene_001.wav;',
+            },
           ],
           metadata: {
             type: 'introduction',
             objectives: ['介绍论文主题'],
-            duration: 10
-          }
-        }
-      ]
+            duration: 10,
+          },
+        },
+      ],
     };
 
     const result = await validator.validateScript(mockScript);
@@ -96,7 +92,7 @@ describe('Script Validator', () => {
         version: '0.1.0',
         language: 'zh',
         characters: ['nene'],
-        totalDuration: 0
+        totalDuration: 0,
       },
       scenes: [
         {
@@ -104,19 +100,20 @@ describe('Script Validator', () => {
           title: 'Invalid Scene',
           lines: [
             {
+              // biome-ignore lint/suspicious/noExplicitAny: Testing invalid command input
               command: 'invalidCommand' as any,
               params: [],
               options: {},
-              raw: 'invalidCommand:;'
-            }
+              raw: 'invalidCommand:;',
+            },
           ],
           metadata: {
             type: 'content',
             objectives: [],
-            duration: 0
-          }
-        }
-      ]
+            duration: 0,
+          },
+        },
+      ],
     };
 
     const result = await validator.validateScript(invalidScript);

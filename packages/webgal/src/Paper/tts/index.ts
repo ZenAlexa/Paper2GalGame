@@ -20,18 +20,17 @@
  * ```
  */
 
-// Export types
-export type {
-  TTSEmotion,
-  VocalMap,
-  AudioFileInfo,
-  TTSGenerationResult,
-  SessionAudioData,
-  TTSGenerationOptions,
-  TTSProgressCallback,
-  TTSGenerationState,
-  TTSStatus,
-} from './types';
-
 // Export client
 export { TTSClient } from './TTSClient';
+// Export types
+export type {
+  AudioFileInfo,
+  SessionAudioData,
+  TTSEmotion,
+  TTSGenerationOptions,
+  TTSGenerationResult,
+  TTSGenerationState,
+  TTSProgressCallback,
+  TTSStatus,
+  VocalMap,
+} from './types';

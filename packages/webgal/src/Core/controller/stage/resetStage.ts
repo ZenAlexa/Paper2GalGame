@@ -1,7 +1,7 @@
-import { initState, resetStageState, setStage } from '@/store/stageReducer';
-import { webgalStore } from '@/store/store';
 import cloneDeep from 'lodash/cloneDeep';
 import { WebGAL } from '@/Core/WebGAL';
+import { initState, resetStageState, setStage } from '@/store/stageReducer';
+import { webgalStore } from '@/store/store';
 
 export const resetStage = (resetBacklog: boolean, resetSceneAndVar = true) => {
   /**

@@ -2,11 +2,10 @@
  * Paper Module - Builder Exports
  */
 
-export {
-  PaperSceneBuilder,
-  buildPaperScene,
-  buildPaperSceneFromDialogues,
-  buildPaperSceneExtended,
-} from './PaperSceneBuilder';
-
 export type { PaperSceneBuilderOptions } from './PaperSceneBuilder';
+export {
+  buildPaperScene,
+  buildPaperSceneExtended,
+  buildPaperSceneFromDialogues,
+  PaperSceneBuilder,
+} from './PaperSceneBuilder';

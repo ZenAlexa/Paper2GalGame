@@ -3,4 +3,4 @@
  * Simple paper upload interface using WebGAL native styling
  */
 
-export { PaperSelection, default } from './PaperSelection';
+export { default, PaperSelection } from './PaperSelection';

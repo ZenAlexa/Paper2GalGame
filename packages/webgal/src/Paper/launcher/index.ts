@@ -2,16 +2,15 @@
  * Paper Module - Launcher Exports
  */
 
+export type { LaunchWithTTSOptions } from './paperLauncher';
 export {
-  startPaperGameWithScene,
-  startPaperGameWithScript,
-  launchPaperGameFromAPI,
-  startPaperGameLegacy,
-  launchPaperGameWithTTS,
   checkTTSAvailability,
   exitPaperGame,
   getPaperProgress,
   isPaperModeActive,
+  launchPaperGameFromAPI,
+  launchPaperGameWithTTS,
+  startPaperGameLegacy,
+  startPaperGameWithScene,
+  startPaperGameWithScript,
 } from './paperLauncher';
-
-export type { LaunchWithTTSOptions } from './paperLauncher';

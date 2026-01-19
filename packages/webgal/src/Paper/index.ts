@@ -32,20 +32,17 @@
  * ```
  */
 
-// Types
-export * from './types';
+// Scene Builder
+export * from './builder';
 
 // Config
 export * from './config';
 
 // Factory functions
 export * from './factory';
-
-// Scene Builder
-export * from './builder';
-
 // Game Launcher
 export * from './launcher';
-
 // TTS Integration
 export * from './tts';
+// Types
+export * from './types';

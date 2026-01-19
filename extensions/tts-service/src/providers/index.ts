@@ -3,4 +3,4 @@
  */
 
 export { MinimaxTTSProvider } from './minimax';
-export { VoicevoxTTSProvider, VOICEVOX_SPEAKERS } from './voicevox';
+export { VOICEVOX_SPEAKERS, VoicevoxTTSProvider } from './voicevox';

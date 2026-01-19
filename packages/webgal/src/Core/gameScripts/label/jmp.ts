@@ -1,5 +1,5 @@
-import { commandType } from '@/Core/controller/scene/sceneInterface';
 import { nextSentence } from '@/Core/controller/gamePlay/nextSentence';
+import { commandType } from '@/Core/controller/scene/sceneInterface';
 
 import { WebGAL } from '@/Core/WebGAL';
 

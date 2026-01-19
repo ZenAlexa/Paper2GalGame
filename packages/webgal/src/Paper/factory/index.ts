@@ -2,27 +2,26 @@
  * Paper Module - Factory Exports
  */
 
-export {
-  createSaySentence,
-  createChangeBgSentence,
-  createChangeFigureSentence,
-  createBgmSentence,
-  createWaitSentence,
-  createEndSentence,
-  createDialogueSentences,
-  // Paper-specific command factories
-  createPaperQuoteSentence,
-  createPaperHighlightSentence,
-} from './sentenceFactory';
-
 export type {
-  SaySentenceOptions,
+  BatchSentenceOptions,
+  BgmSentenceOptions,
   ChangeBgSentenceOptions,
   ChangeFigureSentenceOptions,
-  BgmSentenceOptions,
-  WaitSentenceOptions,
-  BatchSentenceOptions,
+  PaperHighlightSentenceOptions,
   // Paper-specific options
   PaperQuoteSentenceOptions,
-  PaperHighlightSentenceOptions,
+  SaySentenceOptions,
+  WaitSentenceOptions,
+} from './sentenceFactory';
+export {
+  createBgmSentence,
+  createChangeBgSentence,
+  createChangeFigureSentence,
+  createDialogueSentences,
+  createEndSentence,
+  createPaperHighlightSentence,
+  // Paper-specific command factories
+  createPaperQuoteSentence,
+  createSaySentence,
+  createWaitSentence,
 } from './sentenceFactory';

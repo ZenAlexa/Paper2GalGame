@@ -1,11 +1,10 @@
-import { sceneFetcher } from './sceneFetcher';
+import uniqWith from 'lodash/uniqWith';
+import { nextSentence } from '@/Core/controller/gamePlay/nextSentence';
+import { scenePrefetcher } from '@/Core/util/prefetcher/scenePrefetcher';
+import { WebGAL } from '@/Core/WebGAL';
 import { sceneParser } from '../../parser/sceneParser';
 import { logger } from '../../util/logger';
-import { nextSentence } from '@/Core/controller/gamePlay/nextSentence';
-import uniqWith from 'lodash/uniqWith';
-import { scenePrefetcher } from '@/Core/util/prefetcher/scenePrefetcher';
-
-import { WebGAL } from '@/Core/WebGAL';
+import { sceneFetcher } from './sceneFetcher';
 
 /**
  * 切换场景

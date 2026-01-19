@@ -2,7 +2,6 @@
  * TTS Services Export
  */
 
-export { TTSService, createTTSService } from './tts-service';
-export type { TTSServiceConfig } from './tts-service';
-
 export { BatchTTSProcessor } from './batch-processor';
+export type { TTSServiceConfig } from './tts-service';
+export { createTTSService, TTSService } from './tts-service';

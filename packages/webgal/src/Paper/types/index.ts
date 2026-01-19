@@ -4,31 +4,31 @@
 
 // Character types
 export type {
+  CharacterPositionMap,
+  PaperCharacter,
   PaperCharacterName,
   SpriteConfig,
   VoiceConfig,
-  PaperCharacter,
-  CharacterPositionMap,
 } from './character';
 
 // Dialogue types
 export type {
-  CharacterEmotion,
   AIDialogueLine,
-  AIScriptMetadata,
   AIGeneratedScript,
-  ResolvedDialogue,
+  AIGeneratedScriptExtended,
+  AIScriptMetadata,
+  CharacterEmotion,
+  PaperHighlightData,
   // Paper-specific element types
   PaperQuoteData,
-  PaperHighlightData,
-  AIGeneratedScriptExtended,
+  ResolvedDialogue,
 } from './dialogue';
 
 // Paper types
 export type {
-  PaperSectionType,
   PaperSection,
-  ParsedPaper,
-  PaperStats,
+  PaperSectionType,
   PaperSessionState,
+  PaperStats,
+  ParsedPaper,
 } from './paper';

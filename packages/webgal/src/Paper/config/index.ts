@@ -3,9 +3,9 @@
  */
 
 export {
-  PAPER_CHARACTERS,
-  getCharacter,
-  getAvailableCharacterIds,
   buildPositionMap,
+  getAvailableCharacterIds,
+  getCharacter,
   getCharacterDisplayName,
+  PAPER_CHARACTERS,
 } from './characters';

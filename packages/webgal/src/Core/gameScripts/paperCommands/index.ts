@@ -6,5 +6,5 @@
  * with academic-specific display features.
  */
 
-export { paperQuote, PaperQuoteKeys } from './paperQuote.js';
-export { paperHighlight, PaperHighlightKeys, highlightColors, importanceWeights } from './paperHighlight.js';
+export { highlightColors, importanceWeights, PaperHighlightKeys, paperHighlight } from './paperHighlight.js';
+export { PaperQuoteKeys, paperQuote } from './paperQuote.js';

@@ -5,15 +5,9 @@
  */
 import { commandType } from '../interface/sceneInterface';
 
-export const subSceneScanner = (
-  command: commandType,
-  content: string,
-): Array<string> => {
+export const subSceneScanner = (command: commandType, content: string): Array<string> => {
   const subSceneList: Array<string> = [];
-  if (
-    command === commandType.changeScene ||
-    command === commandType.callScene
-  ) {
+  if (command === commandType.changeScene || command === commandType.callScene) {
     subSceneList.push(content);
   }
   if (command === commandType.choose) {

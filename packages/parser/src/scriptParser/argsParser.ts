@@ -1,5 +1,5 @@
-import { arg } from '../interface/sceneInterface';
 import { fileType } from '../interface/assets';
+import type { arg } from '../interface/sceneInterface';
 
 /**
  * 参数解析器
@@ -9,12 +9,12 @@ import { fileType } from '../interface/assets';
  */
 export function argsParser(
   argsRaw: string,
-  assetSetter: (fileName: string, assetType: fileType) => string,
+  assetSetter: (fileName: string, assetType: fileType) => string
 ): Array<arg> {
   const returnArrayList: Array<arg> = [];
   // 处理参数
   // 不要去空格
-  let newArgsRaw = argsRaw.replace(/ /g, ' ');
+  const newArgsRaw = argsRaw.replace(/ /g, ' ');
   // 分割参数列表
   let rawArgsList: Array<string> = newArgsRaw.split(' -');
   // 去除空字符串
@@ -51,7 +51,7 @@ export function argsParser(
           });
         } else {
           // 是数字
-          if (!isNaN(Number(argValue))) {
+          if (!Number.isNaN(Number(argValue))) {
             returnArrayList.push({
               key: argName,
               value: Number(argValue),

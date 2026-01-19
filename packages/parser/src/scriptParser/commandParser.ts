@@ -1,5 +1,5 @@
-import { ConfigMap } from '../config/scriptConfig';
-import { commandType, parsedCommand } from '../interface/sceneInterface';
+import type { ConfigMap } from '../config/scriptConfig';
+import { commandType, type parsedCommand } from '../interface/sceneInterface';
 
 /**
  * 处理命令
@@ -11,18 +11,14 @@ import { commandType, parsedCommand } from '../interface/sceneInterface';
 export const commandParser = (
   commandRaw: string,
   ADD_NEXT_ARG_LIST: commandType[],
-  SCRIPT_CONFIG_MAP: ConfigMap,
+  SCRIPT_CONFIG_MAP: ConfigMap
 ): parsedCommand => {
   let returnCommand: parsedCommand = {
     type: commandType.say, // 默认是say
     additionalArgs: [],
   };
   // 开始处理命令内容
-  const type: commandType = getCommandType(
-    commandRaw,
-    ADD_NEXT_ARG_LIST,
-    SCRIPT_CONFIG_MAP,
-  );
+  const type: commandType = getCommandType(commandRaw, ADD_NEXT_ARG_LIST, SCRIPT_CONFIG_MAP);
   returnCommand.type = type;
   // 如果是对话，加上额外的参数
   if (type === commandType.say && commandRaw !== 'say') {
@@ -42,19 +38,11 @@ export const commandParser = (
  * @param SCRIPT_CONFIG_MAP
  * @return {commandType} 得到的command类型
  */
-function getCommandType(
-  command: string,
-  ADD_NEXT_ARG_LIST: commandType[],
-  SCRIPT_CONFIG_MAP: ConfigMap,
-): commandType {
+function getCommandType(command: string, _ADD_NEXT_ARG_LIST: commandType[], SCRIPT_CONFIG_MAP: ConfigMap): commandType {
   return SCRIPT_CONFIG_MAP.get(command)?.scriptType ?? commandType.say;
 }
 
-function addNextArg(
-  commandToParse: parsedCommand,
-  thisCommandType: commandType,
-  ADD_NEXT_ARG_LIST: commandType[],
-) {
+function addNextArg(commandToParse: parsedCommand, thisCommandType: commandType, ADD_NEXT_ARG_LIST: commandType[]) {
   if (ADD_NEXT_ARG_LIST.includes(thisCommandType)) {
     commandToParse.additionalArgs.push({
       key: 'next',

@@ -1,4 +1,4 @@
-import {commandType} from '../interface/sceneInterface';
+import { commandType } from '../interface/sceneInterface';
 
 export const SCRIPT_CONFIG = [
   { scriptString: 'say', scriptType: commandType.say },

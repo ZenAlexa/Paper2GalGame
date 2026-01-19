@@ -1,26 +1,18 @@
-import {
-  ADD_NEXT_ARG_LIST,
-  SCRIPT_CONFIG,
-  ConfigMap,
-  ConfigItem,
-} from './config/scriptConfig';
-import { configParser, WebgalConfig } from './configParser/configParser';
-import { fileType } from './interface/assets';
-import { IAsset } from './interface/sceneInterface';
+import { ADD_NEXT_ARG_LIST, type ConfigItem, type ConfigMap, SCRIPT_CONFIG } from './config/scriptConfig';
+import { configParser, type WebgalConfig } from './configParser/configParser';
+import type { fileType } from './interface/assets';
+import type { IAsset } from './interface/sceneInterface';
 import { sceneParser } from './sceneParser';
-import { IWebGALStyleObj, scss2cssinjsParser } from "./styleParser";
-import { sceneTextPreProcess } from "./sceneTextPreProcessor";
+import { sceneTextPreProcess } from './sceneTextPreProcessor';
+import { type IWebGALStyleObj, scss2cssinjsParser } from './styleParser';
 
 export default class SceneParser {
   private readonly SCRIPT_CONFIG_MAP: ConfigMap;
   constructor(
     private readonly assetsPrefetcher: (assetList: IAsset[]) => void,
-    private readonly assetSetter: (
-      fileName: string,
-      assetType: fileType,
-    ) => string,
+    private readonly assetSetter: (fileName: string, assetType: fileType) => string,
     private readonly ADD_NEXT_ARG_LIST: number[],
-    SCRIPT_CONFIG_INPUT: ConfigItem[] | ConfigMap,
+    SCRIPT_CONFIG_INPUT: ConfigItem[] | ConfigMap
   ) {
     if (Array.isArray(SCRIPT_CONFIG_INPUT)) {
       this.SCRIPT_CONFIG_MAP = new Map();
@@ -46,7 +38,7 @@ export default class SceneParser {
       this.assetsPrefetcher,
       this.assetSetter,
       this.ADD_NEXT_ARG_LIST,
-      this.SCRIPT_CONFIG_MAP,
+      this.SCRIPT_CONFIG_MAP
     );
   }
 
@@ -59,21 +51,15 @@ export default class SceneParser {
       (previousValue, curr) =>
         previousValue +
         `${curr.command}:${curr.args.join('|')}${
-          curr.options.length <= 0
-            ? ''
-            : curr.options.reduce(
-                (p, c) => p + ' -' + c.key + '=' + c.value,
-                '',
-              )
+          curr.options.length <= 0 ? '' : curr.options.reduce((p, c) => `${p} -${c.key}=${c.value}`, '')
         };\n`,
-      '',
+      ''
     );
   }
 
-  parseScssToWebgalStyleObj(scssString: string): IWebGALStyleObj{
+  parseScssToWebgalStyleObj(scssString: string): IWebGALStyleObj {
     return scss2cssinjsParser(scssString);
   }
-
 }
 
 export { ADD_NEXT_ARG_LIST, SCRIPT_CONFIG };

@@ -1,135 +1,153 @@
-import SceneParser from "../src/index";
-import { ADD_NEXT_ARG_LIST, SCRIPT_CONFIG } from "../src/config/scriptConfig";
-import { expect, test } from "vitest";
-import { commandType, ISentence } from "../src/interface/sceneInterface";
-import * as fsp from 'fs/promises';
-import { fileType } from "../src/interface/assets";
+import * as fsp from 'node:fs/promises';
+import { expect, test } from 'vitest';
+import { ADD_NEXT_ARG_LIST, SCRIPT_CONFIG } from '../src/config/scriptConfig';
+import SceneParser from '../src/index';
+import { fileType } from '../src/interface/assets';
+import { commandType, type ISentence } from '../src/interface/sceneInterface';
 
-test("label", async () => {
-
+test('label', async () => {
   const sceneRaw = await fsp.readFile('test/test-resources/start.txt');
   const sceneText = sceneRaw.toString();
 
-  const parser = new SceneParser((assetList) => {
-  }, (fileName, assetType) => {
-    return fileName;
-  }, ADD_NEXT_ARG_LIST, SCRIPT_CONFIG);
+  const parser = new SceneParser(
+    (_assetList) => {},
+    (fileName, _assetType) => {
+      return fileName;
+    },
+    ADD_NEXT_ARG_LIST,
+    SCRIPT_CONFIG
+  );
 
-  const result = parser.parse(sceneText, "start", "/start.txt");
+  const result = parser.parse(sceneText, 'start', '/start.txt');
   const expectSentenceItem: ISentence = {
     command: commandType.label,
-    commandRaw: "label",
-    content: "end",
-    args: [
-      { key: "next", value: true }
-    ],
+    commandRaw: 'label',
+    content: 'end',
+    args: [{ key: 'next', value: true }],
     sentenceAssets: [],
-    subScene: []
+    subScene: [],
   };
   expect(result.sentenceList).toContainEqual(expectSentenceItem);
 });
 
-test("args", async () => {
-
+test('args', async () => {
   const sceneRaw = await fsp.readFile('test/test-resources/start.txt');
   const sceneText = sceneRaw.toString();
 
-  const parser = new SceneParser((assetList) => {
-  }, (fileName, assetType) => {
-    return fileName;
-  }, ADD_NEXT_ARG_LIST, SCRIPT_CONFIG);
+  const parser = new SceneParser(
+    (_assetList) => {},
+    (fileName, _assetType) => {
+      return fileName;
+    },
+    ADD_NEXT_ARG_LIST,
+    SCRIPT_CONFIG
+  );
 
-  const result = parser.parse(sceneText, "start", "/start.txt");
+  const result = parser.parse(sceneText, 'start', '/start.txt');
   const expectSentenceItem: ISentence = {
     command: commandType.changeFigure,
-    commandRaw: "changeFigure",
-    content: "m2.png",
+    commandRaw: 'changeFigure',
+    content: 'm2.png',
     args: [
-      { key: "left", value: true },
-      { key: "next", value: true }
+      { key: 'left', value: true },
+      { key: 'next', value: true },
     ],
-    sentenceAssets: [{ name: "m2.png", url: 'm2.png', type: fileType.figure, lineNumber: 0 }],
-    subScene: []
+    sentenceAssets: [{ name: 'm2.png', url: 'm2.png', type: fileType.figure, lineNumber: 0 }],
+    subScene: [],
   };
   expect(result.sentenceList).toContainEqual(expectSentenceItem);
 });
 
-test("choose", async () => {
-
+test('choose', async () => {
   const sceneRaw = await fsp.readFile('test/test-resources/choose.txt');
   const sceneText = sceneRaw.toString();
 
-  const parser = new SceneParser((assetList) => {
-  }, (fileName, assetType) => {
-    return fileName;
-  }, ADD_NEXT_ARG_LIST, SCRIPT_CONFIG);
+  const parser = new SceneParser(
+    (_assetList) => {},
+    (fileName, _assetType) => {
+      return fileName;
+    },
+    ADD_NEXT_ARG_LIST,
+    SCRIPT_CONFIG
+  );
 
-  const result = parser.parse(sceneText, "choose", "/choose.txt");
+  const result = parser.parse(sceneText, 'choose', '/choose.txt');
   const expectSentenceItem: ISentence = {
     command: commandType.choose,
-    commandRaw: "choose",
-    content: "",
+    commandRaw: 'choose',
+    content: '',
     args: [],
     sentenceAssets: [],
-    subScene: []
+    subScene: [],
   };
   expect(result.sentenceList).toContainEqual(expectSentenceItem);
 });
 
-test("long-script", async () => {
-
+test('long-script', async () => {
   const sceneRaw = await fsp.readFile('test/test-resources/long-script.txt');
   const sceneText = sceneRaw.toString();
 
-  const parser = new SceneParser((assetList) => {
-  }, (fileName, assetType) => {
-    return fileName;
-  }, ADD_NEXT_ARG_LIST, SCRIPT_CONFIG);
+  const parser = new SceneParser(
+    (_assetList) => {},
+    (fileName, _assetType) => {
+      return fileName;
+    },
+    ADD_NEXT_ARG_LIST,
+    SCRIPT_CONFIG
+  );
 
   console.log('line count:', sceneText.split('\n').length);
   console.time('parse-time-consumed');
-  const result = parser.parse(sceneText, "start", "/start.txt");
+  const result = parser.parse(sceneText, 'start', '/start.txt');
   console.timeEnd('parse-time-consumed');
   const expectSentenceItem: ISentence = {
     command: commandType.label,
-    commandRaw: "label",
-    content: "end",
-    args: [
-      { key: "next", value: true }
-    ],
+    commandRaw: 'label',
+    content: 'end',
+    args: [{ key: 'next', value: true }],
     sentenceAssets: [],
-    subScene: []
+    subScene: [],
   };
   expect(result.sentenceList).toContainEqual(expectSentenceItem);
 });
 
-test("var", async () => {
-
+test('var', async () => {
   const sceneRaw = await fsp.readFile('test/test-resources/var.txt');
   const sceneText = sceneRaw.toString();
 
-  const parser = new SceneParser((assetList) => {
-  }, (fileName, assetType) => {
-    return fileName;
-  }, ADD_NEXT_ARG_LIST, SCRIPT_CONFIG);
+  const parser = new SceneParser(
+    (_assetList) => {},
+    (fileName, _assetType) => {
+      return fileName;
+    },
+    ADD_NEXT_ARG_LIST,
+    SCRIPT_CONFIG
+  );
 
-  const result = parser.parse(sceneText, "var", "/var.txt");
+  const result = parser.parse(sceneText, 'var', '/var.txt');
   const expectSentenceItem: ISentence = {
     command: commandType.say,
-    commandRaw: "WebGAL",
-    content: "a=1?",
-    args: [{ key: 'speaker', value: 'WebGAL' }, { key: 'when', value: "a==1" }],
+    commandRaw: 'WebGAL',
+    content: 'a=1?',
+    args: [
+      { key: 'speaker', value: 'WebGAL' },
+      { key: 'when', value: 'a==1' },
+    ],
     sentenceAssets: [],
-    subScene: []
+    subScene: [],
   };
   expect(result.sentenceList).toContainEqual(expectSentenceItem);
 });
 
-test("config", async () => {
-  const parser = new SceneParser((assetList) => {
-  }, (fileName, assetType) => {
-    return fileName;
-  }, ADD_NEXT_ARG_LIST, SCRIPT_CONFIG);
+test('config', async () => {
+  const parser = new SceneParser(
+    (_assetList) => {},
+    (fileName, _assetType) => {
+      return fileName;
+    },
+    ADD_NEXT_ARG_LIST,
+    SCRIPT_CONFIG
+  );
 
   const configFesult = parser.parseConfig(`
 Game_name:欢迎使用WebGAL！;
@@ -146,15 +164,19 @@ Title_logos: 1.png | 2.png | Image Logo.png| -show -active=false -add=op! -count
       { key: 'active', value: false },
       { key: 'add', value: 'op!' },
       { key: 'count', value: 3 },
-    ]
+    ],
   });
 });
 
-test("config-stringify", async () => {
-  const parser = new SceneParser((assetList) => {
-  }, (fileName, assetType) => {
-    return fileName;
-  }, ADD_NEXT_ARG_LIST, SCRIPT_CONFIG);
+test('config-stringify', async () => {
+  const parser = new SceneParser(
+    (_assetList) => {},
+    (fileName, _assetType) => {
+      return fileName;
+    },
+    ADD_NEXT_ARG_LIST,
+    SCRIPT_CONFIG
+  );
 
   const configFesult = parser.parseConfig(`
 Game_name:欢迎使用WebGAL！;
@@ -173,83 +195,102 @@ Title_logos: 1.png | 2.png | Image Logo.png| -show -active=false -add=op! -count
       { key: 'active', value: false },
       { key: 'add', value: 'op!' },
       { key: 'count', value: 3 },
-    ]
+    ],
   });
 });
 
-
-test("say statement", async () => {
-  const parser = new SceneParser((assetList) => {
-  }, (fileName, assetType) => {
-    return fileName;
-  }, ADD_NEXT_ARG_LIST, SCRIPT_CONFIG);
+test('say statement', async () => {
+  const parser = new SceneParser(
+    (_assetList) => {},
+    (fileName, _assetType) => {
+      return fileName;
+    },
+    ADD_NEXT_ARG_LIST,
+    SCRIPT_CONFIG
+  );
 
   const result = parser.parse(`say:123 -speaker=xx;`, 'test', 'test');
   expect(result.sentenceList).toContainEqual({
     command: commandType.say,
-    commandRaw: "say",
-    content: "123",
+    commandRaw: 'say',
+    content: '123',
     args: [{ key: 'speaker', value: 'xx' }],
     sentenceAssets: [],
-    subScene: []
+    subScene: [],
   });
 });
 
-test("wait command", async () => {
-  const parser = new SceneParser((assetList) => {
-  }, (fileName, assetType) => {
-    return fileName;
-  }, ADD_NEXT_ARG_LIST, SCRIPT_CONFIG);
+test('wait command', async () => {
+  const parser = new SceneParser(
+    (_assetList) => {},
+    (fileName, _assetType) => {
+      return fileName;
+    },
+    ADD_NEXT_ARG_LIST,
+    SCRIPT_CONFIG
+  );
 
   const result = parser.parse(`wait:1000;`, 'test', 'test');
   expect(result.sentenceList).toContainEqual({
     command: commandType.wait,
-    commandRaw: "wait",
-    content: "1000",
+    commandRaw: 'wait',
+    content: '1000',
     args: [],
     sentenceAssets: [],
-    subScene: []
+    subScene: [],
   });
 });
 
-test("changeFigure with duration and animation args", async () => {
-  const parser = new SceneParser((assetList) => {
-  }, (fileName, assetType) => {
-    return fileName;
-  }, ADD_NEXT_ARG_LIST, SCRIPT_CONFIG);
+test('changeFigure with duration and animation args', async () => {
+  const parser = new SceneParser(
+    (_assetList) => {},
+    (fileName, _assetType) => {
+      return fileName;
+    },
+    ADD_NEXT_ARG_LIST,
+    SCRIPT_CONFIG
+  );
 
   const result = parser.parse(`changeFigure:stand.webp -duration=1000 -enter=fadeIn -exit=fadeOut;`, 'test', 'test');
   expect(result.sentenceList).toContainEqual({
     command: commandType.changeFigure,
-    commandRaw: "changeFigure",
-    content: "stand.webp",
+    commandRaw: 'changeFigure',
+    content: 'stand.webp',
     args: [
       { key: 'duration', value: 1000 },
       { key: 'enter', value: 'fadeIn' },
-      { key: 'exit', value: 'fadeOut' }
+      { key: 'exit', value: 'fadeOut' },
     ],
-    sentenceAssets: [{ name: "stand.webp", url: 'stand.webp', type: fileType.figure, lineNumber: 0 }],
-    subScene: []
+    sentenceAssets: [{ name: 'stand.webp', url: 'stand.webp', type: fileType.figure, lineNumber: 0 }],
+    subScene: [],
   });
 });
 
-test("changeBg with animation parameters", async () => {
-  const parser = new SceneParser((assetList) => {
-  }, (fileName, assetType) => {
-    return fileName;
-  }, ADD_NEXT_ARG_LIST, SCRIPT_CONFIG);
+test('changeBg with animation parameters', async () => {
+  const parser = new SceneParser(
+    (_assetList) => {},
+    (fileName, _assetType) => {
+      return fileName;
+    },
+    ADD_NEXT_ARG_LIST,
+    SCRIPT_CONFIG
+  );
 
-  const result = parser.parse(`changeBg:background.jpg -duration=2000 -enter=slideIn -transform={"alpha":0.8};`, 'test', 'test');
+  const result = parser.parse(
+    `changeBg:background.jpg -duration=2000 -enter=slideIn -transform={"alpha":0.8};`,
+    'test',
+    'test'
+  );
   expect(result.sentenceList).toContainEqual({
     command: commandType.changeBg,
-    commandRaw: "changeBg",
-    content: "background.jpg",
+    commandRaw: 'changeBg',
+    content: 'background.jpg',
     args: [
       { key: 'duration', value: 2000 },
       { key: 'enter', value: 'slideIn' },
-      { key: 'transform', value: '{"alpha":0.8}' }
+      { key: 'transform', value: '{"alpha":0.8}' },
     ],
-    sentenceAssets: [{ name: "background.jpg", url: 'background.jpg', type: fileType.background, lineNumber: 0 }],
-    subScene: []
+    sentenceAssets: [{ name: 'background.jpg', url: 'background.jpg', type: fileType.background, lineNumber: 0 }],
+    subScene: [],
   });
 });

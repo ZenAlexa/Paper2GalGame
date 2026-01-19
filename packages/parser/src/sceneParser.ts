@@ -1,13 +1,8 @@
-import {
-  commandType,
-  IAsset,
-  IScene,
-  ISentence,
-} from './interface/sceneInterface';
-import { scriptParser } from './scriptParser/scriptParser';
 import uniqWith from 'lodash/uniqWith';
-import { fileType } from './interface/assets';
-import { ConfigMap } from './config/scriptConfig';
+import type { ConfigMap } from './config/scriptConfig';
+import type { fileType } from './interface/assets';
+import type { commandType, IAsset, IScene, ISentence } from './interface/sceneInterface';
+import { scriptParser } from './scriptParser/scriptParser';
 
 /**
  * 场景解析器
@@ -27,7 +22,7 @@ export const sceneParser = (
   assetsPrefetcher: (assetList: Array<IAsset>) => void,
   assetSetter: (fileName: string, assetType: fileType) => string,
   ADD_NEXT_ARG_LIST: commandType[],
-  SCRIPT_CONFIG_MAP: ConfigMap,
+  SCRIPT_CONFIG_MAP: ConfigMap
 ): IScene => {
   const rawSentenceList = rawScene.replaceAll('\r', '').split('\n'); // 原始句子列表
 
@@ -37,20 +32,13 @@ export const sceneParser = (
   // .filter((sentence) => sentence.trim() !== "");
   let assetsList: Array<IAsset> = []; // 场景资源列表
   let subSceneList: Array<string> = []; // 子场景列表
-  const sentenceList: Array<ISentence> = rawSentenceListWithoutEmpty.map(
-    (sentence) => {
-      const returnSentence: ISentence = scriptParser(
-        sentence,
-        assetSetter,
-        ADD_NEXT_ARG_LIST,
-        SCRIPT_CONFIG_MAP,
-      );
-      // 在这里解析出语句可能携带的资源和场景，合并到 assetsList 和 subSceneList
-      assetsList = [...assetsList, ...returnSentence.sentenceAssets];
-      subSceneList = [...subSceneList, ...returnSentence.subScene];
-      return returnSentence;
-    },
-  );
+  const sentenceList: Array<ISentence> = rawSentenceListWithoutEmpty.map((sentence) => {
+    const returnSentence: ISentence = scriptParser(sentence, assetSetter, ADD_NEXT_ARG_LIST, SCRIPT_CONFIG_MAP);
+    // 在这里解析出语句可能携带的资源和场景，合并到 assetsList 和 subSceneList
+    assetsList = [...assetsList, ...returnSentence.sentenceAssets];
+    subSceneList = [...subSceneList, ...returnSentence.subScene];
+    return returnSentence;
+  });
 
   // 开始资源的预加载
   assetsList = uniqWith(assetsList); // 去重

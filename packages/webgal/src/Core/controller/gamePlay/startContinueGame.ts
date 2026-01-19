@@ -11,6 +11,13 @@ import { restorePerform } from '@/Core/controller/storage/jumpFromBacklog';
 import { hasFastSaveRecord, loadFastSaveGame } from '@/Core/controller/storage/fastSaveLoad';
 import { WebGAL } from '@/Core/WebGAL';
 
+// Re-export Paper launcher functions for convenience
+export {
+  startPaperGameWithScene,
+  startPaperGameWithScript,
+  launchPaperGameFromAPI,
+} from '@/Paper/launcher';
+
 /**
  * Start game from scratch (default start.txt)
  */
@@ -48,12 +55,29 @@ export const startPaperGame = async (sessionId: string) => {
     const rawScript = result.data.script;
     console.log(`[startPaperGame] Loaded script with ${result.data.metadata?.totalDialogues || 0} dialogues`);
 
+    // DEBUG: Log raw script content
+    console.log('[startPaperGame] ========== RAW SCRIPT ==========');
+    console.log(rawScript);
+    console.log('[startPaperGame] ========== END RAW SCRIPT ==========');
+
     // Parse script and load to runtime
     WebGAL.sceneManager.sceneData.currentScene = sceneParser(
       rawScript,
       `paper_${sessionId}.txt`,
       `/api/generate/script/${sessionId}`,
     );
+
+    // DEBUG: Log parsed sentenceList
+    const sentenceList = WebGAL.sceneManager.sceneData.currentScene.sentenceList;
+    console.log(`[startPaperGame] Parsed ${sentenceList.length} sentences`);
+    console.log('[startPaperGame] ========== SENTENCE LIST ==========');
+    sentenceList.slice(0, 20).forEach((sentence, idx) => {
+      console.log(`[startPaperGame] Sentence ${idx}: command=${sentence.command}, commandRaw="${sentence.commandRaw}", content="${sentence.content?.substring(0, 50) || ''}"`, sentence.args);
+    });
+    if (sentenceList.length > 20) {
+      console.log(`[startPaperGame] ... and ${sentenceList.length - 20} more sentences`);
+    }
+    console.log('[startPaperGame] ========== END SENTENCE LIST ==========');
 
     // Hide title screen BEFORE starting script execution
     // This prevents nextSentence() from early-returning due to showTitle check

@@ -43,3 +43,6 @@ export * from './factory';
 
 // Scene Builder
 export * from './builder';
+
+// Game Launcher
+export * from './launcher';

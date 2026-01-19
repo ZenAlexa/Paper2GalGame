@@ -35,6 +35,9 @@ Thumbs.db
 .env.local
 .env.*.local
 
+# MCP configuration (contains API keys)
+.mcp.json
+
 # ============================================
 # CLAUDE CODE (Local Development Only)
 # ============================================

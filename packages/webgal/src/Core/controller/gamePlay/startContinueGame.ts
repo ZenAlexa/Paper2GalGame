@@ -16,6 +16,8 @@ export {
   startPaperGameWithScene,
   startPaperGameWithScript,
   launchPaperGameFromAPI,
+  launchPaperGameWithTTS,
+  checkTTSAvailability,
 } from '@/Paper/launcher';
 
 /**

@@ -46,3 +46,6 @@ export * from './builder';
 
 // Game Launcher
 export * from './launcher';
+
+// TTS Integration
+export * from './tts';

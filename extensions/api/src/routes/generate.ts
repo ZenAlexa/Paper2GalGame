@@ -661,6 +661,77 @@ router.get('/structured/:sessionId', async (req: Request, res: Response) => {
 });
 
 /**
+ * GET /api/generate/audio/:sessionId
+ * Get audio data for a session (vocal map for TTS integration)
+ * Returns the mapping of dialogue IDs to audio URLs
+ */
+router.get('/audio/:sessionId', async (req: Request, res: Response) => {
+  try {
+    const { sessionId } = req.params;
+
+    const session = sessionStore.get(sessionId);
+    if (!session) {
+      const response: ApiResponse = {
+        success: false,
+        error: {
+          code: 'SESSION_NOT_FOUND',
+          message: 'Session not found or expired'
+        },
+        timestamp: new Date().toISOString()
+      };
+      return res.status(404).json(response);
+    }
+
+    if (!session.audio?.files || session.audio.files.length === 0) {
+      const response: ApiResponse = {
+        success: false,
+        error: {
+          code: 'NO_AUDIO',
+          message: 'No audio generated for this session'
+        },
+        timestamp: new Date().toISOString()
+      };
+      return res.status(404).json(response);
+    }
+
+    // Build vocal map: dialogueId -> URL
+    const vocalMap: Record<string, string> = {};
+    for (const file of session.audio.files) {
+      vocalMap[file.dialogueId] = file.url;
+    }
+
+    console.log(`[Generate/Audio] Returning ${Object.keys(vocalMap).length} audio URLs for session ${sessionId}`);
+
+    const response: ApiResponse<{
+      files: typeof session.audio.files;
+      totalDuration: number;
+      vocalMap: Record<string, string>;
+    }> = {
+      success: true,
+      data: {
+        files: session.audio.files,
+        totalDuration: session.audio.totalDuration,
+        vocalMap
+      },
+      timestamp: new Date().toISOString()
+    };
+
+    return res.json(response);
+  } catch (error) {
+    console.error('[Generate/Audio] Error:', error);
+    const response: ApiResponse = {
+      success: false,
+      error: {
+        code: 'ERROR',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      },
+      timestamp: new Date().toISOString()
+    };
+    return res.status(500).json(response);
+  }
+});
+
+/**
  * GET /api/generate/characters
  * Get available characters
  */

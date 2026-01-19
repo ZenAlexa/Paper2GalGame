@@ -7,4 +7,8 @@ export {
   startPaperGameWithScript,
   launchPaperGameFromAPI,
   startPaperGameLegacy,
+  launchPaperGameWithTTS,
+  checkTTSAvailability,
 } from './paperLauncher';
+
+export type { LaunchWithTTSOptions } from './paperLauncher';

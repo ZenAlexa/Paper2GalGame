@@ -2,15 +2,14 @@
  * Basic functionality tests for Paper Parser
  */
 
-import { describe, test, expect } from '@jest/globals';
-import { PaperParser, defaultPaperParser, isSupported, getSupportedTypes } from '../index';
-import { defaultParserFactory } from '../parsers';
+import { describe, expect, test } from '@jest/globals';
 import { StructureAnalyzer } from '../analyzer/structure-analyzer';
-import { cleanText, normalizeAcademicText } from '../utils/text-cleaner';
+import { defaultPaperParser, getSupportedTypes, isSupported, PaperParser } from '../index';
+import { defaultParserFactory } from '../parsers';
 import { defaultSectionDetector } from '../utils/section-detector';
+import { cleanText, normalizeAcademicText } from '../utils/text-cleaner';
 
 describe('Paper Parser - Basic Functionality', () => {
-
   test('should export main classes and functions', () => {
     expect(PaperParser).toBeDefined();
     expect(defaultPaperParser).toBeDefined();
@@ -41,19 +40,17 @@ describe('Paper Parser - Basic Functionality', () => {
   test('should create parser factory with correct parsers', () => {
     const parserInfo = defaultParserFactory.getParserInfo();
 
-    const pdfParser = parserInfo.find(p => p.id === 'pdfparser');
-    const wordParser = parserInfo.find(p => p.id === 'wordparser');
-    const txtParser = parserInfo.find(p => p.id === 'txtparser');
+    const pdfParser = parserInfo.find((p) => p.id === 'pdfparser');
+    const wordParser = parserInfo.find((p) => p.id === 'wordparser');
+    const txtParser = parserInfo.find((p) => p.id === 'txtparser');
 
     expect(pdfParser).toBeDefined();
     expect(wordParser).toBeDefined();
     expect(txtParser).toBeDefined();
   });
-
 });
 
 describe('Text Processing Utilities', () => {
-
   test('should clean text properly', () => {
     const dirtyText = '  This  is\r\n\r\na   test  text\t\t  ';
     const cleaned = cleanText(dirtyText);
@@ -67,11 +64,9 @@ describe('Text Processing Utilities', () => {
 
     expect(normalized).toBe('See Figure 1 and Table 2 in Section 3.');
   });
-
 });
 
 describe('Section Detection', () => {
-
   test('should detect common section types', () => {
     const testCases = [
       { text: 'Abstract', expectedType: 'abstract' },
@@ -80,19 +75,16 @@ describe('Section Detection', () => {
       { text: 'Results', expectedType: 'results' },
       { text: 'Discussion', expectedType: 'discussion' },
       { text: 'Conclusion', expectedType: 'conclusion' },
-      { text: 'References', expectedType: 'references' }
+      { text: 'References', expectedType: 'references' },
     ];
 
     for (const testCase of testCases) {
-      const result = defaultSectionDetector.detectSection(
-        testCase.text,
-        {
-          documentPosition: 0.5,
-          lineNumber: 1,
-          isNumbered: testCase.text.includes('1.'),
-          hasSpecialFormatting: false
-        }
-      );
+      const result = defaultSectionDetector.detectSection(testCase.text, {
+        documentPosition: 0.5,
+        lineNumber: 1,
+        isNumbered: testCase.text.includes('1.'),
+        hasSpecialFormatting: false,
+      });
 
       expect(result.type).toBe(testCase.expectedType);
       expect(result.confidence).toBeGreaterThan(0.5);
@@ -105,24 +97,20 @@ describe('Section Detection', () => {
       '1. Background',
       'METHODOLOGY',
       'Results and Discussion',
-      'Not a header because it is too long and contains too many words to be a typical section header'
+      'Not a header because it is too long and contains too many words to be a typical section header',
     ];
 
-    const results = headers.map(header =>
-      defaultSectionDetector.constructor.isLikelyHeader(header)
-    );
+    const results = headers.map((header) => defaultSectionDetector.constructor.isLikelyHeader(header));
 
-    expect(results[0]).toBe(true);  // Introduction
-    expect(results[1]).toBe(true);  // 1. Background
-    expect(results[2]).toBe(true);  // METHODOLOGY
-    expect(results[3]).toBe(true);  // Results and Discussion
+    expect(results[0]).toBe(true); // Introduction
+    expect(results[1]).toBe(true); // 1. Background
+    expect(results[2]).toBe(true); // METHODOLOGY
+    expect(results[3]).toBe(true); // Results and Discussion
     expect(results[4]).toBe(false); // Too long
   });
-
 });
 
 describe('Structure Analyzer', () => {
-
   test('should analyze simple paper structure', async () => {
     const sampleText = `
 Title: A Study of Academic Paper Structure
@@ -152,16 +140,14 @@ References
     expect(analysis.sections.length).toBeGreaterThan(0);
 
     // Should find at least some common sections
-    const sectionTypes = analysis.sections.map(s => s.type);
+    const sectionTypes = analysis.sections.map((s) => s.type);
     expect(sectionTypes).toContain('abstract');
     expect(sectionTypes).toContain('introduction');
     expect(sectionTypes).toContain('conclusion');
   });
-
 });
 
 describe('Parser Factory', () => {
-
   test('should create parser by extension', () => {
     const pdfParser = defaultParserFactory.createByExtension('pdf');
     const wordParser = defaultParserFactory.createByExtension('docx');
@@ -188,11 +174,9 @@ describe('Parser Factory', () => {
     const unsupportedParser = defaultParserFactory.createByExtension('xyz');
     expect(unsupportedParser).toBeNull();
   });
-
 });
 
 describe('Text Parser Integration', () => {
-
   test('should parse simple text content', async () => {
     const sampleText = 'This is a simple test document.';
     const buffer = new TextEncoder().encode(sampleText).buffer;
@@ -208,11 +192,9 @@ describe('Text Parser Integration', () => {
       expect(result.data?.rawText).toContain('simple test document');
     }
   });
-
 });
 
 describe('Error Handling', () => {
-
   test('should handle invalid file types gracefully', () => {
     expect(() => {
       defaultPaperParser.isSupported('invalid-extension');
@@ -228,12 +210,10 @@ describe('Error Handling', () => {
       expect(error).toBeInstanceOf(Error);
     }
   });
-
 });
 
 // Performance tests (basic)
 describe('Performance', () => {
-
   test('should handle reasonable text sizes efficiently', async () => {
     const largeText = 'This is a test. '.repeat(1000); // ~16KB
     const buffer = new TextEncoder().encode(largeText).buffer;
@@ -246,11 +226,10 @@ describe('Performance', () => {
 
       // Should complete within 5 seconds for 16KB text
       expect(endTime - startTime).toBeLessThan(5000);
-    } catch (error) {
+    } catch (_error) {
       // If parsing fails, we just test that it doesn't take too long to fail
       const endTime = Date.now();
       expect(endTime - startTime).toBeLessThan(1000);
     }
   });
-
 });

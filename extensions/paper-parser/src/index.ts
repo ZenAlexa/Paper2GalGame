@@ -6,58 +6,53 @@
  * suitable for visual novel generation.
  */
 
-// Type definitions
-export * from './types';
+// Structure analysis
+export { StructureAnalyzer } from './analyzer/structure-analyzer';
 
 // Parser implementations
 export {
   BaseParserImpl,
-  PDFParserImpl,
-  WordParserImpl,
-  TxtParserImpl,
-  ParserFactoryImpl,
-  defaultParserFactory,
+  createParserByContent,
   createParserByExtension,
   createParserByMimeType,
-  createParserByContent
+  defaultParserFactory,
+  ParserFactoryImpl,
+  PDFParserImpl,
+  TxtParserImpl,
+  WordParserImpl,
 } from './parsers';
-
-// Structure analysis
-export {
-  StructureAnalyzer
-} from './analyzer/structure-analyzer';
-
-// Text processing utilities
-export {
-  cleanText,
-  removeFormattingArtifacts,
-  fixOCRErrors,
-  normalizeAcademicText,
-  splitIntoParagraphs,
-  splitIntoSentences,
-  preserveCodeBlocks,
-  restoreCodeBlocks,
-  normalizeWhitespace,
-  extractHeaders,
-  cleanPDFText,
-  cleanWordText,
-  comprehensiveTextClean
-} from './utils/text-cleaner';
+// Type definitions
+export * from './types';
+export type {
+  DetectionContext,
+  SectionDetectionResult,
+} from './utils/section-detector';
 
 // Section detection utilities
 export {
+  defaultSectionDetector,
   SectionDetector,
-  defaultSectionDetector
 } from './utils/section-detector';
+// Text processing utilities
+export {
+  cleanPDFText,
+  cleanText,
+  cleanWordText,
+  comprehensiveTextClean,
+  extractHeaders,
+  fixOCRErrors,
+  normalizeAcademicText,
+  normalizeWhitespace,
+  preserveCodeBlocks,
+  removeFormattingArtifacts,
+  restoreCodeBlocks,
+  splitIntoParagraphs,
+  splitIntoSentences,
+} from './utils/text-cleaner';
 
-export type {
-  SectionDetectionResult,
-  DetectionContext
-} from './utils/section-detector';
-
+import { StructureAnalyzer } from './analyzer/structure-analyzer';
 // Import necessary classes
 import { ParserFactoryImpl } from './parsers/parser-factory';
-import { StructureAnalyzer } from './analyzer/structure-analyzer';
 
 /**
  * Main API class for paper parsing
@@ -101,13 +96,11 @@ export class PaperParser {
       extractFigures: options.extractFigures ?? true,
       extractTables: options.extractTables ?? true,
       extractEquations: options.extractEquations ?? true,
-      extractCitations: options.extractCitations ?? true
+      extractCitations: options.extractCitations ?? true,
     });
 
     if (!parseResult.success || !parseResult.data) {
-      throw new Error(
-        `Parsing failed: ${parseResult.errors?.map((e: any) => e.message).join(', ') || 'Unknown error'}`
-      );
+      throw new Error(`Parsing failed: ${parseResult.errors?.map((e) => e.message).join(', ') || 'Unknown error'}`);
     }
 
     // Enrich with structure analysis
@@ -133,7 +126,7 @@ export class PaperParser {
     return {
       extensions: this.factory.getSupportedExtensions(),
       mimeTypes: this.factory.getSupportedMimeTypes(),
-      parsers: this.factory.getParserInfo()
+      parsers: this.factory.getParserInfo(),
     };
   }
 
@@ -166,7 +159,7 @@ export class PaperParser {
       extractFigures: false,
       extractTables: false,
       extractEquations: false,
-      extractCitations: false
+      extractCitations: false,
     });
 
     if (!parseResult.success || !parseResult.data) {
@@ -205,10 +198,7 @@ export const defaultPaperParser = new PaperParser();
 /**
  * Parse a paper from file buffer
  */
-export async function parsePaper(
-  buffer: ArrayBuffer,
-  filename?: string
-) {
+export async function parsePaper(buffer: ArrayBuffer, filename?: string) {
   const options = filename ? { filename } : {};
   return await defaultPaperParser.parse(buffer, options);
 }
@@ -216,10 +206,7 @@ export async function parsePaper(
 /**
  * Extract text from a document
  */
-export async function extractText(
-  buffer: ArrayBuffer,
-  filename?: string
-): Promise<string> {
+export async function extractText(buffer: ArrayBuffer, filename?: string): Promise<string> {
   const options = filename ? { filename } : {};
   return await defaultPaperParser.parseTextOnly(buffer, options);
 }

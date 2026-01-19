@@ -4,15 +4,10 @@
  * Factory class for creating appropriate parser instances based on file type.
  */
 
-import type {
-  ParserFactory,
-  BaseParser,
-  ParserOptions,
-  ExtendedParserOptions
-} from '../types';
+import type { BaseParser, ExtendedParserOptions, ParserFactory, ParserOptions } from '../types';
 import { PDFParserImpl } from './pdf-parser';
-import { WordParserImpl } from './word-parser';
 import { TxtParserImpl } from './txt-parser';
+import { WordParserImpl } from './word-parser';
 
 /**
  * Factory for creating parser instances
@@ -32,11 +27,7 @@ export class ParserFactoryImpl implements ParserFactory {
   private registerDefaultParsers(): void {
     // PDF Parser
     const pdfParser = new PDFParserImpl();
-    this.registerParser(
-      pdfParser,
-      ['pdf'],
-      ['application/pdf']
-    );
+    this.registerParser(pdfParser, ['pdf'], ['application/pdf']);
 
     // Word Parser
     const wordParser = new WordParserImpl();
@@ -46,17 +37,13 @@ export class ParserFactoryImpl implements ParserFactory {
       [
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         'application/msword',
-        'application/vnd.ms-word'
+        'application/vnd.ms-word',
       ]
     );
 
     // Text Parser
     const txtParser = new TxtParserImpl();
-    this.registerParser(
-      txtParser,
-      ['txt', 'text', 'md', 'markdown'],
-      ['text/plain', 'text/markdown']
-    );
+    this.registerParser(txtParser, ['txt', 'text', 'md', 'markdown'], ['text/plain', 'text/markdown']);
   }
 
   /**
@@ -90,17 +77,13 @@ export class ParserFactoryImpl implements ParserFactory {
   /**
    * Auto-detect document type and create appropriate parser
    */
-  async createByContent(
-    buffer: ArrayBuffer,
-    filename?: string,
-    options?: ParserOptions
-  ): Promise<BaseParser | null> {
+  async createByContent(buffer: ArrayBuffer, filename?: string, options?: ParserOptions): Promise<BaseParser | null> {
     // First try by filename extension if provided
     if (filename) {
       const extension = this.extractExtension(filename);
       if (extension) {
         const parser = this.createByExtension(extension, options);
-        if (parser && await parser.canParse(buffer)) {
+        if (parser && (await parser.canParse(buffer))) {
           return parser;
         }
       }
@@ -120,7 +103,7 @@ export class ParserFactoryImpl implements ParserFactory {
 
     // If no specific parser can handle it, try text parser as fallback
     const txtParser = this.parsers.get('txt');
-    if (txtParser && await txtParser.canParse(buffer)) {
+    if (txtParser && (await txtParser.canParse(buffer))) {
       return this.createParserInstance('txt', options);
     }
 
@@ -202,7 +185,7 @@ export class ParserFactoryImpl implements ParserFactory {
         name: parser.getName(),
         version: parser.getVersion(),
         extensions,
-        mimeTypes
+        mimeTypes,
       };
     });
   }
@@ -237,18 +220,25 @@ export class ParserFactoryImpl implements ParserFactory {
     const bytes = new Uint8Array(buffer.slice(0, 8));
 
     // PDF signature
-    if (bytes.length >= 5 &&
-        bytes[0] === 0x25 && bytes[1] === 0x50 && bytes[2] === 0x44 &&
-        bytes[3] === 0x46 && bytes[4] === 0x2D) {
+    if (
+      bytes.length >= 5 &&
+      bytes[0] === 0x25 &&
+      bytes[1] === 0x50 &&
+      bytes[2] === 0x44 &&
+      bytes[3] === 0x46 &&
+      bytes[4] === 0x2d
+    ) {
       return 'application/pdf';
     }
 
     // ZIP signature (DOCX files are ZIP archives)
-    if (bytes.length >= 4 &&
-        bytes[0] === 0x50 && bytes[1] === 0x4B &&
-        (bytes[2] === 0x03 || bytes[2] === 0x05 || bytes[2] === 0x07) &&
-        (bytes[3] === 0x04 || bytes[3] === 0x06 || bytes[3] === 0x08)) {
-
+    if (
+      bytes.length >= 4 &&
+      bytes[0] === 0x50 &&
+      bytes[1] === 0x4b &&
+      (bytes[2] === 0x03 || bytes[2] === 0x05 || bytes[2] === 0x07) &&
+      (bytes[3] === 0x04 || bytes[3] === 0x06 || bytes[3] === 0x08)
+    ) {
       // Could be DOCX, but we need more sophisticated detection
       // For now, we'll check for DOCX-specific content later
       try {
@@ -262,9 +252,17 @@ export class ParserFactoryImpl implements ParserFactory {
     }
 
     // DOC signature
-    if (bytes.length >= 8 &&
-        bytes[0] === 0xD0 && bytes[1] === 0xCF && bytes[2] === 0x11 && bytes[3] === 0xE0 &&
-        bytes[4] === 0xA1 && bytes[5] === 0xB1 && bytes[6] === 0x1A && bytes[7] === 0xE1) {
+    if (
+      bytes.length >= 8 &&
+      bytes[0] === 0xd0 &&
+      bytes[1] === 0xcf &&
+      bytes[2] === 0x11 &&
+      bytes[3] === 0xe0 &&
+      bytes[4] === 0xa1 &&
+      bytes[5] === 0xb1 &&
+      bytes[6] === 0x1a &&
+      bytes[7] === 0xe1
+    ) {
       return 'application/msword';
     }
 
@@ -283,10 +281,7 @@ export class ParserFactoryImpl implements ParserFactory {
   /**
    * Create parser with progress callback support
    */
-  createWithProgress(
-    extensionOrMimeType: string,
-    _options?: ExtendedParserOptions
-  ): BaseParser | null {
+  createWithProgress(extensionOrMimeType: string, _options?: ExtendedParserOptions): BaseParser | null {
     // Try by extension first
     let parser = this.createByExtension(extensionOrMimeType, _options);
 

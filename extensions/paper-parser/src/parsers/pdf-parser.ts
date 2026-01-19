@@ -7,19 +7,19 @@
 // Use legacy build for Node.js compatibility (Node 18-21)
 // Standard build requires Node 22+ for Promise.withResolvers
 import * as pdfjs from 'pdfjs-dist/legacy/build/pdf.mjs';
-import type {
-  PDFParser,
-  ParseResult,
-  ParserConfig,
-  ParsedPaper,
-  PaperMetadata,
-  ParsingStats
-} from '../types';
+import type { PDFDocumentProxy, TextItem } from 'pdfjs-dist/types/src/display/api';
+import type { PaperMetadata, ParsedPaper, ParseResult, ParserConfig, ParsingStats, PDFParser } from '../types';
 import { BaseParserImpl } from './base-parser';
+
+// Type for pdfjs module with worker configuration
+interface PdfjsModule {
+  disableWorker?: boolean;
+  getDocument: typeof pdfjs.getDocument;
+}
 
 // Disable worker globally for Node.js environment
 // This must be set before any getDocument() calls
-(pdfjs as any).disableWorker = true;
+(pdfjs as PdfjsModule).disableWorker = true;
 
 /**
  * PDF parser implementation using pdf.js legacy build
@@ -36,12 +36,14 @@ export class PDFParserImpl extends BaseParserImpl implements PDFParser {
   protected checkMagicBytes(buffer: ArrayBuffer): boolean {
     const bytes = new Uint8Array(buffer.slice(0, 5));
     // PDF files start with "%PDF-"
-    return bytes.length >= 5 &&
-           bytes[0] === 0x25 && // %
-           bytes[1] === 0x50 && // P
-           bytes[2] === 0x44 && // D
-           bytes[3] === 0x46 && // F
-           bytes[4] === 0x2D;   // -
+    return (
+      bytes.length >= 5 &&
+      bytes[0] === 0x25 && // %
+      bytes[1] === 0x50 && // P
+      bytes[2] === 0x44 && // D
+      bytes[3] === 0x46 && // F
+      bytes[4] === 0x2d
+    ); // -
   }
 
   /**
@@ -56,7 +58,7 @@ export class PDFParserImpl extends BaseParserImpl implements PDFParser {
       const loadingTask = pdfjs.getDocument({
         data: buffer,
         useSystemFonts: true,
-        verbosity: 0 // Reduce verbosity
+        verbosity: 0, // Reduce verbosity
       });
 
       const pdfDoc = await loadingTask.promise;
@@ -75,8 +77,8 @@ export class PDFParserImpl extends BaseParserImpl implements PDFParser {
 
         // Combine text items with proper spacing
         const pageText = textContent.items
-          .filter((item: any): item is any => 'str' in item)
-          .map((item: any) => item.str)
+          .filter((item): item is TextItem => 'str' in item)
+          .map((item) => item.str)
           .join(' ');
 
         pageTexts.push(this.cleanText(pageText));
@@ -93,7 +95,8 @@ export class PDFParserImpl extends BaseParserImpl implements PDFParser {
       }> = [];
 
       if (validatedConfig.extractFigures) {
-        for (let i = 1; i <= Math.min(5, pagesToProcess); i++) { // Limit to first 5 pages for demo
+        for (let i = 1; i <= Math.min(5, pagesToProcess); i++) {
+          // Limit to first 5 pages for demo
           const pageImages = await this.extractPageImages(pdfDoc, i);
           images.push(...pageImages);
         }
@@ -110,7 +113,7 @@ export class PDFParserImpl extends BaseParserImpl implements PDFParser {
         charCount: this.calculateCharCount(fullText),
         processingTimeMs,
         confidence: 0.95, // High confidence for PDF parsing
-        detectedLanguage: this.detectLanguage(fullText)
+        detectedLanguage: this.detectLanguage(fullText),
       };
 
       // Create source file info
@@ -118,7 +121,7 @@ export class PDFParserImpl extends BaseParserImpl implements PDFParser {
         name: 'document.pdf',
         size: buffer.byteLength,
         type: 'application/pdf',
-        hash: await this.calculateHash(buffer)
+        hash: await this.calculateHash(buffer),
       };
 
       // Create parsed paper structure
@@ -130,11 +133,10 @@ export class PDFParserImpl extends BaseParserImpl implements PDFParser {
         stats,
         timestamp: new Date(),
         parserVersion: this.getVersion(),
-        sourceFile
+        sourceFile,
       };
 
       return this.createSuccessResult(parsedPaper);
-
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Unknown PDF parsing error';
 
@@ -144,7 +146,7 @@ export class PDFParserImpl extends BaseParserImpl implements PDFParser {
           `Failed to parse PDF document: ${errorMsg}`,
           'error',
           error instanceof Error ? error.stack : undefined
-        )
+        ),
       ]);
     }
   }
@@ -166,15 +168,14 @@ export class PDFParserImpl extends BaseParserImpl implements PDFParser {
         const textContent = await page.getTextContent();
 
         const pageText = textContent.items
-          .filter((item: any): item is any => 'str' in item)
-          .map((item: any) => item.str)
+          .filter((item): item is TextItem => 'str' in item)
+          .map((item) => item.str)
           .join(' ');
 
         pageTexts.push(this.cleanText(pageText));
       }
 
       return pageTexts.join('\n\n');
-
     } catch (error) {
       throw new Error(`Failed to extract page range ${startPage}-${endPage}: ${error}`);
     }
@@ -199,8 +200,17 @@ export class PDFParserImpl extends BaseParserImpl implements PDFParser {
 
       const metadata = await this.extractMetadata(pdfDoc);
 
-      const result: any = {
-        pageCount: pdfDoc.numPages
+      const result: {
+        title?: string;
+        author?: string;
+        subject?: string;
+        creator?: string;
+        producer?: string;
+        creationDate?: Date;
+        modificationDate?: Date;
+        pageCount: number;
+      } = {
+        pageCount: pdfDoc.numPages,
       };
 
       if (metadata.title) result.title = metadata.title;
@@ -208,7 +218,6 @@ export class PDFParserImpl extends BaseParserImpl implements PDFParser {
       if (metadata.date) result.creationDate = new Date(metadata.date);
 
       return result;
-
     } catch (error) {
       throw new Error(`Failed to extract PDF metadata: ${error}`);
     }
@@ -217,12 +226,14 @@ export class PDFParserImpl extends BaseParserImpl implements PDFParser {
   /**
    * Extract images from PDF
    */
-  async extractImages(buffer: ArrayBuffer): Promise<Array<{
-    pageNumber: number;
-    imageData: string;
-    width: number;
-    height: number;
-  }>> {
+  async extractImages(buffer: ArrayBuffer): Promise<
+    Array<{
+      pageNumber: number;
+      imageData: string;
+      width: number;
+      height: number;
+    }>
+  > {
     try {
       const loadingTask = pdfjs.getDocument({ data: buffer });
       const pdfDoc = await loadingTask.promise;
@@ -235,13 +246,13 @@ export class PDFParserImpl extends BaseParserImpl implements PDFParser {
       }> = [];
 
       // Extract images from all pages
-      for (let i = 1; i <= Math.min(pdfDoc.numPages, 10); i++) { // Limit to 10 pages
+      for (let i = 1; i <= Math.min(pdfDoc.numPages, 10); i++) {
+        // Limit to 10 pages
         const pageImages = await this.extractPageImages(pdfDoc, i);
         allImages.push(...pageImages);
       }
 
       return allImages;
-
     } catch (error) {
       throw new Error(`Failed to extract PDF images: ${error}`);
     }
@@ -250,15 +261,15 @@ export class PDFParserImpl extends BaseParserImpl implements PDFParser {
   /**
    * Extract metadata from PDF document object
    */
-  private async extractMetadata(pdfDoc: any): Promise<PaperMetadata> {
+  private async extractMetadata(pdfDoc: PDFDocumentProxy): Promise<PaperMetadata> {
     try {
       const metadata = await pdfDoc.getMetadata();
-      const info = metadata.info;
+      const info = metadata.info as Record<string, string | undefined>;
 
       const paperMetadata: PaperMetadata = {
         title: info.Title || '',
         authors: info.Author ? [info.Author] : [],
-        keywords: info.Keywords ? info.Keywords.split(/[,;]/).map((k: string) => k.trim()) : [],
+        keywords: info.Keywords ? info.Keywords.split(/[,;]/).map((k) => k.trim()) : [],
       };
 
       if (info.CreationDate) {
@@ -269,13 +280,12 @@ export class PDFParserImpl extends BaseParserImpl implements PDFParser {
       }
 
       return paperMetadata;
-
-    } catch (error) {
+    } catch (_error) {
       // Return minimal metadata if extraction fails
       return {
         title: '',
         authors: [],
-        keywords: []
+        keywords: [],
       };
     }
   }
@@ -283,12 +293,17 @@ export class PDFParserImpl extends BaseParserImpl implements PDFParser {
   /**
    * Extract images from a specific page
    */
-  private async extractPageImages(_pdfDoc: any, pageNumber: number): Promise<Array<{
-    pageNumber: number;
-    imageData: string;
-    width: number;
-    height: number;
-  }>> {
+  private async extractPageImages(
+    _pdfDoc: PDFDocumentProxy,
+    pageNumber: number
+  ): Promise<
+    Array<{
+      pageNumber: number;
+      imageData: string;
+      width: number;
+      height: number;
+    }>
+  > {
     const images: Array<{
       pageNumber: number;
       imageData: string;
@@ -296,17 +311,10 @@ export class PDFParserImpl extends BaseParserImpl implements PDFParser {
       height: number;
     }> = [];
 
-    try {
-      // const page = await pdfDoc.getPage(pageNumber);
-      // const operatorList = await page.getOperatorList();
-
-      // This is a simplified image extraction - full implementation would be more complex
-      // For now, we'll return empty array as image extraction from PDF.js is quite involved
-      // The page and operatorList would be used for image extraction but requires complex processing
-
-    } catch (error) {
-      console.warn(`Failed to extract images from page ${pageNumber}:`, error);
-    }
+    // Image extraction from PDF.js requires complex operatorList processing
+    // For now, return empty array - full implementation would be more involved
+    // Unused parameter is kept for API compatibility
+    void pageNumber;
 
     return images;
   }
@@ -323,7 +331,7 @@ export class PDFParserImpl extends BaseParserImpl implements PDFParser {
         const [, year, month, day] = match;
         return `${year}-${month}-${day}`;
       }
-    } catch (error) {
+    } catch (_error) {
       // Return undefined if parsing fails
     }
     return undefined;

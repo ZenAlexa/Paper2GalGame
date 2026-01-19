@@ -4,14 +4,7 @@
  * Handles plain text files with intelligent structure detection.
  */
 
-import type {
-  TxtParser,
-  ParseResult,
-  ParserConfig,
-  ParsedPaper,
-  PaperMetadata,
-  ParsingStats
-} from '../types';
+import type { PaperMetadata, ParsedPaper, ParseResult, ParserConfig, ParsingStats, TxtParser } from '../types';
 import { BaseParserImpl } from './base-parser';
 
 /**
@@ -67,7 +60,7 @@ export class TxtParserImpl extends BaseParserImpl implements TxtParser {
         charCount: this.calculateCharCount(cleanedText),
         processingTimeMs,
         confidence: 0.8, // Good confidence for text parsing
-        detectedLanguage: this.detectLanguage(cleanedText)
+        detectedLanguage: this.detectLanguage(cleanedText),
       };
 
       // Create source file info
@@ -75,7 +68,7 @@ export class TxtParserImpl extends BaseParserImpl implements TxtParser {
         name: 'document.txt',
         size: buffer.byteLength,
         type: 'text/plain',
-        hash: await this.calculateHash(buffer)
+        hash: await this.calculateHash(buffer),
       };
 
       // Create parsed paper structure
@@ -87,11 +80,10 @@ export class TxtParserImpl extends BaseParserImpl implements TxtParser {
         stats,
         timestamp: new Date(),
         parserVersion: this.getVersion(),
-        sourceFile
+        sourceFile,
       };
 
       return this.createSuccessResult(parsedPaper);
-
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Unknown text parsing error';
 
@@ -101,7 +93,7 @@ export class TxtParserImpl extends BaseParserImpl implements TxtParser {
           `Failed to parse text document: ${errorMsg}`,
           'error',
           error instanceof Error ? error.stack : undefined
-        )
+        ),
       ]);
     }
   }
@@ -172,16 +164,11 @@ export class TxtParserImpl extends BaseParserImpl implements TxtParser {
       const encodedBuffer = encoder.encode(text).buffer;
 
       return await this.parse(encodedBuffer, config);
-
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Unknown encoding error';
 
       return this.createErrorResult([
-        this.createError(
-          'ENCODING_ERROR',
-          `Failed to parse text with encoding ${encoding}: ${errorMsg}`,
-          'error'
-        )
+        this.createError('ENCODING_ERROR', `Failed to parse text with encoding ${encoding}: ${errorMsg}`, 'error'),
       ]);
     }
   }
@@ -193,13 +180,13 @@ export class TxtParserImpl extends BaseParserImpl implements TxtParser {
     const bytes = new Uint8Array(buffer.slice(0, 4));
 
     // UTF-8 BOM
-    if (bytes.length >= 3 && bytes[0] === 0xEF && bytes[1] === 0xBB && bytes[2] === 0xBF) {
+    if (bytes.length >= 3 && bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf) {
       return true;
     }
 
     // UTF-16 BOM
     if (bytes.length >= 2) {
-      if ((bytes[0] === 0xFF && bytes[1] === 0xFE) || (bytes[0] === 0xFE && bytes[1] === 0xFF)) {
+      if ((bytes[0] === 0xff && bytes[1] === 0xfe) || (bytes[0] === 0xfe && bytes[1] === 0xff)) {
         return true;
       }
     }
@@ -214,18 +201,18 @@ export class TxtParserImpl extends BaseParserImpl implements TxtParser {
     const byte = bytes[startIndex];
 
     // Single byte (0xxxxxxx)
-    if (byte <= 0x7F) {
+    if (byte <= 0x7f) {
       return true;
     }
 
     // Multi-byte sequence
     let expectedBytes = 0;
 
-    if ((byte & 0xE0) === 0xC0) {
+    if ((byte & 0xe0) === 0xc0) {
       expectedBytes = 1; // 110xxxxx 10xxxxxx
-    } else if ((byte & 0xF0) === 0xE0) {
+    } else if ((byte & 0xf0) === 0xe0) {
       expectedBytes = 2; // 1110xxxx 10xxxxxx 10xxxxxx
-    } else if ((byte & 0xF8) === 0xF0) {
+    } else if ((byte & 0xf8) === 0xf0) {
       expectedBytes = 3; // 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
     } else {
       return false; // Invalid start byte
@@ -237,7 +224,7 @@ export class TxtParserImpl extends BaseParserImpl implements TxtParser {
         return false; // Not enough bytes
       }
 
-      if ((bytes[startIndex + i] & 0xC0) !== 0x80) {
+      if ((bytes[startIndex + i] & 0xc0) !== 0x80) {
         return false; // Invalid continuation byte
       }
     }
@@ -257,8 +244,14 @@ export class TxtParserImpl extends BaseParserImpl implements TxtParser {
       totalCount++;
 
       // Consider printable: space, tab, newline, and characters 32-126, 160+
-      if (charCode === 32 || charCode === 9 || charCode === 10 || charCode === 13 ||
-          (charCode >= 32 && charCode <= 126) || charCode >= 160) {
+      if (
+        charCode === 32 ||
+        charCode === 9 ||
+        charCode === 10 ||
+        charCode === 13 ||
+        (charCode >= 32 && charCode <= 126) ||
+        charCode >= 160
+      ) {
         printableCount++;
       }
     }
@@ -270,11 +263,11 @@ export class TxtParserImpl extends BaseParserImpl implements TxtParser {
    * Extract metadata from text structure
    */
   private extractTextMetadata(text: string): PaperMetadata {
-    const lines = text.split('\n').filter(line => line.trim().length > 0);
+    const lines = text.split('\n').filter((line) => line.trim().length > 0);
     const metadata: PaperMetadata = {
       title: '',
       authors: [],
-      keywords: []
+      keywords: [],
     };
 
     if (lines.length === 0) {
@@ -293,15 +286,15 @@ export class TxtParserImpl extends BaseParserImpl implements TxtParser {
     // Look for author patterns
     const authorPatterns = [
       /^(?:By|Author[s]?|Written by):?\s*(.+)$/i,
-      /^(.+)\s*\(.*\)\s*$/,  // Name (affiliation)
-      /^([A-Z][a-z]+\s+[A-Z][a-z]+(?:\s*,\s*[A-Z][a-z]+\s+[A-Z][a-z]+)*)$/  // Name patterns
+      /^(.+)\s*\(.*\)\s*$/, // Name (affiliation)
+      /^([A-Z][a-z]+\s+[A-Z][a-z]+(?:\s*,\s*[A-Z][a-z]+\s+[A-Z][a-z]+)*)$/, // Name patterns
     ];
 
     for (const line of lines.slice(0, 10)) {
       for (const pattern of authorPatterns) {
         const match = line.match(pattern);
-        if (match && match[1]) {
-          const authors = match[1].split(/[,;]/).map(author => author.trim());
+        if (match?.[1]) {
+          const authors = match[1].split(/[,;]/).map((author) => author.trim());
           metadata.authors.push(...authors);
           break;
         }
@@ -310,16 +303,13 @@ export class TxtParserImpl extends BaseParserImpl implements TxtParser {
     }
 
     // Look for keywords
-    const keywordPatterns = [
-      /^(?:Keywords?|Key\s*words?):?\s*(.+)$/i,
-      /^(?:Tags?):?\s*(.+)$/i
-    ];
+    const keywordPatterns = [/^(?:Keywords?|Key\s*words?):?\s*(.+)$/i, /^(?:Tags?):?\s*(.+)$/i];
 
     for (const line of lines) {
       for (const pattern of keywordPatterns) {
         const match = line.match(pattern);
-        if (match && match[1]) {
-          const keywords = match[1].split(/[,;]/).map(keyword => keyword.trim());
+        if (match?.[1]) {
+          const keywords = match[1].split(/[,;]/).map((keyword) => keyword.trim());
           metadata.keywords.push(...keywords);
           break;
         }
@@ -356,7 +346,7 @@ export class TxtParserImpl extends BaseParserImpl implements TxtParser {
       korean: (sample.match(/[\uac00-\ud7af]/g) || []).length,
       cyrillic: (sample.match(/[\u0400-\u04ff]/g) || []).length,
       arabic: (sample.match(/[\u0600-\u06ff]/g) || []).length,
-      english: (sample.match(/[a-zA-Z]/g) || []).length
+      english: (sample.match(/[a-zA-Z]/g) || []).length,
     };
 
     // Find the most frequent character type

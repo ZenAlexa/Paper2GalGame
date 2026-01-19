@@ -1,1 +1,431 @@
-/**\n * Enhanced Paper Parser Type Definitions - 2026 Edition\n *\n * Advanced types for modern multimodal AI-powered paper parsing\n * with professional formula recognition and layout understanding.\n */\n\nimport type { \n  Equation, \n  Figure, \n  Table, \n  PaperSection, \n  ParsedPaper, \n  ParseResult,\n  ParserConfig,\n  ParsingStats \n} from './paper';\n\n/**\n * Enhanced equation with AI-powered analysis\n */\nexport interface EnhancedEquation extends Equation {\n  /** Normalized bounding box coordinates [x1, y1, x2, y2] (0-1) */\n  bbox?: [number, number, number, number];\n  \n  /** AI recognition confidence score (0-1) */\n  confidence: number;\n  \n  /** Semantic description of the equation's meaning */\n  semanticDescription?: string;\n  \n  /** Contextual information from surrounding text */\n  context?: string;\n  \n  /** Mathematical complexity assessment */\n  complexity: 'simple' | 'medium' | 'complex';\n  \n  /** Type of mathematics involved */\n  mathType: 'arithmetic' | 'algebra' | 'calculus' | 'statistics' | 'geometry' | 'logic' | 'other';\n  \n  /** Original formula image (base64 encoded PNG) */\n  visualImage?: string;\n  \n  /** AI processing metadata */\n  aiMetadata?: {\n    /** AI model used for recognition */\n    model: string;\n    /** Processing time in milliseconds */\n    processingTime: number;\n    /** Alternative LaTeX representations */\n    alternatives?: string[];\n    /** Recognition method used */\n    method: 'structural' | 'visual' | 'hybrid';\n    /** Quality assessment */\n    quality: {\n      latexAccuracy: number;      // 0-1\n      semanticRelevance: number;  // 0-1\n      contextAlignment: number;   // 0-1\n    };\n  };\n  \n  /** Educational annotations for galgame use */\n  educational?: {\n    /** Difficulty level for learning */\n    difficulty: 'beginner' | 'intermediate' | 'advanced';\n    /** Key concepts involved */\n    concepts: string[];\n    /** Suggested explanation approach */\n    explanation?: string;\n  };\n}\n\n/**\n * Enhanced figure with layout and AI analysis\n */\nexport interface EnhancedFigure extends Figure {\n  /** Normalized bounding box coordinates */\n  bbox?: [number, number, number, number];\n  \n  /** AI-generated detailed description */\n  aiDescription?: string;\n  \n  /** Detected elements within the figure */\n  elements?: {\n    /** Text elements (OCR) */\n    textRegions: Array<{\n      text: string;\n      bbox: [number, number, number, number];\n      confidence: number;\n    }>;\n    /** Mathematical elements */\n    mathRegions: Array<{\n      latex: string;\n      bbox: [number, number, number, number];\n      confidence: number;\n    }>;\n  };\n  \n  /** Educational value assessment */\n  educational?: {\n    relevance: number;    // 0-1\n    explanation?: string;\n    keyPoints: string[];\n  };\n}\n\n/**\n * Enhanced table with structure analysis\n */\nexport interface EnhancedTable extends Table {\n  /** Normalized bounding box coordinates */\n  bbox?: [number, number, number, number];\n  \n  /** AI understanding of table structure */\n  structure?: {\n    /** Column types detected */\n    columnTypes: ('text' | 'number' | 'formula' | 'mixed')[];\n    /** Data patterns identified */\n    patterns: string[];\n    /** Statistical summary if applicable */\n    summary?: string;\n  };\n  \n  /** Enhanced cell data with metadata */\n  enhancedCells?: Array<Array<{\n    content: string;\n    type: 'text' | 'number' | 'formula' | 'empty';\n    latex?: string;  // If cell contains formula\n    confidence: number;\n  }>>;\n}\n\n/**\n * Enhanced paper section with AI analysis\n */\nexport interface EnhancedPaperSection extends Omit<PaperSection, 'equations' | 'figures' | 'tables'> {\n  /** Enhanced equations in this section */\n  equations?: EnhancedEquation[];\n  \n  /** Enhanced figures in this section */\n  figures?: EnhancedFigure[];\n  \n  /** Enhanced tables in this section */\n  tables?: EnhancedTable[];\n  \n  /** AI-generated section summary */\n  aiSummary?: string;\n  \n  /** Key concepts identified in this section */\n  keyConcepts?: string[];\n  \n  /** Educational importance score */\n  educationalValue?: number; // 0-1\n  \n  /** Recommended teaching approach */\n  teachingNotes?: {\n    approach: 'conceptual' | 'practical' | 'mathematical' | 'mixed';\n    prerequisites: string[];\n    learningObjectives: string[];\n    suggestedExamples: string[];\n  };\n}\n\n/**\n * Enhanced parsing statistics with AI metrics\n */\nexport interface EnhancedParsingStats extends ParsingStats {\n  /** AI processing statistics */\n  aiProcessing: {\n    /** Total API calls made */\n    apiCalls: number;\n    /** Total AI processing time */\n    aiProcessingTimeMs: number;\n    /** Cost estimation */\n    estimatedCost: number;\n    /** AI models used */\n    modelsUsed: string[];\n    /** Overall AI confidence */\n    overallAiConfidence: number; // 0-1\n  };\n  \n  /** Quality metrics */\n  quality: {\n    /** Formula recognition accuracy estimate */\n    formulaAccuracy: number;     // 0-1\n    /** Layout detection accuracy */\n    layoutAccuracy: number;      // 0-1\n    /** Structure classification accuracy */\n    structureAccuracy: number;   // 0-1\n  };\n  \n  /** Method used for processing */\n  processingMethod: 'legacy' | 'mineru' | 'hybrid' | 'ai-only';\n}\n\n/**\n * Enhanced parsed paper with AI enrichment\n */\nexport interface EnhancedParsedPaper extends Omit<ParsedPaper, 'sections' | 'stats'> {\n  /** Enhanced sections with AI analysis */\n  sections: EnhancedPaperSection[];\n  \n  /** Enhanced statistics */\n  stats: EnhancedParsingStats;\n  \n  /** Overall paper analysis */\n  analysis?: {\n    /** Academic field classification */\n    field: string;\n    /** Complexity assessment */\n    complexity: 'undergraduate' | 'graduate' | 'research' | 'expert';\n    /** Key mathematical concepts */\n    mathConcepts: string[];\n    /** Recommended character assignments for galgame */\n    characterSuggestions: Array<{\n      character: string;\n      role: 'presenter' | 'questioner' | 'explainer' | 'challenger';\n      sections: string[];  // Section types this character should handle\n    }>;\n    /** Educational pathway */\n    learningPath: Array<{\n      step: number;\n      concept: string;\n      prerequisites: string[];\n      difficulty: number; // 1-10\n    }>;\n  };\n}\n\n/**\n * Enhanced parsing result with AI confidence\n */\nexport interface EnhancedParseResult extends Omit<ParseResult, 'data'> {\n  /** Enhanced paper data */\n  data?: EnhancedParsedPaper;\n  \n  /** AI processing summary */\n  aiSummary?: {\n    /** Processing method used */\n    method: 'legacy' | 'ai-enhanced' | 'full-ai';\n    /** Confidence in overall result */\n    confidence: number;\n    /** Recommendations for improvement */\n    recommendations: string[];\n    /** Cost breakdown */\n    costs: {\n      apiCalls: number;\n      estimatedDollars: number;\n      tokensUsed: number;\n    };\n  };\n}\n\n/**\n * Configuration for AI-enhanced parsing\n */\nexport interface EnhancedParserConfig extends ParserConfig {\n  /** AI enhancement settings */\n  aiEnhancement?: {\n    /** Enable AI-powered formula recognition */\n    enableFormulaAI: boolean;\n    \n    /** Enable layout analysis */\n    enableLayoutAnalysis: boolean;\n    \n    /** Enable semantic understanding */\n    enableSemanticAnalysis: boolean;\n    \n    /** Enable educational annotations */\n    enableEducationalAnalysis: boolean;\n    \n    /** Maximum formulas to process with AI (cost control) */\n    maxAIFormulas: number;\n    \n    /** Preferred AI models */\n    preferredModels: {\n      vision: string;      // e.g., 'google/gemini-3-flash-preview'\n      text: string;        // e.g., 'google/gemini-3-flash-preview' \n      fallback: string;    // e.g., 'openai/gpt-4o'\n    };\n    \n    /** Cost control */\n    costControl: {\n      maxCostPerPaper: number;    // Maximum cost in dollars\n      enableCaching: boolean;     // Enable result caching\n      fallbackToLegacy: boolean;  // Fall back if cost exceeded\n    };\n  };\n  \n  /** MinerU service configuration */\n  mineruConfig?: {\n    /** MinerU service endpoint */\n    serviceUrl: string;\n    \n    /** Enable MinerU for PDF processing */\n    enabled: boolean;\n    \n    /** Timeout for MinerU calls */\n    timeout: number;\n    \n    /** Fallback to legacy PDF parser if failed */\n    fallbackToLegacy: boolean;\n  };\n  \n  /** OpenRouter API configuration */\n  openRouterConfig?: {\n    /** API key */\n    apiKey: string;\n    \n    /** Base URL */\n    baseURL?: string;\n    \n    /** Request timeout */\n    timeout?: number;\n    \n    /** Rate limiting */\n    rateLimit?: {\n      requestsPerMinute: number;\n      burstLimit: number;\n    };\n  };\n}\n\n/**\n * Engine type for parsing\n */\nexport type ParsingEngine = 'auto' | 'legacy' | 'mineru' | 'ai-enhanced' | 'full-ai';\n\n/**\n * Result from engine detection/selection\n */\nexport interface EngineSelection {\n  /** Selected engine */\n  engine: ParsingEngine;\n  \n  /** Reason for selection */\n  reason: string;\n  \n  /** Confidence in selection */\n  confidence: number;\n  \n  /** Fallback engines available */\n  fallbacks: ParsingEngine[];\n}\n\n/**\n * Progress callback for long-running parsing\n */\nexport interface ParsingProgress {\n  /** Current stage */\n  stage: 'init' | 'pdf-extraction' | 'structure-analysis' | 'formula-processing' | 'ai-enhancement' | 'finalization';\n  \n  /** Progress percentage (0-100) */\n  progress: number;\n  \n  /** Current operation description */\n  description: string;\n  \n  /** Estimated remaining time in seconds */\n  estimatedRemainingSeconds?: number;\n  \n  /** Items processed vs total */\n  itemsProcessed?: {\n    current: number;\n    total: number;\n    type: 'pages' | 'formulas' | 'figures' | 'sections';\n  };\n}\n\n/**\n * Callback function type for progress updates\n */\nexport type ProgressCallback = (progress: ParsingProgress) => void;\n\n/**\n * Cache entry for parsed results\n */\nexport interface CacheEntry {\n  /** File hash */\n  fileHash: string;\n  \n  /** Parsing configuration used */\n  configHash: string;\n  \n  /** Cached result */\n  result: EnhancedParseResult;\n  \n  /** Cache timestamp */\n  timestamp: Date;\n  \n  /** Expiration time */\n  expiresAt: Date;\n  \n  /** Cache metadata */\n  metadata: {\n    fileSize: number;\n    processingTime: number;\n    aiCost: number;\n  };\n}\n\n/**\n * Validation result for parsed content\n */\nexport interface ValidationResult {\n  /** Overall validation passed */\n  valid: boolean;\n  \n  /** Validation score (0-1) */\n  score: number;\n  \n  /** Issues found */\n  issues: Array<{\n    type: 'warning' | 'error' | 'critical';\n    code: string;\n    message: string;\n    section?: string;\n    position?: number;\n    suggestion?: string;\n  }>;\n  \n  /** Quality metrics */\n  quality: {\n    formulaQuality: number;      // 0-1\n    structureQuality: number;    // 0-1\n    contentCompleteness: number; // 0-1\n    aiAccuracy: number;          // 0-1\n  };\n}\n"
+/**
+ * Enhanced Paper Parser Type Definitions - 2026 Edition
+ *
+ * Advanced types for modern multimodal AI-powered paper parsing
+ * with professional formula recognition and layout understanding.
+ */
+
+import type {
+  Equation,
+  Figure,
+  PaperSection,
+  ParsedPaper,
+  ParseResult,
+  ParserConfig,
+  ParsingStats,
+  Table,
+} from './paper';
+
+/**
+ * Enhanced equation with AI-powered analysis
+ */
+export interface EnhancedEquation extends Equation {
+  /** Normalized bounding box coordinates [x1, y1, x2, y2] (0-1) */
+  bbox?: [number, number, number, number];
+
+  /** AI recognition confidence score (0-1) */
+  confidence: number;
+
+  /** Semantic description of the equation's meaning */
+  semanticDescription?: string;
+
+  /** Contextual information from surrounding text */
+  context?: string;
+
+  /** Mathematical complexity assessment */
+  complexity: 'simple' | 'medium' | 'complex';
+
+  /** Type of mathematics involved */
+  mathType: 'arithmetic' | 'algebra' | 'calculus' | 'statistics' | 'geometry' | 'logic' | 'other';
+
+  /** Original formula image (base64 encoded PNG) */
+  visualImage?: string;
+
+  /** AI processing metadata */
+  aiMetadata?: {
+    /** AI model used for recognition */
+    model: string;
+    /** Processing time in milliseconds */
+    processingTime: number;
+    /** Alternative LaTeX representations */
+    alternatives?: string[];
+    /** Recognition method used */
+    method: 'structural' | 'visual' | 'hybrid';
+    /** Quality assessment */
+    quality: {
+      latexAccuracy: number; // 0-1
+      semanticRelevance: number; // 0-1
+      contextAlignment: number; // 0-1
+    };
+  };
+
+  /** Educational annotations for galgame use */
+  educational?: {
+    /** Difficulty level for learning */
+    difficulty: 'beginner' | 'intermediate' | 'advanced';
+    /** Key concepts involved */
+    concepts: string[];
+    /** Suggested explanation approach */
+    explanation?: string;
+  };
+}
+
+/**
+ * Enhanced figure with layout and AI analysis
+ */
+export interface EnhancedFigure extends Figure {
+  /** Normalized bounding box coordinates */
+  bbox?: [number, number, number, number];
+
+  /** AI-generated detailed description */
+  aiDescription?: string;
+
+  /** Detected elements within the figure */
+  elements?: {
+    /** Text elements (OCR) */
+    textRegions: Array<{
+      text: string;
+      bbox: [number, number, number, number];
+      confidence: number;
+    }>;
+    /** Mathematical elements */
+    mathRegions: Array<{
+      latex: string;
+      bbox: [number, number, number, number];
+      confidence: number;
+    }>;
+  };
+
+  /** Educational value assessment */
+  educational?: {
+    relevance: number; // 0-1
+    explanation?: string;
+    keyPoints: string[];
+  };
+}
+
+/**
+ * Enhanced table with structure analysis
+ */
+export interface EnhancedTable extends Table {
+  /** Normalized bounding box coordinates */
+  bbox?: [number, number, number, number];
+
+  /** AI understanding of table structure */
+  structure?: {
+    /** Column types detected */
+    columnTypes: ('text' | 'number' | 'formula' | 'mixed')[];
+    /** Data patterns identified */
+    patterns: string[];
+    /** Statistical summary if applicable */
+    summary?: string;
+  };
+
+  /** Enhanced cell data with metadata */
+  enhancedCells?: Array<
+    Array<{
+      content: string;
+      type: 'text' | 'number' | 'formula' | 'empty';
+      latex?: string; // If cell contains formula
+      confidence: number;
+    }>
+  >;
+}
+
+/**
+ * Enhanced paper section with AI analysis
+ */
+export interface EnhancedPaperSection extends Omit<PaperSection, 'equations' | 'figures' | 'tables'> {
+  /** Enhanced equations in this section */
+  equations?: EnhancedEquation[];
+
+  /** Enhanced figures in this section */
+  figures?: EnhancedFigure[];
+
+  /** Enhanced tables in this section */
+  tables?: EnhancedTable[];
+
+  /** AI-generated section summary */
+  aiSummary?: string;
+
+  /** Key concepts identified in this section */
+  keyConcepts?: string[];
+
+  /** Educational importance score */
+  educationalValue?: number; // 0-1
+
+  /** Recommended teaching approach */
+  teachingNotes?: {
+    approach: 'conceptual' | 'practical' | 'mathematical' | 'mixed';
+    prerequisites: string[];
+    learningObjectives: string[];
+    suggestedExamples: string[];
+  };
+}
+
+/**
+ * Enhanced parsing statistics with AI metrics
+ */
+export interface EnhancedParsingStats extends ParsingStats {
+  /** AI processing statistics */
+  aiProcessing: {
+    /** Total API calls made */
+    apiCalls: number;
+    /** Total AI processing time */
+    aiProcessingTimeMs: number;
+    /** Cost estimation */
+    estimatedCost: number;
+    /** AI models used */
+    modelsUsed: string[];
+    /** Overall AI confidence */
+    overallAiConfidence: number; // 0-1
+  };
+
+  /** Quality metrics */
+  quality: {
+    /** Formula recognition accuracy estimate */
+    formulaAccuracy: number; // 0-1
+    /** Layout detection accuracy */
+    layoutAccuracy: number; // 0-1
+    /** Structure classification accuracy */
+    structureAccuracy: number; // 0-1
+  };
+
+  /** Method used for processing */
+  processingMethod: 'legacy' | 'mineru' | 'hybrid' | 'ai-only';
+}
+
+/**
+ * Enhanced parsed paper with AI enrichment
+ */
+export interface EnhancedParsedPaper extends Omit<ParsedPaper, 'sections' | 'stats'> {
+  /** Enhanced sections with AI analysis */
+  sections: EnhancedPaperSection[];
+
+  /** Enhanced statistics */
+  stats: EnhancedParsingStats;
+
+  /** Overall paper analysis */
+  analysis?: {
+    /** Academic field classification */
+    field: string;
+    /** Complexity assessment */
+    complexity: 'undergraduate' | 'graduate' | 'research' | 'expert';
+    /** Key mathematical concepts */
+    mathConcepts: string[];
+    /** Recommended character assignments for galgame */
+    characterSuggestions: Array<{
+      character: string;
+      role: 'presenter' | 'questioner' | 'explainer' | 'challenger';
+      sections: string[]; // Section types this character should handle
+    }>;
+    /** Educational pathway */
+    learningPath: Array<{
+      step: number;
+      concept: string;
+      prerequisites: string[];
+      difficulty: number; // 1-10
+    }>;
+  };
+}
+
+/**
+ * Enhanced parsing result with AI confidence
+ */
+export interface EnhancedParseResult extends Omit<ParseResult, 'data'> {
+  /** Enhanced paper data */
+  data?: EnhancedParsedPaper;
+
+  /** AI processing summary */
+  aiSummary?: {
+    /** Processing method used */
+    method: 'legacy' | 'ai-enhanced' | 'full-ai';
+    /** Confidence in overall result */
+    confidence: number;
+    /** Recommendations for improvement */
+    recommendations: string[];
+    /** Cost breakdown */
+    costs: {
+      apiCalls: number;
+      estimatedDollars: number;
+      tokensUsed: number;
+    };
+  };
+}
+
+/**
+ * Configuration for AI-enhanced parsing
+ */
+export interface EnhancedParserConfig extends ParserConfig {
+  /** AI enhancement settings */
+  aiEnhancement?: {
+    /** Enable AI-powered formula recognition */
+    enableFormulaAI: boolean;
+
+    /** Enable layout analysis */
+    enableLayoutAnalysis: boolean;
+
+    /** Enable semantic understanding */
+    enableSemanticAnalysis: boolean;
+
+    /** Enable educational annotations */
+    enableEducationalAnalysis: boolean;
+
+    /** Maximum formulas to process with AI (cost control) */
+    maxAIFormulas: number;
+
+    /** Preferred AI models */
+    preferredModels: {
+      vision: string; // e.g., 'google/gemini-3-flash-preview'
+      text: string; // e.g., 'google/gemini-3-flash-preview'
+      fallback: string; // e.g., 'openai/gpt-4o'
+    };
+
+    /** Cost control */
+    costControl: {
+      maxCostPerPaper: number; // Maximum cost in dollars
+      enableCaching: boolean; // Enable result caching
+      fallbackToLegacy: boolean; // Fall back if cost exceeded
+    };
+  };
+
+  /** MinerU service configuration */
+  mineruConfig?: {
+    /** MinerU service endpoint */
+    serviceUrl: string;
+
+    /** Enable MinerU for PDF processing */
+    enabled: boolean;
+
+    /** Timeout for MinerU calls */
+    timeout: number;
+
+    /** Fallback to legacy PDF parser if failed */
+    fallbackToLegacy: boolean;
+  };
+
+  /** OpenRouter API configuration */
+  openRouterConfig?: {
+    /** API key */
+    apiKey: string;
+
+    /** Base URL */
+    baseURL?: string;
+
+    /** Request timeout */
+    timeout?: number;
+
+    /** Rate limiting */
+    rateLimit?: {
+      requestsPerMinute: number;
+      burstLimit: number;
+    };
+  };
+}
+
+/**
+ * Engine type for parsing
+ */
+export type ParsingEngine = 'auto' | 'legacy' | 'mineru' | 'ai-enhanced' | 'full-ai';
+
+/**
+ * Result from engine detection/selection
+ */
+export interface EngineSelection {
+  /** Selected engine */
+  engine: ParsingEngine;
+
+  /** Reason for selection */
+  reason: string;
+
+  /** Confidence in selection */
+  confidence: number;
+
+  /** Fallback engines available */
+  fallbacks: ParsingEngine[];
+}
+
+/**
+ * Progress callback for long-running parsing
+ */
+export interface ParsingProgress {
+  /** Current stage */
+  stage: 'init' | 'pdf-extraction' | 'structure-analysis' | 'formula-processing' | 'ai-enhancement' | 'finalization';
+
+  /** Progress percentage (0-100) */
+  progress: number;
+
+  /** Current operation description */
+  description: string;
+
+  /** Estimated remaining time in seconds */
+  estimatedRemainingSeconds?: number;
+
+  /** Items processed vs total */
+  itemsProcessed?: {
+    current: number;
+    total: number;
+    type: 'pages' | 'formulas' | 'figures' | 'sections';
+  };
+}
+
+/**
+ * Callback function type for progress updates
+ */
+export type ProgressCallback = (progress: ParsingProgress) => void;
+
+/**
+ * Cache entry for parsed results
+ */
+export interface CacheEntry {
+  /** File hash */
+  fileHash: string;
+
+  /** Parsing configuration used */
+  configHash: string;
+
+  /** Cached result */
+  result: EnhancedParseResult;
+
+  /** Cache timestamp */
+  timestamp: Date;
+
+  /** Expiration time */
+  expiresAt: Date;
+
+  /** Cache metadata */
+  metadata: {
+    fileSize: number;
+    processingTime: number;
+    aiCost: number;
+  };
+}
+
+/**
+ * Validation result for parsed content
+ */
+export interface ValidationResult {
+  /** Overall validation passed */
+  valid: boolean;
+
+  /** Validation score (0-1) */
+  score: number;
+
+  /** Issues found */
+  issues: Array<{
+    type: 'warning' | 'error' | 'critical';
+    code: string;
+    message: string;
+    section?: string;
+    position?: number;
+    suggestion?: string;
+  }>;
+
+  /** Quality metrics */
+  quality: {
+    formulaQuality: number; // 0-1
+    structureQuality: number; // 0-1
+    contentCompleteness: number; // 0-1
+    aiAccuracy: number; // 0-1
+  };
+}

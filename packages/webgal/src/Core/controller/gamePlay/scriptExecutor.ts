@@ -1,26 +1,24 @@
-import { commandType, ISentence } from '@/Core/controller/scene/sceneInterface';
-import { runScript } from './runScript';
-import { logger } from '../../util/logger';
-import { IStageState } from '@/store/stageInterface';
-import { restoreScene } from '../scene/restoreScene';
-import { webgalStore } from '@/store/store';
-import { getValueFromStateElseKey } from '@/Core/gameScripts/setVar';
-import { strIf } from '@/Core/controller/gamePlay/strIf';
-import { nextSentence } from '@/Core/controller/gamePlay/nextSentence';
 import cloneDeep from 'lodash/cloneDeep';
-import { ISceneEntry } from '@/Core/Modules/scene';
-import { IBacklogItem } from '@/Core/Modules/backlog';
-import { SYSTEM_CONFIG } from '@/config';
-import { WebGAL } from '@/Core/WebGAL';
+import { nextSentence } from '@/Core/controller/gamePlay/nextSentence';
+import { strIf } from '@/Core/controller/gamePlay/strIf';
+import { commandType, type ISentence } from '@/Core/controller/scene/sceneInterface';
+import { getValueFromStateElseKey } from '@/Core/gameScripts/setVar';
+import type { ISceneEntry } from '@/Core/Modules/scene';
 import { getBooleanArgByKey, getStringArgByKey } from '@/Core/util/getSentenceArg';
+import { WebGAL } from '@/Core/WebGAL';
 import { updateProgress } from '@/store/paperReducer';
+import type { IStageState } from '@/store/stageInterface';
+import { webgalStore } from '@/store/store';
+import { logger } from '../../util/logger';
+import { restoreScene } from '../scene/restoreScene';
+import { runScript } from './runScript';
 
 export const whenChecker = (whenValue: string | undefined): boolean => {
   if (whenValue === undefined) {
     return true;
   }
   // 先把变量解析出来
-  const valExpArr = whenValue.split(/([+\-*\/()><!]|>=|<=|==|&&|\|\||!=)/g);
+  const valExpArr = whenValue.split(/([+\-*/()><!]|>=|<=|==|&&|\|\||!=)/g);
   const valExp = valExpArr
     .map((e) => {
       if (e.match(/[a-zA-Z]/)) {
@@ -53,7 +51,7 @@ export const scriptExecutor = () => {
     return;
   }
   const currentScript: ISentence = cloneDeep(
-    WebGAL.sceneManager.sceneData.currentScene.sentenceList[WebGAL.sceneManager.sceneData.currentSentenceId],
+    WebGAL.sceneManager.sceneData.currentScene.sentenceList[WebGAL.sceneManager.sceneData.currentSentenceId]
   );
 
   const interpolationOneItem = (content: string): string => {
@@ -87,7 +85,7 @@ export const scriptExecutor = () => {
 
   // 判断这个脚本要不要执行
   let runThis = true;
-  let whenValue = getStringArgByKey(currentScript, 'when');
+  const whenValue = getStringArgByKey(currentScript, 'when');
   // 如果语句有 when
   if (whenValue) {
     runThis = whenChecker(whenValue);
@@ -102,7 +100,7 @@ export const scriptExecutor = () => {
   }
   runScript(currentScript);
   // 是否要进行下一句
-  let isNext = getBooleanArgByKey(currentScript, 'next') ?? false;
+  const isNext = getBooleanArgByKey(currentScript, 'next') ?? false;
 
   let isSaveBacklog = currentScript.command === commandType.say; // 是否在本句保存backlog（一般遇到对话保存）
   // 检查当前对话是否有 notend 参数

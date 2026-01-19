@@ -1,26 +1,25 @@
+import { nextSentence } from '@/Core/controller/gamePlay/nextSentence';
+import { resetStage } from '@/Core/controller/stage/resetStage';
+import { hasFastSaveRecord, loadFastSaveGame } from '@/Core/controller/storage/fastSaveLoad';
+import { restorePerform } from '@/Core/controller/storage/jumpFromBacklog';
+import { setEbg } from '@/Core/gameScripts/changeBg/setEbg';
+import { WebGAL } from '@/Core/WebGAL';
+import { setVisibility } from '@/store/GUIReducer';
+import { webgalStore } from '@/store/store';
+import { sceneParser } from '../../parser/sceneParser';
 import { assetSetter, fileType } from '../../util/gameAssetsAccess/assetSetter';
 import { sceneFetcher } from '../scene/sceneFetcher';
-import { sceneParser } from '../../parser/sceneParser';
-import { resetStage } from '@/Core/controller/stage/resetStage';
-import { webgalStore } from '@/store/store';
-import { setVisibility } from '@/store/GUIReducer';
-import { nextSentence } from '@/Core/controller/gamePlay/nextSentence';
-import { setEbg } from '@/Core/gameScripts/changeBg/setEbg';
-import { restorePerform } from '@/Core/controller/storage/jumpFromBacklog';
-
-import { hasFastSaveRecord, loadFastSaveGame } from '@/Core/controller/storage/fastSaveLoad';
-import { WebGAL } from '@/Core/WebGAL';
 
 // Re-export Paper launcher functions for convenience
 export {
-  startPaperGameWithScene,
-  startPaperGameWithScript,
-  launchPaperGameFromAPI,
-  launchPaperGameWithTTS,
   checkTTSAvailability,
   exitPaperGame,
   getPaperProgress,
   isPaperModeActive,
+  launchPaperGameFromAPI,
+  launchPaperGameWithTTS,
+  startPaperGameWithScene,
+  startPaperGameWithScript,
 } from '@/Paper/launcher';
 
 /**
@@ -69,7 +68,7 @@ export const startPaperGame = async (sessionId: string) => {
     WebGAL.sceneManager.sceneData.currentScene = sceneParser(
       rawScript,
       `paper_${sessionId}.txt`,
-      `/api/generate/script/${sessionId}`,
+      `/api/generate/script/${sessionId}`
     );
 
     // DEBUG: Log parsed sentenceList
@@ -77,7 +76,10 @@ export const startPaperGame = async (sessionId: string) => {
     console.log(`[startPaperGame] Parsed ${sentenceList.length} sentences`);
     console.log('[startPaperGame] ========== SENTENCE LIST ==========');
     sentenceList.slice(0, 20).forEach((sentence, idx) => {
-      console.log(`[startPaperGame] Sentence ${idx}: command=${sentence.command}, commandRaw="${sentence.commandRaw}", content="${sentence.content?.substring(0, 50) || ''}"`, sentence.args);
+      console.log(
+        `[startPaperGame] Sentence ${idx}: command=${sentence.command}, commandRaw="${sentence.commandRaw}", content="${sentence.content?.substring(0, 50) || ''}"`,
+        sentence.args
+      );
     });
     if (sentenceList.length > 20) {
       console.log(`[startPaperGame] ... and ${sentenceList.length - 20} more sentences`);

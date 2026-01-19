@@ -1,5 +1,5 @@
-import { BaseImageResource, Ticker, UPDATE_PRIORITY, settings } from 'pixi.js';
-import { parseGIF, decompressFrames } from 'gifuct-js';
+import { decompressFrames, parseGIF } from 'gifuct-js';
+import { BaseImageResource, settings, Ticker, UPDATE_PRIORITY } from 'pixi.js';
 
 export interface GifResourceOptions {
   autoLoad?: boolean;
@@ -145,7 +145,7 @@ export class GifResource extends BaseImageResource {
     const frame = findFrame(this._frames, this._currentTime);
 
     if (frame) {
-      this.source.getContext('2d')!.putImageData(frame.imageData, 0, 0);
+      this.source.getContext('2d')?.putImageData(frame.imageData, 0, 0);
       super.update();
     }
 

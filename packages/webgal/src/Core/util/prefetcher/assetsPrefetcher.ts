@@ -1,15 +1,13 @@
-import { IAsset } from '@/Core/controller/scene/sceneInterface';
-import { logger } from '../logger';
-
+import type { IAsset } from '@/Core/controller/scene/sceneInterface';
 import { WebGAL } from '@/Core/WebGAL';
+import { logger } from '../logger';
 
 /**
  * 预加载函数
  * @param assetList 场景资源列表
  */
 export const assetsPrefetcher = (assetList: Array<IAsset>) => {
-  // @ts-ignore
-  // 未必要移除，加载到内存里也有用
+  // May not need to remove, loading into memory is also useful
   // if (window?.isElectron) {
   //   return;
   // }

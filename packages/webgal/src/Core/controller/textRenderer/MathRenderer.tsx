@@ -1,4 +1,4 @@
-import { InlineMath, BlockMath } from 'react-katex';
+import { BlockMath, InlineMath } from 'react-katex';
 import 'katex/dist/katex.min.css';
 import './MathStyles.css';
 import React from 'react';
@@ -15,10 +15,10 @@ export class MathRenderer {
    * Gets the singleton instance of MathRenderer
    */
   static getInstance(): MathRenderer {
-    if (!this.instance) {
-      this.instance = new MathRenderer();
+    if (!MathRenderer.instance) {
+      MathRenderer.instance = new MathRenderer();
     }
-    return this.instance;
+    return MathRenderer.instance;
   }
 
   /**
@@ -74,6 +74,7 @@ export class MathRenderer {
     let placeholderIndex = 0;
 
     // Process display formulas $$...$$
+    // biome-ignore lint/correctness/noEmptyCharacterClassInRegex: [^] is JS idiom for matching any char including newlines
     processedText = processedText.replace(/\$\$([^]*?)\$\$/g, (match, formula) => {
       try {
         const cleanFormula = formula.trim();
@@ -98,7 +99,7 @@ export class MathRenderer {
                 className: 'webgal-math-error',
                 style: { color: '#cc0000', fontSize: '0.9em' },
               },
-              `[Math Error: ${cleanFormula}]`,
+              `[Math Error: ${cleanFormula}]`
             );
           },
         });
@@ -145,10 +146,10 @@ export class MathRenderer {
                   className: 'webgal-math-error',
                   style: { color: '#cc0000', fontSize: '0.9em' },
                 },
-                `[Formula Error: ${cleanFormula}]`,
+                `[Formula Error: ${cleanFormula}]`
               );
             },
-          }),
+          })
         );
 
         mathComponents.set(placeholder, component);
@@ -181,6 +182,7 @@ export class MathRenderer {
     const formulas: MathFormula[] = [];
 
     // Extract display formulas
+    // biome-ignore lint/correctness/noEmptyCharacterClassInRegex: [^] is JS idiom for matching any char including newlines
     const displayMatches = text.matchAll(/\$\$([^]*?)\$\$/g);
     for (const match of displayMatches) {
       formulas.push({
@@ -209,7 +211,7 @@ export class MathRenderer {
    * Legacy method for multi-language math rendering
    * @deprecated Modern implementation uses react-katex components
    */
-  renderMathForLanguage(text: string, language: 'zh' | 'jp' | 'en'): string {
+  renderMathForLanguage(text: string, _language: 'zh' | 'jp' | 'en'): string {
     console.warn('MathRenderer.renderMathForLanguage() is deprecated.');
     return text;
   }

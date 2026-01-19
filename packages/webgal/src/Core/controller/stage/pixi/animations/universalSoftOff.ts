@@ -1,7 +1,7 @@
 import { WebGAL } from '@/Core/WebGAL';
 
 export function generateUniversalSoftOffAnimationObj(targetKey: string, duration: number) {
-  const target = WebGAL.gameplay.pixiStage!.getStageObjByKey(targetKey);
+  const target = WebGAL.gameplay.pixiStage?.getStageObjByKey(targetKey);
   let elapsedTime = 0;
 
   // 新增变量，用于存储动画开始时的初始透明度
@@ -32,10 +32,10 @@ export function generateUniversalSoftOffAnimationObj(targetKey: string, duration
    * 在此书写动画每一帧执行的函数
    * @param delta
    */
-  function tickerFunc(delta: number) {
+  function tickerFunc(_delta: number) {
     if (target) {
       const targetContainer = target.pixiContainer;
-      const baseDuration = WebGAL.gameplay.pixiStage!.frameDuration;
+      const baseDuration = WebGAL.gameplay.pixiStage?.frameDuration ?? 0;
 
       elapsedTime += baseDuration;
 
@@ -43,7 +43,7 @@ export function generateUniversalSoftOffAnimationObj(targetKey: string, duration
       const progress = realElapsedTime / duration;
 
       // 使用 Cubic Ease-In 函数
-      const easedProgress = Math.pow(progress, 3);
+      const easedProgress = progress ** 3;
 
       // 修正：基于初始透明度 startAlpha 进行计算
       // 公式：最终值 = 初始值 + (目标值 - 初始值) * 进度

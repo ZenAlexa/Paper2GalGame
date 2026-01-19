@@ -1,19 +1,18 @@
-import { ISaveData } from '@/store/userDataInterface';
-import { logger } from '../../util/logger';
-import { sceneFetcher } from '../scene/sceneFetcher';
-import { sceneParser } from '../../parser/sceneParser';
-import { webgalStore } from '@/store/store';
-import { resetStageState } from '@/store/stageReducer';
-import { setVisibility } from '@/store/GUIReducer';
-import { restorePerform } from './jumpFromBacklog';
-import { stopAllPerform } from '@/Core/controller/gamePlay/stopAllPerform';
 import cloneDeep from 'lodash/cloneDeep';
 import uniqWith from 'lodash/uniqWith';
-import { scenePrefetcher } from '@/Core/util/prefetcher/scenePrefetcher';
+import { stopAllPerform } from '@/Core/controller/gamePlay/stopAllPerform';
 import { setEbg } from '@/Core/gameScripts/changeBg/setEbg';
-import { restoreFromSave, resetPaperState } from '@/store/paperReducer';
-
+import { scenePrefetcher } from '@/Core/util/prefetcher/scenePrefetcher';
 import { WebGAL } from '@/Core/WebGAL';
+import { setVisibility } from '@/store/GUIReducer';
+import { resetPaperState, restoreFromSave } from '@/store/paperReducer';
+import { resetStageState } from '@/store/stageReducer';
+import { webgalStore } from '@/store/store';
+import type { ISaveData } from '@/store/userDataInterface';
+import { sceneParser } from '../../parser/sceneParser';
+import { logger } from '../../util/logger';
+import { sceneFetcher } from '../scene/sceneFetcher';
+import { restorePerform } from './jumpFromBacklog';
 
 /**
  * 读取游戏存档
@@ -39,61 +38,63 @@ export function loadGameFromStageData(stageData: ISaveData) {
   stopAllPerform();
 
   // Fetch scene and restore state only after scene is loaded
-  sceneFetcher(loadFile.sceneData.sceneUrl).then((rawScene) => {
-    // Parse scene data
-    WebGAL.sceneManager.sceneData.currentScene = sceneParser(
-      rawScene,
-      loadFile.sceneData.sceneName,
-      loadFile.sceneData.sceneUrl,
-    );
+  sceneFetcher(loadFile.sceneData.sceneUrl)
+    .then((rawScene) => {
+      // Parse scene data
+      WebGAL.sceneManager.sceneData.currentScene = sceneParser(
+        rawScene,
+        loadFile.sceneData.sceneName,
+        loadFile.sceneData.sceneUrl
+      );
 
-    // Set scene state AFTER scene is parsed
-    WebGAL.sceneManager.sceneData.currentSentenceId = loadFile.sceneData.currentSentenceId;
-    WebGAL.sceneManager.sceneData.sceneStack = cloneDeep(loadFile.sceneData.sceneStack);
+      // Set scene state AFTER scene is parsed
+      WebGAL.sceneManager.sceneData.currentSentenceId = loadFile.sceneData.currentSentenceId;
+      WebGAL.sceneManager.sceneData.sceneStack = cloneDeep(loadFile.sceneData.sceneStack);
 
-    // Start scene prefetching
-    const subSceneList = WebGAL.sceneManager.sceneData.currentScene.subSceneList;
-    WebGAL.sceneManager.settledScenes.push(WebGAL.sceneManager.sceneData.currentScene.sceneUrl);
-    const subSceneListUniq = uniqWith(subSceneList);
-    scenePrefetcher(subSceneListUniq);
+      // Start scene prefetching
+      const subSceneList = WebGAL.sceneManager.sceneData.currentScene.subSceneList;
+      WebGAL.sceneManager.settledScenes.push(WebGAL.sceneManager.sceneData.currentScene.sceneUrl);
+      const subSceneListUniq = uniqWith(subSceneList);
+      scenePrefetcher(subSceneListUniq);
 
-    // Restore backlog
-    const newBacklog = loadFile.backlog;
-    WebGAL.backlogManager.getBacklog().splice(0, WebGAL.backlogManager.getBacklog().length);
-    for (const e of newBacklog) {
-      WebGAL.backlogManager.getBacklog().push(e);
-    }
-
-    // Restore stage state
-    const newStageState = cloneDeep(loadFile.nowStageState);
-    const dispatch = webgalStore.dispatch;
-    dispatch(resetStageState(newStageState));
-
-    // Restore performances after state is set
-    setTimeout(restorePerform, 0);
-
-    dispatch(setVisibility({ component: 'showTitle', visibility: false }));
-    dispatch(setVisibility({ component: 'showMenuPanel', visibility: false }));
-
-    // Restore blurred background
-    setEbg(webgalStore.getState().stage.bgName);
-
-    // Restore Paper mode state if present in save
-    if (loadFile.paperState && loadFile.paperState.isPaperMode) {
-      dispatch(restoreFromSave(loadFile.paperState));
-      logger.info('Paper mode state restored from save', {
-        paperId: loadFile.paperState.metadata.paperId,
-        progress: loadFile.paperState.progress.percentage,
-      });
-    } else {
-      // Not a Paper mode save, ensure Paper mode is disabled
-      const currentPaperState = webgalStore.getState().paper;
-      if (currentPaperState.isPaperMode) {
-        dispatch(resetPaperState());
-        logger.info('Exited Paper mode (loaded non-Paper save)');
+      // Restore backlog
+      const newBacklog = loadFile.backlog;
+      WebGAL.backlogManager.getBacklog().splice(0, WebGAL.backlogManager.getBacklog().length);
+      for (const e of newBacklog) {
+        WebGAL.backlogManager.getBacklog().push(e);
       }
-    }
-  }).catch((error) => {
-    logger.error('Failed to load game scene:', error);
-  });
+
+      // Restore stage state
+      const newStageState = cloneDeep(loadFile.nowStageState);
+      const dispatch = webgalStore.dispatch;
+      dispatch(resetStageState(newStageState));
+
+      // Restore performances after state is set
+      setTimeout(restorePerform, 0);
+
+      dispatch(setVisibility({ component: 'showTitle', visibility: false }));
+      dispatch(setVisibility({ component: 'showMenuPanel', visibility: false }));
+
+      // Restore blurred background
+      setEbg(webgalStore.getState().stage.bgName);
+
+      // Restore Paper mode state if present in save
+      if (loadFile.paperState?.isPaperMode) {
+        dispatch(restoreFromSave(loadFile.paperState));
+        logger.info('Paper mode state restored from save', {
+          paperId: loadFile.paperState.metadata.paperId,
+          progress: loadFile.paperState.progress.percentage,
+        });
+      } else {
+        // Not a Paper mode save, ensure Paper mode is disabled
+        const currentPaperState = webgalStore.getState().paper;
+        if (currentPaperState.isPaperMode) {
+          dispatch(resetPaperState());
+          logger.info('Exited Paper mode (loaded non-Paper save)');
+        }
+      }
+    })
+    .catch((error) => {
+      logger.error('Failed to load game scene:', error);
+    });
 }

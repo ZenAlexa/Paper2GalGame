@@ -1,4 +1,4 @@
-import { ISentence } from '@/Core/controller/scene/sceneInterface';
+import type { ISentence } from '@/Core/controller/scene/sceneInterface';
 import { toSafeBoolean, toSafeNumber, toSafeString } from './toSafeType';
 
 export function getSentenceArgByKey(sentence: ISentence, argKey: string): null | string | boolean | number {

@@ -1,18 +1,14 @@
-import { ISentence } from '@/Core/controller/scene/sceneInterface';
-import { IPerform } from '@/Core/Modules/perform/performInterface';
-import { changeScene } from '@/Core/controller/scene/changeScene';
-import { jmp } from '@/Core/gameScripts/label/jmp';
 import ReactDOM from 'react-dom';
-import React from 'react';
-import styles from './getUserInput.module.scss';
-import { webgalStore } from '@/store/store';
-import { PerformController } from '@/Core/Modules/perform/performController';
-import { useSEByWebgalStore } from '@/hooks/useSoundEffect';
-import { WebGAL } from '@/Core/WebGAL';
-import { getStringArgByKey } from '@/Core/util/getSentenceArg';
 import { nextSentence } from '@/Core/controller/gamePlay/nextSentence';
-import { setStageVar } from '@/store/stageReducer';
+import type { ISentence } from '@/Core/controller/scene/sceneInterface';
+import type { IPerform } from '@/Core/Modules/perform/performInterface';
+import { getStringArgByKey } from '@/Core/util/getSentenceArg';
+import { WebGAL } from '@/Core/WebGAL';
 import { getCurrentFontFamily } from '@/hooks/useFontFamily';
+import { useSEByWebgalStore } from '@/hooks/useSoundEffect';
+import { setStageVar } from '@/store/stageReducer';
+import { webgalStore } from '@/store/store';
+import styles from './getUserInput.module.scss';
 
 /**
  * 显示选择枝
@@ -44,7 +40,7 @@ export const getUserInput = (sentence: ISentence): IPerform => {
                 setStageVar({
                   key: varKey,
                   value: userInput?.value || defaultValue || ' ',
-                }),
+                })
               );
             }
             playSeClick();
@@ -61,7 +57,7 @@ export const getUserInput = (sentence: ISentence): IPerform => {
   // eslint-disable-next-line react/no-deprecated
   ReactDOM.render(
     <div className={styles.Choose_Main}>{chooseElements}</div>,
-    document.getElementById('chooseContainer'),
+    document.getElementById('chooseContainer')
   );
   return {
     performName: 'userInput',

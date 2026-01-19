@@ -14,13 +14,13 @@
  * - hold: If true, wait for user click (default: false)
  */
 
-import { ISentence } from '@/Core/controller/scene/sceneInterface';
-import { IPerform } from '@/Core/Modules/perform/performInterface';
+import type React from 'react';
+import ReactDOM from 'react-dom';
+import type { ISentence } from '@/Core/controller/scene/sceneInterface';
+import type { IPerform } from '@/Core/Modules/perform/performInterface';
 import { getBooleanArgByKey, getNumberArgByKey, getStringArgByKey } from '@/Core/util/getSentenceArg';
 import { logger } from '@/Core/util/logger';
 import { WebGAL } from '@/Core/WebGAL';
-import React from 'react';
-import ReactDOM from 'react-dom';
 
 // Container ID for paper quote overlay
 const PAPER_QUOTE_CONTAINER_ID = 'paperQuoteContainer';
@@ -33,7 +33,7 @@ function getQuoteContainer(): HTMLElement | null {
   if (!container) {
     // Try to find a parent container to append to
     const introContainer = document.getElementById('introContainer');
-    if (introContainer && introContainer.parentElement) {
+    if (introContainer?.parentElement) {
       container = document.createElement('div');
       container.id = PAPER_QUOTE_CONTAINER_ID;
       container.style.cssText = `
@@ -157,7 +157,7 @@ export const paperQuote = (sentence: ISentence): IPerform => {
   const duration = getNumberArgByKey(sentence, 'duration') ?? (isHold ? 1000 * 60 * 60 * 24 : defaultDuration);
 
   logger.info('Paper quote command executing', {
-    text: quoteText.substring(0, 50) + '...',
+    text: `${quoteText.substring(0, 50)}...`,
     source,
     style,
     duration,

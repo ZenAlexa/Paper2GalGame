@@ -1,18 +1,15 @@
-import { commandType, ISentence } from '@/Core/controller/scene/sceneInterface';
-import { IPerform } from '@/Core/Modules/perform/performInterface';
+import type { ISentence } from '@/Core/controller/scene/sceneInterface';
+import type { IPerform } from '@/Core/Modules/perform/performInterface';
 import { logger } from '@/Core/util/logger';
-import { webgalStore } from '@/store/store';
-import { resetStageState, stageActions } from '@/store/stageReducer';
-import cloneDeep from 'lodash/cloneDeep';
-
 import { WebGAL } from '@/Core/WebGAL';
-import { IRunPerform } from '@/store/stageInterface';
+import { stageActions } from '@/store/stageReducer';
+import { webgalStore } from '@/store/store';
 
 /**
  * 初始化pixi
  * @param sentence
  */
-export const pixiInit = (sentence: ISentence): IPerform => {
+export const pixiInit = (_sentence: ISentence): IPerform => {
   WebGAL.gameplay.performController.performList.forEach((e) => {
     if (e.performName.match(/PixiPerform/)) {
       logger.warn('pixi 被脚本重新初始化', e.performName);

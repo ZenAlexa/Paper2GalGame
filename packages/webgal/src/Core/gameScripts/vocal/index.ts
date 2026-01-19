@@ -1,9 +1,4 @@
-import { ISentence } from '@/Core/controller/scene/sceneInterface';
-import { logger } from '@/Core/util/logger';
-import { webgalStore } from '@/store/store';
-import { setStage } from '@/store/stageReducer';
-import { getBooleanArgByKey, getNumberArgByKey, getStringArgByKey } from '@/Core/util/getSentenceArg';
-import { IStageState } from '@/store/stageInterface';
+import type { ISentence } from '@/Core/controller/scene/sceneInterface';
 import {
   audioContextWrapper,
   getAudioLevel,
@@ -11,8 +6,12 @@ import {
   performMouthAnimation,
   updateThresholds,
 } from '@/Core/gameScripts/vocal/vocalAnimation';
-import { match } from '../../util/match';
+import { getBooleanArgByKey, getNumberArgByKey, getStringArgByKey } from '@/Core/util/getSentenceArg';
+import { logger } from '@/Core/util/logger';
 import { WebGAL } from '@/Core/WebGAL';
+import type { IStageState } from '@/store/stageInterface';
+import { setStage } from '@/store/stageReducer';
+import { webgalStore } from '@/store/store';
 
 /**
  * 播放一段语音
@@ -40,11 +39,11 @@ export const playVocal = (sentence: ISentence) => {
   const freeFigure = currentStageState.freeFigure;
   const figureAssociatedAnimation = currentStageState.figureAssociatedAnimation;
   let bufferLength = 0;
-  let currentMouthValue = 0;
+  const currentMouthValue = 0;
   const lerpSpeed = 1;
 
   // 先停止之前的语音
-  let VocalControl: any = document.getElementById('currentVocal');
+  const VocalControl: any = document.getElementById('currentVocal');
   WebGAL.gameplay.performController.unmountPerform('vocal-play', true);
   if (VocalControl !== null) {
     VocalControl.currentTime = 0;
@@ -62,7 +61,7 @@ export const playVocal = (sentence: ISentence) => {
    */
 
   return {
-    arrangePerformPromise: new Promise((resolve) => {
+    arrangePerformPromise: new Promise((_resolve) => {
       // Set vocal volume immediately
       webgalStore.dispatch(setStage({ key: 'vocalVolume', value: volume }));
 
@@ -73,7 +72,7 @@ export const playVocal = (sentence: ISentence) => {
         if (!VocalControl) {
           // Element not yet rendered, retry with exponential backoff (max 10 retries = ~1s)
           if (retries < 10) {
-            setTimeout(() => waitForAudioElement(retries + 1), Math.min(100, 10 * Math.pow(2, retries)));
+            setTimeout(() => waitForAudioElement(retries + 1), Math.min(100, 10 * 2 ** retries));
           } else {
             logger.error('Audio element not found after retries');
           }
@@ -85,9 +84,8 @@ export const playVocal = (sentence: ISentence) => {
         // Get actual audio duration when metadata is loaded
         const setupPerformance = (audioDuration: number) => {
           // Use actual duration or fallback to 5 minutes (reasonable max)
-          const safeDuration = audioDuration > 0 && isFinite(audioDuration)
-            ? audioDuration * 1000
-            : 1000 * 60 * 5;
+          const safeDuration =
+            audioDuration > 0 && Number.isFinite(audioDuration) ? audioDuration * 1000 : 1000 * 60 * 5;
 
           const perform = {
             performName: performInitName,
@@ -156,7 +154,7 @@ export const playVocal = (sentence: ISentence) => {
               const audioLevel = getAudioLevel(
                 audioContextWrapper.analyser!,
                 audioContextWrapper.dataArray!,
-                bufferLength,
+                bufferLength
               );
               const { OPEN_THRESHOLD, HALF_OPEN_THRESHOLD } = updateThresholds(audioLevel);
 

@@ -1,16 +1,16 @@
-import { DebugCommand, IComponentVisibilityCommand, IDebugMessage } from '@/types/debugProtocol';
-import { webgalStore } from '@/store/store';
-import { setFontOptimization, setVisibility } from '@/store/GUIReducer';
-import { WebGAL } from '@/Core/WebGAL';
-import { sceneParser, WebgalParser } from '@/Core/parser/sceneParser';
-import { ISentence } from '@/Core/controller/scene/sceneInterface';
-import { runScript } from '@/Core/controller/gamePlay/runScript';
 import { nextSentence } from '@/Core/controller/gamePlay/nextSentence';
+import { runScript } from '@/Core/controller/gamePlay/runScript';
+import type { ISentence } from '@/Core/controller/scene/sceneInterface';
 import { resetStage } from '@/Core/controller/stage/resetStage';
+import { sceneParser, WebgalParser } from '@/Core/parser/sceneParser';
 import { logger } from '@/Core/util/logger';
-import { syncWithOrigine } from './syncWithOrigine';
+import { WebGAL } from '@/Core/WebGAL';
+import { setFontOptimization, setVisibility } from '@/store/GUIReducer';
+import { baseTransform, type IEffect } from '@/store/stageInterface';
 import { stageActions } from '@/store/stageReducer';
-import { baseTransform, IEffect } from '@/store/stageInterface';
+import { webgalStore } from '@/store/store';
+import { DebugCommand, type IComponentVisibilityCommand, type IDebugMessage } from '@/types/debugProtocol';
+import { syncWithOrigine } from './syncWithOrigine';
 
 export const webSocketFunc = () => {
   const loc: string = window.location.hostname;
@@ -32,7 +32,7 @@ export const webSocketFunc = () => {
   if (protocol === 'https:') {
     wsUrl = `wss://${loc}${defaultPort}/api/webgalsync`;
   }
-  logger.info('正在启动socket连接位于：' + wsUrl);
+  logger.info(`正在启动socket连接位于：${wsUrl}`);
   const socket = new WebSocket(wsUrl);
   socket.onopen = () => {
     logger.info('socket已连接');

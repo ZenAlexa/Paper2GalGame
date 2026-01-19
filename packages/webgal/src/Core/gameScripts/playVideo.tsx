@@ -1,12 +1,11 @@
-import { ISentence } from '@/Core/controller/scene/sceneInterface';
-import { IPerform } from '@/Core/Modules/perform/performInterface';
-import React from 'react';
 import ReactDOM from 'react-dom';
-import styles from '@/Stage/FullScreenPerform/fullScreenPerform.module.scss';
-import { webgalStore } from '@/store/store';
-import { getRandomPerformName, PerformController } from '@/Core/Modules/perform/performController';
+import type { ISentence } from '@/Core/controller/scene/sceneInterface';
+import { getRandomPerformName } from '@/Core/Modules/perform/performController';
+import type { IPerform } from '@/Core/Modules/perform/performInterface';
 import { getBooleanArgByKey } from '@/Core/util/getSentenceArg';
 import { WebGAL } from '@/Core/WebGAL';
+import styles from '@/Stage/FullScreenPerform/fullScreenPerform.module.scss';
+import { webgalStore } from '@/store/store';
 /**
  * 播放一段视频 * @param sentence
  */
@@ -17,14 +16,14 @@ export const playVideo = (sentence: ISentence): IPerform => {
   const bgmVol = mainVol * 0.01 * userDataState.optionData.bgmVolume * 0.01;
   const performInitName: string = getRandomPerformName();
 
-  let blockingNextFlag = getBooleanArgByKey(sentence, 'skipOff') ?? false;
+  const blockingNextFlag = getBooleanArgByKey(sentence, 'skipOff') ?? false;
 
   // eslint-disable-next-line react/no-deprecated
   ReactDOM.render(
     <div className={styles.videoContainer}>
       <video className={styles.fullScreen_video} id="playVideoElement" src={sentence.content} autoPlay={true} />
     </div>,
-    document.getElementById('videoContainer'),
+    document.getElementById('videoContainer')
   );
   let isOver = false;
   return {
@@ -40,7 +39,7 @@ export const playVideo = (sentence: ISentence): IPerform => {
        * 启动视频播放
        */
       setTimeout(() => {
-        let VocalControl: any = document.getElementById('playVideoElement');
+        const VocalControl: any = document.getElementById('playVideoElement');
         if (VocalControl !== null) {
           VocalControl.currentTime = 0;
           VocalControl.volume = bgmVol;

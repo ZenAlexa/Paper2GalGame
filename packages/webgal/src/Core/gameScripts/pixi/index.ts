@@ -1,16 +1,15 @@
-import { ISentence } from '@/Core/controller/scene/sceneInterface';
-import { IPerform } from '@/Core/Modules/perform/performInterface';
+import type { ISentence } from '@/Core/controller/scene/sceneInterface';
+import type { IPerform } from '@/Core/Modules/perform/performInterface';
 import { logger } from '@/Core/util/logger';
-import { IResult, call } from '../../util/pixiPerformManager/pixiPerformManager';
-
 import { WebGAL } from '@/Core/WebGAL';
+import { call, type IResult } from '../../util/pixiPerformManager/pixiPerformManager';
 
 /**
  * 运行一段pixi演出
  * @param sentence
  */
 export const pixi = (sentence: ISentence): IPerform => {
-  const pixiPerformName = 'PixiPerform' + sentence.content;
+  const pixiPerformName = `PixiPerform${sentence.content}`;
   WebGAL.gameplay.performController.performList.forEach((e) => {
     if (e.performName === pixiPerformName) {
       return {

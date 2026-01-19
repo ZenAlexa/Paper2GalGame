@@ -1,12 +1,11 @@
-import { ITransform } from '@/store/stageInterface';
-import * as popmotion from 'popmotion';
-import { WebGAL } from '@/Core/WebGAL';
-import { webgalStore } from '@/store/store';
-import { stageActions } from '@/store/stageReducer';
-import omitBy from 'lodash/omitBy';
 import isUndefined from 'lodash/isUndefined';
-import PixiStage, { IAnimationObject } from '@/Core/controller/stage/pixi/PixiController';
-import { AnimationFrame } from '@/Core/Modules/animations';
+import omitBy from 'lodash/omitBy';
+import * as popmotion from 'popmotion';
+import PixiStage, { type IAnimationObject } from '@/Core/controller/stage/pixi/PixiController';
+import type { AnimationFrame } from '@/Core/Modules/animations';
+import { WebGAL } from '@/Core/WebGAL';
+import { stageActions } from '@/store/stageReducer';
+import { webgalStore } from '@/store/store';
 
 /**
  * 动画创建模板
@@ -17,12 +16,12 @@ import { AnimationFrame } from '@/Core/Modules/animations';
 export function generateTimelineObj(
   timeline: Array<AnimationFrame>,
   targetKey: string,
-  duration: number,
+  duration: number
 ): IAnimationObject {
-  for (const segment of timeline) {
+  for (const _segment of timeline) {
     // Alpha 现在直接使用原生属性，无需转换为 alphaFilterVal
   }
-  const target = WebGAL.gameplay.pixiStage!.getStageObjByKey(targetKey);
+  const target = WebGAL.gameplay.pixiStage?.getStageObjByKey(targetKey);
   let currentDelay = 0;
   const values = [];
   const easeArray: Array<popmotion.Easing> = [];
@@ -54,7 +53,7 @@ export function generateTimelineObj(
       onUpdate: (updateValue) => {
         if (container) {
           const { scaleX, scaleY, ...val } = updateValue;
-          // @ts-ignore
+          // @ts-expect-error
           PixiStage.assignTransform(container, omitBy(val, isUndefined));
           // 因为 popmotion 不能用嵌套，scale 要手动设置
           if (!isUndefined(scaleX)) container.scale.x = scaleX;
@@ -75,7 +74,7 @@ export function generateTimelineObj(
       // 不能赋值到 position，因为 x 和 y 被 WebGALPixiContainer 代理，而 position 属性没有代理
       const { position, scale, ...state } = getStartStateEffect();
       const assignValue = omitBy({ x: position.x, y: position.y, ...state }, isUndefined);
-      // @ts-ignore
+      // @ts-expect-error
       PixiStage.assignTransform(target?.pixiContainer, assignValue);
       if (target?.pixiContainer) {
         if (!isUndefined(scale.x)) {
@@ -102,7 +101,7 @@ export function generateTimelineObj(
       // 不能赋值到 position，因为 x 和 y 被 WebGALPixiContainer 代理，而 position 属性没有代理
       const { position, scale, ...state } = getEndStateEffect();
       const assignValue = omitBy({ x: position.x, y: position.y, ...state }, isUndefined);
-      // @ts-ignore
+      // @ts-expect-error
       PixiStage.assignTransform(target?.pixiContainer, assignValue);
       if (target?.pixiContainer) {
         if (!isUndefined(scale.x)) {
@@ -119,7 +118,7 @@ export function generateTimelineObj(
    * 在此书写动画每一帧执行的函数
    * @param delta
    */
-  function tickerFunc(delta: number) {}
+  function tickerFunc(_delta: number) {}
 
   function getStartStateEffect() {
     return timeline[0];

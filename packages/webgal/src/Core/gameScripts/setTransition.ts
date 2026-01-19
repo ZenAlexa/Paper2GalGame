@@ -1,10 +1,8 @@
-import { ISentence } from '@/Core/controller/scene/sceneInterface';
-import { IPerform } from '@/Core/Modules/perform/performInterface';
-import { webgalStore } from '@/store/store';
-import cloneDeep from 'lodash/cloneDeep';
+import type { ISentence } from '@/Core/controller/scene/sceneInterface';
+import type { IPerform } from '@/Core/Modules/perform/performInterface';
 import { getStringArgByKey } from '@/Core/util/getSentenceArg';
-import { setStage, stageActions } from '@/store/stageReducer';
-import { WebGAL } from '@/Core/WebGAL';
+import { stageActions } from '@/store/stageReducer';
+import { webgalStore } from '@/store/store';
 
 /**
  * 设置转场效果
@@ -12,17 +10,17 @@ import { WebGAL } from '@/Core/WebGAL';
  */
 export const setTransition = (sentence: ISentence): IPerform => {
   // 根据参数设置指定位置
-  let key = getStringArgByKey(sentence, 'target') ?? '0';
+  const key = getStringArgByKey(sentence, 'target') ?? '0';
   const enterAnimation = getStringArgByKey(sentence, 'enter');
   const exitAnimation = getStringArgByKey(sentence, 'exit');
   if (enterAnimation) {
     webgalStore.dispatch(
-      stageActions.updateAnimationSettings({ target: key, key: 'enterAnimationName', value: enterAnimation }),
+      stageActions.updateAnimationSettings({ target: key, key: 'enterAnimationName', value: enterAnimation })
     );
   }
   if (exitAnimation) {
     webgalStore.dispatch(
-      stageActions.updateAnimationSettings({ target: key, key: 'exitAnimationName', value: exitAnimation }),
+      stageActions.updateAnimationSettings({ target: key, key: 'exitAnimationName', value: exitAnimation })
     );
   }
   return {

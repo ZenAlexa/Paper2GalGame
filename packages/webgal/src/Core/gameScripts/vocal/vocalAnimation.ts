@@ -4,7 +4,7 @@ interface IAudioContextWrapper {
   audioContext: AudioContext;
   source: MediaElementAudioSourceNode | null;
   analyser: AnalyserNode | undefined;
-  dataArray: Uint8Array | undefined;
+  dataArray: Uint8Array<ArrayBuffer> | undefined;
   audioLevelInterval: ReturnType<typeof setInterval>;
   blinkTimerID: ReturnType<typeof setTimeout>;
   maxAudioLevel: number;
@@ -51,8 +51,12 @@ export const performBlinkAnimation = (params: {
   blink();
 };
 
-// Updated getAudioLevel function
-export const getAudioLevel = (analyser: AnalyserNode, dataArray: Uint8Array, bufferLength: number): number => {
+// Get audio level from analyser node
+export const getAudioLevel = (
+  analyser: AnalyserNode,
+  dataArray: Uint8Array<ArrayBuffer>,
+  bufferLength: number
+): number => {
   analyser.getByteFrequencyData(dataArray);
   let sum = 0;
   for (let i = 0; i < bufferLength; i++) {

@@ -1,11 +1,11 @@
-import { ISentence } from '@/Core/controller/scene/sceneInterface';
-import { IPerform } from '@/Core/Modules/perform/performInterface';
+import type { ISentence } from '@/Core/controller/scene/sceneInterface';
+import type { IPerform } from '@/Core/Modules/perform/performInterface';
 
 /**
  * 语句执行的模板代码
  * @param sentence
  */
-export const template = (sentence: ISentence): IPerform => {
+export const template = (_sentence: ISentence): IPerform => {
   return {
     performName: 'none',
     duration: 0,

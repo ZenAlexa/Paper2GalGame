@@ -1,7 +1,7 @@
 import { WebGAL } from '@/Core/WebGAL';
 
 export function generateTestblurAnimationObj(targetKey: string, duration: number) {
-  const target = WebGAL.gameplay.pixiStage!.getStageObjByKey(targetKey);
+  const target = WebGAL.gameplay.pixiStage?.getStageObjByKey(targetKey);
 
   // 先设置一个通用的初态
 
@@ -12,8 +12,7 @@ export function generateTestblurAnimationObj(targetKey: string, duration: number
   function setStartState() {
     if (target?.pixiContainer) {
       target.pixiContainer.alpha = 0;
-      // @ts-ignore
-      target.pixiContainer.blur = 0;
+      (target.pixiContainer as any).blur = 0;
     }
   }
 
@@ -24,8 +23,7 @@ export function generateTestblurAnimationObj(targetKey: string, duration: number
   function setEndState() {
     if (target?.pixiContainer) {
       target.pixiContainer.alpha = 1;
-      // @ts-ignore
-      target.pixiContainer.blur = 5;
+      (target.pixiContainer as any).blur = 5;
     }
   }
 
@@ -36,7 +34,7 @@ export function generateTestblurAnimationObj(targetKey: string, duration: number
   function tickerFunc(delta: number) {
     if (target) {
       const container = target.pixiContainer;
-      const baseDuration = WebGAL.gameplay.pixiStage!.frameDuration;
+      const baseDuration = WebGAL.gameplay.pixiStage?.frameDuration ?? 1;
       const currentAddOplityDelta = (duration / baseDuration) * delta;
       const increasement = 1 / currentAddOplityDelta;
       const decreasement = 5 / currentAddOplityDelta;
@@ -44,9 +42,9 @@ export function generateTestblurAnimationObj(targetKey: string, duration: number
         if (container.alpha < 1) {
           container.alpha += increasement;
         }
-      // @ts-ignore
+      // @ts-expect-error
       if (container.blur < 5) {
-        // @ts-ignore
+        // @ts-expect-error
         container.blur += decreasement;
       }
     }

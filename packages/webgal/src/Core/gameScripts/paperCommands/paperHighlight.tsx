@@ -15,13 +15,13 @@
  * - hold: If true, wait for user click (default: false)
  */
 
-import { ISentence } from '@/Core/controller/scene/sceneInterface';
-import { IPerform } from '@/Core/Modules/perform/performInterface';
+import type React from 'react';
+import ReactDOM from 'react-dom';
+import type { ISentence } from '@/Core/controller/scene/sceneInterface';
+import type { IPerform } from '@/Core/Modules/perform/performInterface';
 import { getBooleanArgByKey, getNumberArgByKey, getStringArgByKey } from '@/Core/util/getSentenceArg';
 import { logger } from '@/Core/util/logger';
 import { WebGAL } from '@/Core/WebGAL';
-import React from 'react';
-import ReactDOM from 'react-dom';
 
 // Container ID for paper highlight overlay
 const PAPER_HIGHLIGHT_CONTAINER_ID = 'paperHighlightContainer';
@@ -49,7 +49,7 @@ function getHighlightContainer(): HTMLElement | null {
   if (!container) {
     // Try to find a parent container to append to
     const introContainer = document.getElementById('introContainer');
-    if (introContainer && introContainer.parentElement) {
+    if (introContainer?.parentElement) {
       container = document.createElement('div');
       container.id = PAPER_HIGHLIGHT_CONTAINER_ID;
       container.style.cssText = `
@@ -165,9 +165,7 @@ export const paperHighlight = (sentence: ISentence): IPerform => {
 
   // Validate color and importance
   const color = highlightColors[colorArg] ? colorArg : 'yellow';
-  const importance = importanceWeights[importanceArg]
-    ? (importanceArg as 'high' | 'medium' | 'low')
-    : 'medium';
+  const importance = importanceWeights[importanceArg] ? (importanceArg as 'high' | 'medium' | 'low') : 'medium';
 
   // Calculate duration based on text length and importance
   const importanceMultiplier = importanceWeights[importance];
@@ -176,7 +174,7 @@ export const paperHighlight = (sentence: ISentence): IPerform => {
   const duration = getNumberArgByKey(sentence, 'duration') ?? (isHold ? 1000 * 60 * 60 * 24 : defaultDuration);
 
   logger.info('Paper highlight command executing', {
-    text: highlightText.substring(0, 50) + '...',
+    text: `${highlightText.substring(0, 50)}...`,
     note,
     color,
     importance,

@@ -1,13 +1,13 @@
 /**
  * 当前的backlog
  */
-import { IEffect, IStageState } from '@/store/stageInterface';
-import { webgalStore } from '@/store/store';
-import { ISaveScene } from '@/store/userDataInterface';
-import cloneDeep from 'lodash/cloneDeep';
 
+import cloneDeep from 'lodash/cloneDeep';
+import type { SceneManager } from '@/Core/Modules/scene';
 import { SYSTEM_CONFIG } from '@/config';
-import { SceneManager } from '@/Core/Modules/scene';
+import type { IEffect, IStageState } from '@/store/stageInterface';
+import { webgalStore } from '@/store/store';
+import type { ISaveScene } from '@/store/userDataInterface';
 
 export interface IBacklogItem {
   currentStageState: IStageState;

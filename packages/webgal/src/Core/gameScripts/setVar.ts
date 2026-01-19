@@ -1,16 +1,15 @@
-import { ISentence } from '@/Core/controller/scene/sceneInterface';
-import { IPerform } from '@/Core/Modules/perform/performInterface';
-import { webgalStore } from '@/store/store';
-import { setStageVar } from '@/store/stageReducer';
-import { logger } from '@/Core/util/logger';
-import { compile } from 'angular-expressions';
-import { setScriptManagedGlobalVar } from '@/store/userDataReducer';
-import { ActionCreatorWithPayload } from '@reduxjs/toolkit';
-import { ISetGameVar } from '@/store/stageInterface';
-import { dumpToStorageFast } from '@/Core/controller/storage/storageController';
-import expression from 'angular-expressions';
+import type { ActionCreatorWithPayload } from '@reduxjs/toolkit';
+import expression, { compile } from 'angular-expressions';
 import get from 'lodash/get';
 import random from 'lodash/random';
+import type { ISentence } from '@/Core/controller/scene/sceneInterface';
+import { dumpToStorageFast } from '@/Core/controller/storage/storageController';
+import type { IPerform } from '@/Core/Modules/perform/performInterface';
+import { logger } from '@/Core/util/logger';
+import type { ISetGameVar } from '@/store/stageInterface';
+import { setStageVar } from '@/store/stageReducer';
+import { webgalStore } from '@/store/store';
+import { setScriptManagedGlobalVar } from '@/store/userDataReducer';
 import { getBooleanArgByKey } from '../util/getSentenceArg';
 
 /**
@@ -18,7 +17,7 @@ import { getBooleanArgByKey } from '../util/getSentenceArg';
  * @param sentence
  */
 export const setVar = (sentence: ISentence): IPerform => {
-  let setGlobal = getBooleanArgByKey(sentence, 'global') ?? false;
+  const setGlobal = getBooleanArgByKey(sentence, 'global') ?? false;
   let targetReducerFunction: ActionCreatorWithPayload<ISetGameVar, string>;
   if (setGlobal) {
     targetReducerFunction = setScriptManagedGlobalVar;
@@ -31,10 +30,10 @@ export const setVar = (sentence: ISentence): IPerform => {
     const valExp = sentence.content.split(/\s*=\s*/)[1];
     if (/^\s*[a-zA-Z_$][\w$]*\s*\(.*\)\s*$/.test(valExp)) {
       webgalStore.dispatch(targetReducerFunction({ key, value: EvaluateExpression(valExp) }));
-    } else if (valExp.match(/[+\-*\/()]/)) {
+    } else if (valExp.match(/[+\-*/()]/)) {
       // 如果包含加减乘除号，则运算
       // 先取出运算表达式中的变量
-      const valExpArr = valExp.split(/([+\-*\/()])/g);
+      const valExpArr = valExp.split(/([+\-*/()])/g);
       // 将变量替换为变量的值，然后合成表达式字符串
       const valExp2 = valExpArr
         .map((e) => {
@@ -64,7 +63,7 @@ export const setVar = (sentence: ISentence): IPerform => {
     } else if (valExp.length === 0) {
       webgalStore.dispatch(targetReducerFunction({ key, value: '' }));
     } else {
-      if (!isNaN(Number(valExp))) {
+      if (!Number.isNaN(Number(valExp))) {
         webgalStore.dispatch(targetReducerFunction({ key, value: Number(valExp) }));
       } else {
         // 字符串
@@ -111,9 +110,9 @@ export function getValueFromState(key: string) {
   const stage = webgalStore.getState().stage;
   const userData = webgalStore.getState().userData;
   const _Merge = { stage, userData }; // 不要直接合并到一起，防止可能的键冲突
-  if (stage.GameVar.hasOwnProperty(key)) {
+  if (Object.hasOwn(stage.GameVar, key)) {
     ret = stage.GameVar[key];
-  } else if (userData.globalGameVar.hasOwnProperty(key)) {
+  } else if (Object.hasOwn(userData.globalGameVar, key)) {
     ret = userData.globalGameVar[key];
   } else if (key.startsWith('$')) {
     const propertyKey = key.replace('$', '');
@@ -128,7 +127,7 @@ export function getValueFromState(key: string) {
 export function getValueFromStateElseKey(key: string, useKeyNameAsReturn = false) {
   const valueFromState = getValueFromState(key);
   if (valueFromState === null || valueFromState === undefined) {
-    logger.warn('valueFromState result null, key = ' + key);
+    logger.warn(`valueFromState result null, key = ${key}`);
     if (useKeyNameAsReturn) {
       return key;
     }

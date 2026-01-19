@@ -1,6 +1,6 @@
-import { ISentence } from '@/Core/controller/scene/sceneInterface';
-import { IPerform } from '@/Core/Modules/perform/performInterface';
+import type { ISentence } from '@/Core/controller/scene/sceneInterface';
 import { playBgm } from '@/Core/controller/stage/playBgm';
+import type { IPerform } from '@/Core/Modules/perform/performInterface';
 import { getNumberArgByKey, getStringArgByKey } from '@/Core/util/getSentenceArg';
 import { webgalStore } from '@/store/store';
 import { unlockBgmInUserData } from '@/store/userDataReducer';
@@ -10,7 +10,7 @@ import { unlockBgmInUserData } from '@/store/userDataReducer';
  * @param sentence
  */
 export const bgm = (sentence: ISentence): IPerform => {
-  let url: string = sentence.content; // 获取bgm的url
+  const url: string = sentence.content; // 获取bgm的url
   const name = getStringArgByKey(sentence, 'unlockname') ?? '';
   const series = getStringArgByKey(sentence, 'series') ?? 'default';
   let enter = getNumberArgByKey(sentence, 'enter') ?? 0; // 获取bgm的淡入时间

@@ -1,18 +1,17 @@
-import { ISentence } from '@/Core/controller/scene/sceneInterface';
-import { IPerform } from '@/Core/Modules/perform/performInterface';
-import { webgalStore } from '@/store/store';
-import { setStage } from '@/store/stageReducer';
-import { logger } from '@/Core/util/logger';
+import type { ISentence } from '@/Core/controller/scene/sceneInterface';
 import { getRandomPerformName } from '@/Core/Modules/perform/performController';
-import { PERFORM_CONFIG } from '@/config';
+import type { IPerform } from '@/Core/Modules/perform/performInterface';
+import { logger } from '@/Core/util/logger';
 import { WebGAL } from '@/Core/WebGAL';
+import { setStage } from '@/store/stageReducer';
+import { webgalStore } from '@/store/store';
 
 /**
  * 进行普通对话的显示
  * @param sentence 语句
  * @return {IPerform} 执行的演出
  */
-export const showVars = (sentence: ISentence): IPerform => {
+export const showVars = (_sentence: ISentence): IPerform => {
   const stageState = webgalStore.getState().stage;
   const userDataState = webgalStore.getState().userData;
   const dispatch = webgalStore.dispatch;

@@ -14,7 +14,7 @@ export function toSafeNumber(value: null | string | boolean | number): number | 
   if (typeof value === 'boolean') return value ? 1 : 0;
   if (typeof value === 'string') {
     const num = Number(value.trim());
-    return isNaN(num) ? null : num;
+    return Number.isNaN(num) ? null : num;
   }
   return null;
 }

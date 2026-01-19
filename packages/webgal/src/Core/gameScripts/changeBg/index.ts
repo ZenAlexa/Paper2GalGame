@@ -1,19 +1,14 @@
-import { ISentence } from '@/Core/controller/scene/sceneInterface';
-import { IPerform } from '@/Core/Modules/perform/performInterface';
-// import {getRandomPerformName} from '../../../util/getRandomPerformName';
-import styles from '@/Stage/stage.module.scss';
-import { webgalStore } from '@/store/store';
-import { setStage, stageActions } from '@/store/stageReducer';
-import { getNumberArgByKey, getStringArgByKey } from '@/Core/util/getSentenceArg';
-import { unlockCgInUserData } from '@/store/userDataReducer';
-import { logger } from '@/Core/util/logger';
-import { ITransform } from '@/store/stageInterface';
-import { generateTransformAnimationObj } from '@/Core/controller/stage/pixi/animations/generateTransformAnimationObj';
-import { AnimationFrame, IUserAnimation } from '@/Core/Modules/animations';
-import cloneDeep from 'lodash/cloneDeep';
-import { getAnimateDuration } from '@/Core/Modules/animationFunctions';
-import { WebGAL } from '@/Core/WebGAL';
 import { DEFAULT_BG_OUT_DURATION } from '@/Core/constants';
+import type { ISentence } from '@/Core/controller/scene/sceneInterface';
+import { generateTransformAnimationObj } from '@/Core/controller/stage/pixi/animations/generateTransformAnimationObj';
+import { getAnimateDuration } from '@/Core/Modules/animationFunctions';
+import type { AnimationFrame, IUserAnimation } from '@/Core/Modules/animations';
+import type { IPerform } from '@/Core/Modules/perform/performInterface';
+import { getNumberArgByKey, getStringArgByKey } from '@/Core/util/getSentenceArg';
+import { WebGAL } from '@/Core/WebGAL';
+import { setStage, stageActions } from '@/store/stageReducer';
+import { webgalStore } from '@/store/store';
+import { unlockCgInUserData } from '@/store/userDataReducer';
 
 /**
  * 进行背景图片的切换
@@ -62,9 +57,9 @@ export const changeBg = (sentence: ISentence): IPerform => {
       WebGAL.animationManager.addAnimation(newAnimation);
       duration = getAnimateDuration(animationName);
       webgalStore.dispatch(
-        stageActions.updateAnimationSettings({ target: 'bg-main', key: 'enterAnimationName', value: animationName }),
+        stageActions.updateAnimationSettings({ target: 'bg-main', key: 'enterAnimationName', value: animationName })
       );
-    } catch (e) {
+    } catch (_e) {
       // 解析都错误了，歇逼吧
       applyDefaultTransform();
     }
@@ -83,7 +78,7 @@ export const changeBg = (sentence: ISentence): IPerform => {
     WebGAL.animationManager.addAnimation(newAnimation);
     duration = getAnimateDuration(animationName);
     webgalStore.dispatch(
-      stageActions.updateAnimationSettings({ target: 'bg-main', key: 'enterAnimationName', value: animationName }),
+      stageActions.updateAnimationSettings({ target: 'bg-main', key: 'enterAnimationName', value: animationName })
     );
   }
 
@@ -92,24 +87,24 @@ export const changeBg = (sentence: ISentence): IPerform => {
   const exitAnimation = getStringArgByKey(sentence, 'exit');
   if (enterAnimation) {
     webgalStore.dispatch(
-      stageActions.updateAnimationSettings({ target: 'bg-main', key: 'enterAnimationName', value: enterAnimation }),
+      stageActions.updateAnimationSettings({ target: 'bg-main', key: 'enterAnimationName', value: enterAnimation })
     );
     duration = getAnimateDuration(enterAnimation);
   }
   if (exitAnimation) {
     webgalStore.dispatch(
-      stageActions.updateAnimationSettings({ target: 'bg-main', key: 'exitAnimationName', value: exitAnimation }),
+      stageActions.updateAnimationSettings({ target: 'bg-main', key: 'exitAnimationName', value: exitAnimation })
     );
     duration = getAnimateDuration(exitAnimation);
   }
   if (enterDuration >= 0) {
     webgalStore.dispatch(
-      stageActions.updateAnimationSettings({ target: 'bg-main', key: 'enterDuration', value: enterDuration }),
+      stageActions.updateAnimationSettings({ target: 'bg-main', key: 'enterDuration', value: enterDuration })
     );
   }
   if (exitDuration >= 0) {
     webgalStore.dispatch(
-      stageActions.updateAnimationSettings({ target: 'bg-main', key: 'exitDuration', value: exitDuration }),
+      stageActions.updateAnimationSettings({ target: 'bg-main', key: 'exitDuration', value: exitDuration })
     );
   }
 

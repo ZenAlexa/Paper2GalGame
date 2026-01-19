@@ -4,8 +4,6 @@
  * Types for dynamic content loading and segment management
  */
 
-import type { ISentence } from '@/Core/controller/scene/sceneInterface';
-
 /**
  * Segment status in the game
  */

@@ -1,8 +1,8 @@
-import { ISentence } from '@/Core/controller/scene/sceneInterface';
-import { IPerform } from '@/Core/Modules/perform/performInterface';
-import { WebGAL } from '@/Core/WebGAL';
-import { logger } from '@/Core/util/logger';
+import type { ISentence } from '@/Core/controller/scene/sceneInterface';
+import type { IPerform } from '@/Core/Modules/perform/performInterface';
 import { getStringArgByKey } from '@/Core/util/getSentenceArg';
+import { logger } from '@/Core/util/logger';
+import { WebGAL } from '@/Core/WebGAL';
 import { WEBGAL_NONE } from '../constants';
 
 /**

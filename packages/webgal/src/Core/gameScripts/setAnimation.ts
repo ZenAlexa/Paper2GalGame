@@ -1,12 +1,11 @@
-import { ISentence } from '@/Core/controller/scene/sceneInterface';
-import { IPerform } from '@/Core/Modules/perform/performInterface';
-import { getBooleanArgByKey, getStringArgByKey } from '@/Core/util/getSentenceArg';
-import { IAnimationObject } from '@/Core/controller/stage/pixi/PixiController';
-import { logger } from '@/Core/util/logger';
-import { webgalStore } from '@/store/store';
-
+import type { ISentence } from '@/Core/controller/scene/sceneInterface';
+import type { IAnimationObject } from '@/Core/controller/stage/pixi/PixiController';
 import { getAnimateDuration, getAnimationObject } from '@/Core/Modules/animationFunctions';
+import type { IPerform } from '@/Core/Modules/perform/performInterface';
+import { getBooleanArgByKey, getStringArgByKey } from '@/Core/util/getSentenceArg';
+import { logger } from '@/Core/util/logger';
 import { WebGAL } from '@/Core/WebGAL';
+import { webgalStore } from '@/store/store';
 
 /**
  * 设置背景动画
@@ -33,7 +32,7 @@ export const setAnimation = (sentence: ISentence): IPerform => {
       animationName,
       target,
       animationDuration,
-      writeDefault,
+      writeDefault
     );
     if (animationObj) {
       logger.debug(`动画${animationName}作用在${target}`, animationDuration);
@@ -43,7 +42,7 @@ export const setAnimation = (sentence: ISentence): IPerform => {
   stopFunction = () => {
     setTimeout(() => {
       const endDialogKey = webgalStore.getState().stage.currentDialogKey;
-      const isHasNext = startDialogKey !== endDialogKey;
+      const _isHasNext = startDialogKey !== endDialogKey;
       WebGAL.gameplay.pixiStage?.removeAnimationWithSetEffects(key);
     }, 0);
   };

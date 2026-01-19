@@ -1,16 +1,15 @@
-import { ISentence } from '@/Core/controller/scene/sceneInterface';
-import { IPerform } from '@/Core/Modules/perform/performInterface';
-import { playVocal } from './vocal';
-import { webgalStore } from '@/store/store';
-import { setStage } from '@/store/stageReducer';
-import { useTextAnimationDuration, useTextDelay } from '@/hooks/useTextOptions';
-import { getRandomPerformName, PerformController } from '@/Core/Modules/perform/performController';
-import { getBooleanArgByKey, getStringArgByKey } from '@/Core/util/getSentenceArg';
-import { textSize, voiceOption } from '@/store/userDataInterface';
-import { WebGAL } from '@/Core/WebGAL';
-import { compileSentence } from '@/Stage/TextBox/TextBox';
+import type { ISentence } from '@/Core/controller/scene/sceneInterface';
 import { performMouthAnimation } from '@/Core/gameScripts/vocal/vocalAnimation';
-import { match } from '@/Core/util/match';
+import { getRandomPerformName } from '@/Core/Modules/perform/performController';
+import type { IPerform } from '@/Core/Modules/perform/performInterface';
+import { getBooleanArgByKey, getStringArgByKey } from '@/Core/util/getSentenceArg';
+import { WebGAL } from '@/Core/WebGAL';
+import { useTextAnimationDuration, useTextDelay } from '@/hooks/useTextOptions';
+import { compileSentence } from '@/Stage/TextBox/TextBox';
+import { setStage } from '@/store/stageReducer';
+import { webgalStore } from '@/store/store';
+import { textSize, voiceOption } from '@/store/userDataInterface';
+import { playVocal } from './vocal';
 
 /**
  * 进行普通对话的显示
@@ -23,6 +22,17 @@ export const say = (sentence: ISentence): IPerform => {
   const dispatch = webgalStore.dispatch;
   let dialogKey = Math.random().toString(); // 生成一个随机的key
   let dialogToShow = sentence.content; // 获取对话内容
+
+  // Debug logging for troubleshooting empty content issues
+  if (!dialogToShow || dialogToShow.trim() === '') {
+    console.error('[say] CRITICAL: Empty dialogue content!', {
+      command: sentence.command,
+      commandRaw: sentence.commandRaw,
+      content: sentence.content,
+      args: sentence.args,
+    });
+  }
+
   if (dialogToShow) {
     dialogToShow = String(dialogToShow).replace(/ {2,}/g, (match) => '\u00a0'.repeat(match.length)); // 替换连续两个或更多空格
   }
@@ -98,7 +108,7 @@ export const say = (sentence: ISentence): IPerform => {
   if (rightFromArgs) pos = 'right';
   if (centerFromArgs) pos = 'center';
 
-  let key = getStringArgByKey(sentence, 'figureId') ?? '';
+  const key = getStringArgByKey(sentence, 'figureId') ?? '';
 
   let audioLevel = 80;
   const performSimulateVocal = (end = false) => {

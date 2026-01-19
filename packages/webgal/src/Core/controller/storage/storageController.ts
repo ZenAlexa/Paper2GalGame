@@ -1,12 +1,11 @@
 import * as localforage from 'localforage';
-import { IUserData, ISaveData } from '@/store/userDataInterface';
-import { IPersistedPaperData, IPaperReadingList, IPaperReadingEntry } from '@/store/paperInterface';
-import { logger } from '../../util/logger';
-import { webgalStore } from '@/store/store';
-import { initState, resetUserData } from '@/store/userDataReducer';
-import { restorePaperData, initialPaperState } from '@/store/paperReducer';
-
 import { WebGAL } from '@/Core/WebGAL';
+import type { IPaperReadingEntry, IPaperReadingList, IPersistedPaperData } from '@/store/paperInterface';
+import { restorePaperData } from '@/store/paperReducer';
+import { webgalStore } from '@/store/store';
+import type { ISaveData, IUserData } from '@/store/userDataInterface';
+import { initState, resetUserData } from '@/store/userDataReducer';
+import { logger } from '../../util/logger';
 
 /**
  * Get the storage key for Paper reading list
@@ -85,7 +84,7 @@ export const dumpToStorageFast = () => {
 function checkUserDataProperty(userData: any) {
   let result = true;
   for (const key in initState) {
-    if (!userData.hasOwnProperty(key)) {
+    if (!Object.hasOwn(userData, key)) {
       result = false;
     }
   }
@@ -218,9 +217,7 @@ export async function updatePaperReadingEntry(entry: IPaperReadingEntry): Promis
   const list = await getPaperReadingList();
 
   // Find existing entry by paper ID
-  const existingIndex = list.entries.findIndex(
-    (e) => e.metadata.paperId === entry.metadata.paperId
-  );
+  const existingIndex = list.entries.findIndex((e) => e.metadata.paperId === entry.metadata.paperId);
 
   if (existingIndex >= 0) {
     // Update existing entry

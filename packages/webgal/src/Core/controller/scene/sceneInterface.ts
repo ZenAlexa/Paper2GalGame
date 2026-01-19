@@ -1,8 +1,9 @@
 /**
  * 语句类型
  */
-import { fileType } from '@/Core/util/gameAssetsAccess/assetSetter';
-import { ISceneEntry } from '@/Core/Modules/scene';
+
+import type { ISceneEntry } from '@/Core/Modules/scene';
+import type { fileType } from '@/Core/util/gameAssetsAccess/assetSetter';
 
 export enum commandType {
   say, // 对话

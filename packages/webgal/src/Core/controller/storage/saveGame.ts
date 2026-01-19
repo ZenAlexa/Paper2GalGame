@@ -1,15 +1,12 @@
-import { logger } from '../../util/logger';
-import { ISaveData } from '@/store/userDataInterface';
-import { IPaperSaveState } from '@/store/paperInterface';
-import { dumpToStorageFast } from './storageController';
-import { webgalStore } from '@/store/store';
-import { setUserData } from '@/store/userDataReducer';
 import cloneDeep from 'lodash/cloneDeep';
-
-import { WebGAL } from '@/Core/WebGAL';
-import { saveActions } from '@/store/savesReducer';
 import { dumpSavesToStorage } from '@/Core/controller/storage/savesController';
 import { createPaperReadingEntry, updatePaperReadingEntry } from '@/Core/controller/storage/storageController';
+import { WebGAL } from '@/Core/WebGAL';
+import type { IPaperSaveState } from '@/store/paperInterface';
+import { saveActions } from '@/store/savesReducer';
+import { webgalStore } from '@/store/store';
+import type { ISaveData } from '@/store/userDataInterface';
+import { logger } from '../../util/logger';
 
 /**
  * 保存游戏
@@ -68,7 +65,7 @@ export function generateCurrentStageData(index: number, isSavePreviewImage = tru
     nowStageState: cloneDeep(stageState),
     backlog: saveBacklog, // 舞台数据
     index: index, // 存档的序号
-    saveTime: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString('chinese', { hour12: false }), // 保存时间
+    saveTime: `${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString('chinese', { hour12: false })}`, // 保存时间
     // 场景数据
     sceneData: {
       currentSentenceId: WebGAL.sceneManager.sceneData.currentSentenceId, // 当前语句ID

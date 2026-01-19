@@ -6,14 +6,13 @@
  */
 
 import type {
-  SegmentInfo,
-  SegmentStatus,
-  DynamicContentState,
   DynamicContentEvent,
   DynamicContentListener,
-  WaitingDialogue,
+  DynamicContentState,
   IncrementalControllerConfig,
   MultiLanguageText,
+  SegmentInfo,
+  WaitingDialogue,
 } from './types';
 
 /**

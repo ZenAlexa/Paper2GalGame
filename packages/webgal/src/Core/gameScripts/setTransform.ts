@@ -1,23 +1,20 @@
-import { ISentence } from '@/Core/controller/scene/sceneInterface';
-import { IPerform } from '@/Core/Modules/perform/performInterface';
-import { getBooleanArgByKey, getNumberArgByKey, getStringArgByKey } from '@/Core/util/getSentenceArg';
-import PixiStage, { IAnimationObject } from '@/Core/controller/stage/pixi/PixiController';
-import { logger } from '@/Core/util/logger';
-import { webgalStore } from '@/store/store';
-import { generateTimelineObj } from '@/Core/controller/stage/pixi/animations/timeline';
-import cloneDeep from 'lodash/cloneDeep';
-import { baseTransform, ITransform } from '@/store/stageInterface';
-import { AnimationFrame, IUserAnimation } from '../Modules/animations';
+import type { ISentence } from '@/Core/controller/scene/sceneInterface';
 import { generateTransformAnimationObj } from '@/Core/controller/stage/pixi/animations/generateTransformAnimationObj';
+import type { IAnimationObject } from '@/Core/controller/stage/pixi/PixiController';
+import type { IPerform } from '@/Core/Modules/perform/performInterface';
+import { getBooleanArgByKey, getNumberArgByKey, getStringArgByKey } from '@/Core/util/getSentenceArg';
+import { logger } from '@/Core/util/logger';
 import { WebGAL } from '@/Core/WebGAL';
+import { webgalStore } from '@/store/store';
 import { getAnimateDuration, getAnimationObject } from '../Modules/animationFunctions';
+import type { AnimationFrame, IUserAnimation } from '../Modules/animations';
 
 /**
  * 设置变换
  * @param sentence
  */
 export const setTransform = (sentence: ISentence): IPerform => {
-  const startDialogKey = webgalStore.getState().stage.currentDialogKey;
+  const _startDialogKey = webgalStore.getState().stage.currentDialogKey;
   const animationName = (Math.random() * 10).toString(16);
   const animationString = sentence.content;
   let animationObj: AnimationFrame[];
@@ -36,7 +33,7 @@ export const setTransform = (sentence: ISentence): IPerform => {
     const frame = JSON.parse(animationString) as AnimationFrame;
     animationObj = generateTransformAnimationObj(target, frame, duration, ease);
     console.log('animationObj:', animationObj);
-  } catch (e) {
+  } catch (_e) {
     // 解析都错误了，歇逼吧
     animationObj = [];
   }
@@ -56,7 +53,7 @@ export const setTransform = (sentence: ISentence): IPerform => {
       animationName,
       target,
       animationDuration,
-      writeDefault,
+      writeDefault
     );
     if (animationObj) {
       logger.debug(`动画${animationName}作用在${target}`, animationDuration);

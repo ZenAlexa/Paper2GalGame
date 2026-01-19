@@ -1,11 +1,11 @@
 import axios from 'axios';
+import { buildFontOptionsFromTemplate } from '@/Core/util/fonts/fontOptions';
 import { logger } from '@/Core/util/logger';
 import { WebGAL } from '@/Core/WebGAL';
-import { TemplateFontDescriptor, WebgalTemplate } from '@/types/template';
-import { buildFontOptionsFromTemplate } from '@/Core/util/fonts/fontOptions';
-import { webgalStore } from '@/store/store';
 import { setFontOptions } from '@/store/GUIReducer';
+import { webgalStore } from '@/store/store';
 import { setOptionData } from '@/store/userDataReducer';
+import type { TemplateFontDescriptor, WebgalTemplate } from '@/types/template';
 
 const TEMPLATE_PATH = './game/template/template.json';
 const TEMPLATE_FONT_STYLE_SELECTOR = 'style[data-webgal-template-fonts]';

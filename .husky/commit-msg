@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+
+# Conventional Commits validation
+# References:
+# - https://www.conventionalcommits.org/
+# - https://github.com/conventional-changelog/commitlint
+
+npx --no -- commitlint --edit "$1"

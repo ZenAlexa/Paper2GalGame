@@ -40,6 +40,9 @@ export enum commandType {
   applyStyle,
   wait,
   callSteam, // 调用Steam功能
+  // Paper mode commands
+  paperQuote, // Display paper citation/quote with source reference
+  paperHighlight, // Highlight important paper content with annotation
 }
 
 /**

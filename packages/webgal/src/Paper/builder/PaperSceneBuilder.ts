@@ -8,7 +8,14 @@
 
 import { commandType, ISentence, IScene, IAsset } from '@/Core/controller/scene/sceneInterface';
 import { fileType } from '@/Core/util/gameAssetsAccess/assetSetter';
-import type { AIGeneratedScript, AIDialogueLine, ResolvedDialogue } from '../types';
+import type {
+  AIGeneratedScript,
+  AIDialogueLine,
+  ResolvedDialogue,
+  PaperQuoteData,
+  PaperHighlightData,
+  AIGeneratedScriptExtended,
+} from '../types';
 import { PAPER_CHARACTERS, getCharacterDisplayName, buildPositionMap } from '../config';
 import {
   createSaySentence,
@@ -16,6 +23,8 @@ import {
   createChangeFigureSentence,
   createBgmSentence,
   createEndSentence,
+  createPaperQuoteSentence,
+  createPaperHighlightSentence,
 } from '../factory';
 
 /**
@@ -193,6 +202,172 @@ export class PaperSceneBuilder {
   }
 
   /**
+   * Build IScene from AIGeneratedScriptExtended (with quotes and highlights)
+   * This is the enhanced version that supports Paper-specific commands
+   */
+  buildExtended(script: AIGeneratedScriptExtended, sessionId?: string): IScene {
+    const sentences: ISentence[] = [];
+    const assets: IAsset[] = [];
+
+    // Step 1: Add changeBg at the beginning
+    const background = script.background || this.options.defaultBackground;
+    sentences.push(
+      createChangeBgSentence({
+        filename: background,
+        next: true,
+      })
+    );
+    assets.push({
+      name: background,
+      type: fileType.background,
+      url: background,
+      lineNumber: 0,
+    });
+
+    // Step 2: Add single BGM command (deduplication logic)
+    const bgm = script.bgm || this.options.defaultBgm;
+    const bgmVolume = script.bgmVolume ?? this.options.defaultBgmVolume;
+    sentences.push(
+      createBgmSentence({
+        filename: bgm,
+        volume: bgmVolume,
+      })
+    );
+    assets.push({
+      name: bgm,
+      type: fileType.bgm,
+      url: bgm,
+      lineNumber: 1,
+    });
+
+    // Step 3: Build position map for speaker-sprite mapping
+    const characterIds = script.metadata.characters;
+    const positionMap = buildPositionMap(characterIds);
+
+    // Step 4: Build maps for quotes and highlights by insertAfter position
+    const quotesMap = this.buildInsertionMap(script.quotes || []);
+    const highlightsMap = this.buildInsertionMap(script.highlights || []);
+
+    // Step 5: Process dialogues with speaker change detection and paper elements
+    let currentSpeaker: string | null = null;
+    let lineNumber = 2; // Start after changeBg and bgm
+    let dialogueIndex = 0;
+
+    for (const dialogue of script.dialogues) {
+      const resolvedDialogue = this.resolveDialogue(dialogue, positionMap);
+
+      // Insert changeFigure when speaker changes
+      if (dialogue.characterId !== currentSpeaker) {
+        sentences.push(
+          createChangeFigureSentence({
+            filename: resolvedDialogue.sprite,
+            position: resolvedDialogue.position,
+            next: true,
+          })
+        );
+
+        // Add figure asset
+        if (!assets.some((a) => a.name === resolvedDialogue.sprite && a.type === fileType.figure)) {
+          assets.push({
+            name: resolvedDialogue.sprite,
+            type: fileType.figure,
+            url: resolvedDialogue.sprite,
+            lineNumber,
+          });
+        }
+
+        currentSpeaker = dialogue.characterId;
+        lineNumber++;
+      }
+
+      // Add say sentence with vocal if available
+      sentences.push(
+        createSaySentence({
+          text: dialogue.text,
+          speaker: resolvedDialogue.speakerName,
+          vocal: dialogue.vocal,
+        })
+      );
+
+      // Add vocal asset if present
+      if (dialogue.vocal) {
+        assets.push({
+          name: dialogue.vocal,
+          type: fileType.vocal,
+          url: dialogue.vocal,
+          lineNumber,
+        });
+      }
+
+      lineNumber++;
+
+      // Insert quotes after this dialogue if specified
+      const quotesAfter = quotesMap.get(dialogueIndex) || [];
+      for (const quote of quotesAfter) {
+        sentences.push(
+          createPaperQuoteSentence({
+            text: quote.text,
+            source: quote.source,
+            style: quote.style,
+            duration: quote.duration ?? undefined,
+            hold: quote.duration === null,
+          })
+        );
+        lineNumber++;
+      }
+
+      // Insert highlights after this dialogue if specified
+      const highlightsAfter = highlightsMap.get(dialogueIndex) || [];
+      for (const highlight of highlightsAfter) {
+        sentences.push(
+          createPaperHighlightSentence({
+            text: highlight.text,
+            note: highlight.note,
+            color: highlight.color,
+            importance: highlight.importance,
+            duration: highlight.duration ?? undefined,
+            hold: highlight.duration === null,
+          })
+        );
+        lineNumber++;
+      }
+
+      dialogueIndex++;
+    }
+
+    // Step 6: Add end command
+    sentences.push(createEndSentence());
+
+    // Build scene name
+    const sceneName = sessionId
+      ? `${this.options.sceneNamePrefix}_${sessionId}`
+      : `${this.options.sceneNamePrefix}_${Date.now()}`;
+
+    return {
+      sceneName,
+      sceneUrl: `paper://${sceneName}`,
+      sentenceList: sentences,
+      assetsList: assets,
+      subSceneList: [],
+    };
+  }
+
+  /**
+   * Build insertion map from array of items with insertAfter property
+   */
+  private buildInsertionMap<T extends { insertAfter?: number }>(items: T[]): Map<number, T[]> {
+    const map = new Map<number, T[]>();
+    for (const item of items) {
+      const position = item.insertAfter ?? -1;
+      if (!map.has(position)) {
+        map.set(position, []);
+      }
+      map.get(position)!.push(item);
+    }
+    return map;
+  }
+
+  /**
    * Build IScene from raw dialogues (convenience method)
    * Use when you have dialogue data but not a full AIGeneratedScript
    */
@@ -323,4 +498,15 @@ export function buildPaperSceneFromDialogues(
 ): IScene {
   const builder = new PaperSceneBuilder(options);
   return builder.buildFromDialogues(dialogues, options);
+}
+
+/**
+ * Factory function for building extended scene with Paper-specific commands
+ */
+export function buildPaperSceneExtended(
+  script: AIGeneratedScriptExtended,
+  options?: PaperSceneBuilderOptions
+): IScene {
+  const builder = new PaperSceneBuilder(options);
+  return builder.buildExtended(script);
 }

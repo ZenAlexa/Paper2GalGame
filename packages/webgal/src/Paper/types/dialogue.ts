@@ -75,3 +75,47 @@ export interface ResolvedDialogue extends AIDialogueLine {
   /** Speaker display name */
   speakerName: string;
 }
+
+/**
+ * Paper quote data for displaying citations
+ */
+export interface PaperQuoteData {
+  /** Quote text content */
+  text: string;
+  /** Source reference (e.g., "Section 3.2", "Figure 1") */
+  source?: string;
+  /** Quote style */
+  style?: 'blockquote' | 'inline' | 'highlight';
+  /** Display duration in ms (null = wait for user) */
+  duration?: number | null;
+  /** Insert position (index in dialogue sequence) */
+  insertAfter?: number;
+}
+
+/**
+ * Paper highlight data for emphasizing content
+ */
+export interface PaperHighlightData {
+  /** Highlighted text content */
+  text: string;
+  /** Annotation or explanation */
+  note?: string;
+  /** Highlight color */
+  color?: 'yellow' | 'green' | 'blue' | 'pink';
+  /** Importance level */
+  importance?: 'high' | 'medium' | 'low';
+  /** Display duration in ms (null = wait for user) */
+  duration?: number | null;
+  /** Insert position (index in dialogue sequence) */
+  insertAfter?: number;
+}
+
+/**
+ * Extended AI-generated script with Paper-specific elements
+ */
+export interface AIGeneratedScriptExtended extends AIGeneratedScript {
+  /** Paper quotes to display */
+  quotes?: PaperQuoteData[];
+  /** Paper highlights to display */
+  highlights?: PaperHighlightData[];
+}

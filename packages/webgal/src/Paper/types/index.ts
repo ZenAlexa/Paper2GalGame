@@ -18,6 +18,10 @@ export type {
   AIScriptMetadata,
   AIGeneratedScript,
   ResolvedDialogue,
+  // Paper-specific element types
+  PaperQuoteData,
+  PaperHighlightData,
+  AIGeneratedScriptExtended,
 } from './dialogue';
 
 // Paper types

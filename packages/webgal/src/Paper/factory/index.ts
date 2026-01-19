@@ -10,6 +10,9 @@ export {
   createWaitSentence,
   createEndSentence,
   createDialogueSentences,
+  // Paper-specific command factories
+  createPaperQuoteSentence,
+  createPaperHighlightSentence,
 } from './sentenceFactory';
 
 export type {
@@ -19,4 +22,7 @@ export type {
   BgmSentenceOptions,
   WaitSentenceOptions,
   BatchSentenceOptions,
+  // Paper-specific options
+  PaperQuoteSentenceOptions,
+  PaperHighlightSentenceOptions,
 } from './sentenceFactory';

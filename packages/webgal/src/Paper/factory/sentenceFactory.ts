@@ -293,3 +293,102 @@ export function createDialogueSentences(options: BatchSentenceOptions): ISentenc
 
   return sentences;
 }
+
+// ========================
+// Paper-specific Commands
+// ========================
+
+/**
+ * Options for creating a paperQuote sentence
+ */
+export interface PaperQuoteSentenceOptions {
+  /** Quote text content */
+  text: string;
+  /** Source reference (e.g., "Section 3.2", "Figure 1") */
+  source?: string;
+  /** Quote style: blockquote, inline, or highlight */
+  style?: 'blockquote' | 'inline' | 'highlight';
+  /** Display duration in ms (if not set, calculated from text length) */
+  duration?: number;
+  /** Wait for user click before advancing */
+  hold?: boolean;
+}
+
+/**
+ * Create a paperQuote sentence for displaying paper citations
+ */
+export function createPaperQuoteSentence(options: PaperQuoteSentenceOptions): ISentence {
+  const args: arg[] = [];
+
+  if (options.source) {
+    args.push(createArg('source', options.source));
+  }
+  if (options.style) {
+    args.push(createArg('style', options.style));
+  }
+  if (options.duration !== undefined) {
+    args.push(createArg('duration', options.duration));
+  }
+  if (options.hold) {
+    args.push(createArg('hold', true));
+  }
+
+  return {
+    command: commandType.paperQuote,
+    commandRaw: 'paperQuote',
+    content: options.text,
+    args,
+    sentenceAssets: [],
+    subScene: [],
+  };
+}
+
+/**
+ * Options for creating a paperHighlight sentence
+ */
+export interface PaperHighlightSentenceOptions {
+  /** Highlighted text content */
+  text: string;
+  /** Annotation or explanation */
+  note?: string;
+  /** Highlight color */
+  color?: 'yellow' | 'green' | 'blue' | 'pink';
+  /** Importance level */
+  importance?: 'high' | 'medium' | 'low';
+  /** Display duration in ms (if not set, calculated from text length and importance) */
+  duration?: number;
+  /** Wait for user click before advancing */
+  hold?: boolean;
+}
+
+/**
+ * Create a paperHighlight sentence for emphasizing paper content
+ */
+export function createPaperHighlightSentence(options: PaperHighlightSentenceOptions): ISentence {
+  const args: arg[] = [];
+
+  if (options.note) {
+    args.push(createArg('note', options.note));
+  }
+  if (options.color) {
+    args.push(createArg('color', options.color));
+  }
+  if (options.importance) {
+    args.push(createArg('importance', options.importance));
+  }
+  if (options.duration !== undefined) {
+    args.push(createArg('duration', options.duration));
+  }
+  if (options.hold) {
+    args.push(createArg('hold', true));
+  }
+
+  return {
+    command: commandType.paperHighlight,
+    commandRaw: 'paperHighlight',
+    content: options.text,
+    args,
+    sentenceAssets: [],
+    subScene: [],
+  };
+}

@@ -37,6 +37,7 @@ import { showVars } from '../gameScripts/showVars';
 import { defineScripts, IConfigInterface, ScriptConfig, ScriptFunction, scriptRegistry } from './utils';
 import { applyStyle } from '@/Core/gameScripts/applyStyle';
 import { wait } from '@/Core/gameScripts/wait';
+import { paperQuote, paperHighlight } from '@/Core/gameScripts/paperCommands';
 
 export const SCRIPT_TAG_MAP = defineScripts({
   say: ScriptConfig(commandType.say, say),
@@ -74,6 +75,9 @@ export const SCRIPT_TAG_MAP = defineScripts({
   applyStyle: ScriptConfig(commandType.applyStyle, applyStyle, { next: true }),
   wait: ScriptConfig(commandType.wait, wait),
   callSteam: ScriptConfig(commandType.callSteam, callSteam, { next: true }),
+  // Paper mode commands
+  paperQuote: ScriptConfig(commandType.paperQuote, paperQuote),
+  paperHighlight: ScriptConfig(commandType.paperHighlight, paperHighlight),
 });
 
 export const SCRIPT_CONFIG: IConfigInterface[] = Object.values(SCRIPT_TAG_MAP);

@@ -1,8 +1,8 @@
 /**
  * Paper Module - Main Export
  *
- * Provides types, configurations, and factory functions for Paper mode
- * which converts academic papers into visual novel experiences.
+ * Provides types, configurations, factory functions, and scene builders
+ * for Paper mode which converts academic papers into visual novel experiences.
  *
  * Usage:
  * ```typescript
@@ -23,6 +23,11 @@
  *   createChangeFigureSentence,
  *   createBgmSentence,
  *   createDialogueSentences,
+ *
+ *   // Scene Builder
+ *   PaperSceneBuilder,
+ *   buildPaperScene,
+ *   buildPaperSceneFromDialogues,
  * } from '@/Paper';
  * ```
  */
@@ -35,3 +40,6 @@ export * from './config';
 
 // Factory functions
 export * from './factory';
+
+// Scene Builder
+export * from './builder';

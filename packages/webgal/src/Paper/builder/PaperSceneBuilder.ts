@@ -6,26 +6,19 @@
  * text-based scripts.
  */
 
-import { commandType, ISentence, IScene, IAsset } from '@/Core/controller/scene/sceneInterface';
+import type { IAsset, IScene, ISentence } from '@/Core/controller/scene/sceneInterface';
 import { fileType } from '@/Core/util/gameAssetsAccess/assetSetter';
-import type {
-  AIGeneratedScript,
-  AIDialogueLine,
-  ResolvedDialogue,
-  PaperQuoteData,
-  PaperHighlightData,
-  AIGeneratedScriptExtended,
-} from '../types';
-import { PAPER_CHARACTERS, getCharacterDisplayName, buildPositionMap } from '../config';
+import { buildPositionMap, getCharacterDisplayName, PAPER_CHARACTERS } from '../config';
 import {
-  createSaySentence,
+  createBgmSentence,
   createChangeBgSentence,
   createChangeFigureSentence,
-  createBgmSentence,
   createEndSentence,
-  createPaperQuoteSentence,
   createPaperHighlightSentence,
+  createPaperQuoteSentence,
+  createSaySentence,
 } from '../factory';
+import type { AIDialogueLine, AIGeneratedScript, AIGeneratedScriptExtended, ResolvedDialogue } from '../types';
 
 /**
  * Configuration options for scene building
@@ -191,7 +184,7 @@ export class PaperSceneBuilder {
     positionMap: ReturnType<typeof buildPositionMap>
   ): ResolvedDialogue {
     const characterId = dialogue.characterId || 'unknown';
-    const mapping = positionMap[characterId] || positionMap['unknown'];
+    const mapping = positionMap[characterId] || positionMap.unknown;
 
     return {
       ...dialogue,
@@ -362,7 +355,7 @@ export class PaperSceneBuilder {
       if (!map.has(position)) {
         map.set(position, []);
       }
-      map.get(position)!.push(item);
+      map.get(position)?.push(item);
     }
     return map;
   }
@@ -419,8 +412,7 @@ export class PaperSceneBuilder {
     dialogues: AIDialogueLine[],
     vocalMap: Map<string, string> | Record<string, string>
   ): AIDialogueLine[] {
-    const vocalMapNormalized =
-      vocalMap instanceof Map ? vocalMap : new Map(Object.entries(vocalMap));
+    const vocalMapNormalized = vocalMap instanceof Map ? vocalMap : new Map(Object.entries(vocalMap));
 
     return dialogues.map((dialogue, index) => {
       const dialogueId = `dialogue_${index}`;
@@ -475,10 +467,7 @@ export class PaperSceneBuilder {
 /**
  * Factory function for quick scene building
  */
-export function buildPaperScene(
-  script: AIGeneratedScript,
-  options?: PaperSceneBuilderOptions
-): IScene {
+export function buildPaperScene(script: AIGeneratedScript, options?: PaperSceneBuilderOptions): IScene {
   const builder = new PaperSceneBuilder(options);
   return builder.build(script);
 }
@@ -503,10 +492,7 @@ export function buildPaperSceneFromDialogues(
 /**
  * Factory function for building extended scene with Paper-specific commands
  */
-export function buildPaperSceneExtended(
-  script: AIGeneratedScriptExtended,
-  options?: PaperSceneBuilderOptions
-): IScene {
+export function buildPaperSceneExtended(script: AIGeneratedScriptExtended, options?: PaperSceneBuilderOptions): IScene {
   const builder = new PaperSceneBuilder(options);
   return builder.buildExtended(script);
 }

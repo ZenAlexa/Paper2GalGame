@@ -6,13 +6,7 @@
 /**
  * Character emotion for expression selection
  */
-export type CharacterEmotion =
-  | 'neutral'
-  | 'happy'
-  | 'thinking'
-  | 'surprised'
-  | 'serious'
-  | 'excited';
+export type CharacterEmotion = 'neutral' | 'happy' | 'thinking' | 'surprised' | 'serious' | 'excited';
 
 /**
  * Single dialogue line from AI generation

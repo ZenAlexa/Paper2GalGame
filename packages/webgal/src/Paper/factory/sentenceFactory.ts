@@ -3,7 +3,7 @@
  * Factory functions to create WebGAL ISentence objects programmatically
  */
 
-import { commandType, ISentence, arg, IAsset } from '@/Core/controller/scene/sceneInterface';
+import { type arg, commandType, type IAsset, type ISentence } from '@/Core/controller/scene/sceneInterface';
 import { fileType } from '@/Core/util/gameAssetsAccess/assetSetter';
 
 /**

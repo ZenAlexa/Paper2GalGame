@@ -5,12 +5,7 @@
  * Handles TTS generation requests and vocal map retrieval.
  */
 
-import type {
-  VocalMap,
-  TTSGenerationResult,
-  TTSGenerationOptions,
-  SessionAudioData,
-} from './types';
+import type { SessionAudioData, TTSGenerationOptions, TTSGenerationResult, VocalMap } from './types';
 
 /**
  * Default API base URL
@@ -42,10 +37,7 @@ export class TTSClient {
    * @param options - Generation options
    * @returns Generation result with audio statistics
    */
-  static async generateVocals(
-    sessionId: string,
-    options: TTSGenerationOptions = {}
-  ): Promise<TTSGenerationResult> {
+  static async generateVocals(sessionId: string, options: TTSGenerationOptions = {}): Promise<TTSGenerationResult> {
     const timeout = options.timeout ?? DEFAULT_TIMEOUT;
 
     console.log('[TTSClient] Starting TTS generation for session:', sessionId);
@@ -105,9 +97,7 @@ export class TTSClient {
         success: false,
         sessionId,
         error: {
-          code: error instanceof Error && error.name === 'AbortError'
-            ? 'TTS_TIMEOUT'
-            : 'TTS_ERROR',
+          code: error instanceof Error && error.name === 'AbortError' ? 'TTS_TIMEOUT' : 'TTS_ERROR',
           message: errorMessage,
         },
       };
@@ -128,9 +118,7 @@ export class TTSClient {
 
     try {
       // Fetch session audio data
-      const response = await fetch(
-        `${API_BASE_URL}/generate/audio/${sessionId}`
-      );
+      const response = await fetch(`${API_BASE_URL}/generate/audio/${sessionId}`);
       const result = await response.json();
 
       if (!result.success || !result.data) {
@@ -146,11 +134,7 @@ export class TTSClient {
         vocalMap[file.dialogueId] = file.url;
       }
 
-      console.log(
-        '[TTSClient] Loaded vocal map with',
-        Object.keys(vocalMap).length,
-        'entries'
-      );
+      console.log('[TTSClient] Loaded vocal map with', Object.keys(vocalMap).length, 'entries');
 
       return vocalMap;
     } catch (error) {
@@ -169,21 +153,16 @@ export class TTSClient {
    * @returns Vocal map (dialogueId → audio URL)
    * @throws Error if generation fails
    */
-  static async generateAndFetchVocals(
-    sessionId: string,
-    options: TTSGenerationOptions = {}
-  ): Promise<VocalMap> {
+  static async generateAndFetchVocals(sessionId: string, options: TTSGenerationOptions = {}): Promise<VocalMap> {
     // Generate vocals
-    const result = await this.generateVocals(sessionId, options);
+    const result = await TTSClient.generateVocals(sessionId, options);
 
     if (!result.success) {
-      throw new Error(
-        result.error?.message || 'TTS generation failed'
-      );
+      throw new Error(result.error?.message || 'TTS generation failed');
     }
 
     // Fetch the vocal map
-    return this.fetchVocalMap(sessionId);
+    return TTSClient.fetchVocalMap(sessionId);
   }
 
   /**
@@ -208,9 +187,7 @@ export class TTSClient {
       }
 
       const providers = result.data || [];
-      const available = providers.some(
-        (p: { configured: boolean }) => p.configured
-      );
+      const available = providers.some((p: { configured: boolean }) => p.configured);
 
       return { available, providers };
     } catch (error) {
@@ -227,7 +204,7 @@ export class TTSClient {
    */
   static async hasAudio(sessionId: string): Promise<boolean> {
     try {
-      const vocalMap = await this.fetchVocalMap(sessionId);
+      const vocalMap = await TTSClient.fetchVocalMap(sessionId);
       return Object.keys(vocalMap).length > 0;
     } catch {
       return false;

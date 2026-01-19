@@ -7,9 +7,9 @@
  * Multi-language character name
  */
 export interface PaperCharacterName {
-  zh: string;  // Chinese name
-  jp: string;  // Japanese name
-  en: string;  // English name
+  zh: string; // Chinese name
+  jp: string; // Japanese name
+  en: string; // English name
 }
 
 /**

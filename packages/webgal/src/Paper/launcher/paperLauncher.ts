@@ -5,24 +5,24 @@
  * bypassing the traditional script file parsing flow.
  */
 
-import { IScene } from '@/Core/controller/scene/sceneInterface';
+import { nextSentence } from '@/Core/controller/gamePlay/nextSentence';
+import type { IScene } from '@/Core/controller/scene/sceneInterface';
 import { resetStage } from '@/Core/controller/stage/resetStage';
-import { webgalStore } from '@/store/store';
+import { setPaperStorageAsync } from '@/Core/controller/storage/storageController';
+import { WebGAL } from '@/Core/WebGAL';
 import { setVisibility } from '@/store/GUIReducer';
 import {
   enterPaperMode,
   exitPaperMode,
+  savePaperToHistory,
   setPaper,
   setSession,
   setTotalDialogues,
-  savePaperToHistory,
 } from '@/store/paperReducer';
-import { nextSentence } from '@/Core/controller/gamePlay/nextSentence';
-import { WebGAL } from '@/Core/WebGAL';
-import type { AIGeneratedScript } from '../types';
-import { PaperSceneBuilder, PaperSceneBuilderOptions } from '../builder';
+import { webgalStore } from '@/store/store';
+import { PaperSceneBuilder, type PaperSceneBuilderOptions } from '../builder';
 import { TTSClient } from '../tts';
-import { setPaperStorageAsync } from '@/Core/controller/storage/storageController';
+import type { AIGeneratedScript } from '../types';
 
 /**
  * Start Paper game with a pre-built IScene
@@ -130,10 +130,7 @@ export function startPaperGameWithScript(
  * Fetch AIGeneratedScript from API and start game
  * This is the high-level entry point that replaces the old text-based approach
  */
-export async function launchPaperGameFromAPI(
-  sessionId: string,
-  options?: PaperSceneBuilderOptions
-): Promise<void> {
+export async function launchPaperGameFromAPI(sessionId: string, options?: PaperSceneBuilderOptions): Promise<void> {
   console.log('[PaperLauncher] Launching Paper game for session:', sessionId);
 
   try {
@@ -192,10 +189,7 @@ export interface LaunchWithTTSOptions extends PaperSceneBuilderOptions {
  * @param sessionId - Session ID from /api/generate
  * @param options - Launch options including TTS settings
  */
-export async function launchPaperGameWithTTS(
-  sessionId: string,
-  options: LaunchWithTTSOptions = {}
-): Promise<void> {
+export async function launchPaperGameWithTTS(sessionId: string, options: LaunchWithTTSOptions = {}): Promise<void> {
   console.log('[PaperLauncher] Launching Paper game with TTS for session:', sessionId);
 
   let ttsGenerated = false;
@@ -214,15 +208,11 @@ export async function launchPaperGameWithTTS(
           '[PaperLauncher] TTS generation complete:',
           ttsResult.audio?.totalFiles,
           'files,',
-          ttsResult.audio?.successRate + '% success rate'
+          `${ttsResult.audio?.successRate}% success rate`
         );
         ttsGenerated = true;
       } else {
-        console.warn(
-          '[PaperLauncher] TTS generation failed:',
-          ttsResult.error?.message,
-          '- continuing without audio'
-        );
+        console.warn('[PaperLauncher] TTS generation failed:', ttsResult.error?.message, '- continuing without audio');
       }
     } else {
       console.log('[PaperLauncher] Skipping TTS generation (skipTTS=true)');
@@ -240,11 +230,7 @@ export async function launchPaperGameWithTTS(
     }
 
     const script: AIGeneratedScript = result.data;
-    console.log(
-      '[PaperLauncher] Loaded script with',
-      script.dialogues.length,
-      'dialogues'
-    );
+    console.log('[PaperLauncher] Loaded script with', script.dialogues.length, 'dialogues');
 
     // Step 3: Build scene and start game
     startPaperGameWithScript(script, sessionId, options);

@@ -3,7 +3,7 @@
  * Default character definitions for Paper mode
  */
 
-import type { PaperCharacter, CharacterPositionMap } from '../types';
+import type { CharacterPositionMap, PaperCharacter } from '../types';
 
 /**
  * Default character configurations for academic paper narration
@@ -76,7 +76,7 @@ export function buildPositionMap(characterIds: string[]): CharacterPositionMap {
   }
 
   // Add fallback for unknown speakers
-  map['unknown'] = {
+  map.unknown = {
     sprite: 'stand.webp',
     position: 'center',
   };
@@ -87,10 +87,7 @@ export function buildPositionMap(characterIds: string[]): CharacterPositionMap {
 /**
  * Get character display name in specified language
  */
-export function getCharacterDisplayName(
-  id: string,
-  language: 'zh' | 'jp' | 'en' = 'jp'
-): string {
+export function getCharacterDisplayName(id: string, language: 'zh' | 'jp' | 'en' = 'jp'): string {
   const character = PAPER_CHARACTERS[id];
   if (!character) return id;
   return character.name[language];

@@ -9,14 +9,7 @@
 /**
  * TTS Emotion types (matches backend TTSEmotion)
  */
-export type TTSEmotion =
-  | 'neutral'
-  | 'happy'
-  | 'serious'
-  | 'excited'
-  | 'calm'
-  | 'sad'
-  | 'angry';
+export type TTSEmotion = 'neutral' | 'happy' | 'serious' | 'excited' | 'calm' | 'sad' | 'angry';
 
 /**
  * Map of dialogue IDs to audio URLs
@@ -86,20 +79,12 @@ export interface TTSGenerationOptions {
  * Note: Currently not used as API is synchronous,
  * but included for future async implementation
  */
-export type TTSProgressCallback = (
-  completed: number,
-  total: number,
-  currentItem?: string
-) => void;
+export type TTSProgressCallback = (completed: number, total: number, currentItem?: string) => void;
 
 /**
  * TTS generation state (for UI state management)
  */
-export type TTSGenerationState =
-  | 'idle'
-  | 'generating'
-  | 'completed'
-  | 'error';
+export type TTSGenerationState = 'idle' | 'generating' | 'completed' | 'error';
 
 /**
  * TTS status information

@@ -13,6 +13,7 @@ import { IBacklogItem } from '@/Core/Modules/backlog';
 import { SYSTEM_CONFIG } from '@/config';
 import { WebGAL } from '@/Core/WebGAL';
 import { getBooleanArgByKey, getStringArgByKey } from '@/Core/util/getSentenceArg';
+import { updateProgress } from '@/store/paperReducer';
 
 export const whenChecker = (whenValue: string | undefined): boolean => {
   if (whenValue === undefined) {
@@ -142,4 +143,14 @@ export const scriptExecutor = () => {
     }
   }, 0);
   WebGAL.sceneManager.sceneData.currentSentenceId++;
+
+  // Update Paper progress if in Paper mode
+  const paperState = webgalStore.getState().paper;
+  if (paperState.isPaperMode && paperState.progress) {
+    webgalStore.dispatch(
+      updateProgress({
+        currentIndex: WebGAL.sceneManager.sceneData.currentSentenceId,
+      })
+    );
+  }
 };

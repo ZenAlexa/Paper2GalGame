@@ -9,11 +9,20 @@ import { IScene } from '@/Core/controller/scene/sceneInterface';
 import { resetStage } from '@/Core/controller/stage/resetStage';
 import { webgalStore } from '@/store/store';
 import { setVisibility } from '@/store/GUIReducer';
+import {
+  enterPaperMode,
+  exitPaperMode,
+  setPaper,
+  setSession,
+  setTotalDialogues,
+  savePaperToHistory,
+} from '@/store/paperReducer';
 import { nextSentence } from '@/Core/controller/gamePlay/nextSentence';
 import { WebGAL } from '@/Core/WebGAL';
 import type { AIGeneratedScript } from '../types';
 import { PaperSceneBuilder, PaperSceneBuilderOptions } from '../builder';
 import { TTSClient } from '../tts';
+import { setPaperStorageAsync } from '@/Core/controller/storage/storageController';
 
 /**
  * Start Paper game with a pre-built IScene
@@ -25,6 +34,10 @@ export function startPaperGameWithScene(scene: IScene): void {
 
   // Reset stage (clear existing state)
   resetStage(true);
+
+  // Enter Paper mode and set total dialogues for progress tracking
+  webgalStore.dispatch(enterPaperMode());
+  webgalStore.dispatch(setTotalDialogues(scene.sentenceList.length));
 
   // Reset sentence ID to start from beginning
   WebGAL.sceneManager.sceneData.currentSentenceId = 0;
@@ -74,6 +87,35 @@ export function startPaperGameWithScript(
   if (!validation.valid) {
     console.error('[PaperLauncher] Script validation failed:', validation.errors);
     throw new Error(`Invalid script: ${validation.errors.join(', ')}`);
+  }
+
+  // Initialize Paper state with metadata
+  if (script.metadata) {
+    webgalStore.dispatch(
+      setPaper({
+        metadata: {
+          paperId: sessionId || `paper_${Date.now()}`,
+          title: script.metadata.paperTitle || 'Untitled Paper',
+          authors: [], // Not available in current script format
+          abstract: '', // Not available in current script format
+          uploadedAt: new Date().toISOString(),
+          source: 'upload',
+        },
+        totalDialogues: script.dialogues.length,
+      })
+    );
+  }
+
+  // Set session information if available
+  if (sessionId) {
+    webgalStore.dispatch(
+      setSession({
+        sessionId,
+        apiBaseUrl: '/api',
+        scriptGenerated: true,
+        ttsGenerated: false,
+      })
+    );
   }
 
   // Build scene
@@ -156,6 +198,8 @@ export async function launchPaperGameWithTTS(
 ): Promise<void> {
   console.log('[PaperLauncher] Launching Paper game with TTS for session:', sessionId);
 
+  let ttsGenerated = false;
+
   try {
     // Step 1: Generate TTS audio (unless skipped)
     if (!options.skipTTS) {
@@ -172,6 +216,7 @@ export async function launchPaperGameWithTTS(
           'files,',
           ttsResult.audio?.successRate + '% success rate'
         );
+        ttsGenerated = true;
       } else {
         console.warn(
           '[PaperLauncher] TTS generation failed:',
@@ -181,6 +226,7 @@ export async function launchPaperGameWithTTS(
       }
     } else {
       console.log('[PaperLauncher] Skipping TTS generation (skipTTS=true)');
+      ttsGenerated = true; // Assume already generated if skipped
     }
 
     // Step 2: Fetch structured script data (now includes vocals if generated)
@@ -203,6 +249,16 @@ export async function launchPaperGameWithTTS(
     // Step 3: Build scene and start game
     startPaperGameWithScript(script, sessionId, options);
 
+    // Update session with TTS status
+    webgalStore.dispatch(
+      setSession({
+        sessionId,
+        apiBaseUrl: '/api',
+        scriptGenerated: true,
+        ttsGenerated,
+      })
+    );
+
     console.log('[PaperLauncher] Paper game with TTS launched successfully');
   } catch (error) {
     console.error('[PaperLauncher] Failed to launch game with TTS:', error);
@@ -224,4 +280,65 @@ export async function checkTTSAvailability(): Promise<{
   }>;
 }> {
   return TTSClient.checkAvailability();
+}
+
+/**
+ * Exit Paper mode and save progress to history
+ *
+ * Call this when the user returns to the title screen or closes the game.
+ * This saves the current progress to paper history for resuming later.
+ */
+export async function exitPaperGame(): Promise<void> {
+  console.log('[PaperLauncher] Exiting Paper mode');
+
+  const paperState = webgalStore.getState().paper;
+
+  if (paperState.isPaperMode && paperState.currentPaper) {
+    // Save current progress to history before exiting
+    webgalStore.dispatch(savePaperToHistory());
+    console.log('[PaperLauncher] Progress saved to history');
+
+    // Persist to storage
+    await setPaperStorageAsync();
+    console.log('[PaperLauncher] Progress persisted to storage');
+  }
+
+  // Exit Paper mode
+  webgalStore.dispatch(exitPaperMode());
+
+  console.log('[PaperLauncher] Paper mode exited');
+}
+
+/**
+ * Get current Paper reading progress
+ *
+ * @returns Current progress or null if not in Paper mode
+ */
+export function getPaperProgress(): {
+  currentDialogueIndex: number;
+  totalDialogues: number;
+  percentage: number;
+  phaseName: string;
+} | null {
+  const paperState = webgalStore.getState().paper;
+
+  if (!paperState.isPaperMode || !paperState.progress) {
+    return null;
+  }
+
+  return {
+    currentDialogueIndex: paperState.progress.currentDialogueIndex,
+    totalDialogues: paperState.progress.totalDialogues,
+    percentage: paperState.progress.percentage,
+    phaseName: paperState.progress.phaseName,
+  };
+}
+
+/**
+ * Check if currently in Paper mode
+ *
+ * @returns True if Paper mode is active
+ */
+export function isPaperModeActive(): boolean {
+  return webgalStore.getState().paper.isPaperMode;
 }

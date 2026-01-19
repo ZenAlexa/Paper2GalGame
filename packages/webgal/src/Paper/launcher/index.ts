@@ -9,6 +9,9 @@ export {
   startPaperGameLegacy,
   launchPaperGameWithTTS,
   checkTTSAvailability,
+  exitPaperGame,
+  getPaperProgress,
+  isPaperModeActive,
 } from './paperLauncher';
 
 export type { LaunchWithTTSOptions } from './paperLauncher';

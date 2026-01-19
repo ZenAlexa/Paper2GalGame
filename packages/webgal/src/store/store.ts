@@ -3,6 +3,7 @@ import stageReducer from '@/store/stageReducer';
 import GUIReducer from '@/store/GUIReducer';
 import userDataReducer from '@/store/userDataReducer';
 import savesReducer from '@/store/savesReducer';
+import paperReducer from '@/store/paperReducer';
 
 /**
  * WebGAL 全局状态管理
@@ -13,6 +14,7 @@ export const webgalStore = configureStore({
     GUI: GUIReducer,
     userData: userDataReducer,
     saveData: savesReducer,
+    paper: paperReducer,
   },
   middleware: getDefaultMiddleware({
     serializableCheck: false,

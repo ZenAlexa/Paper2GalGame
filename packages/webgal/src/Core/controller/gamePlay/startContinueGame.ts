@@ -18,6 +18,9 @@ export {
   launchPaperGameFromAPI,
   launchPaperGameWithTTS,
   checkTTSAvailability,
+  exitPaperGame,
+  getPaperProgress,
+  isPaperModeActive,
 } from '@/Paper/launcher';
 
 /**

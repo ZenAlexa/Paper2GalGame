@@ -1,10 +1,17 @@
 import * as localforage from 'localforage';
 import { IUserData } from '@/store/userDataInterface';
+import { IPersistedPaperData } from '@/store/paperInterface';
 import { logger } from '../../util/logger';
 import { webgalStore } from '@/store/store';
 import { initState, resetUserData } from '@/store/userDataReducer';
+import { restorePaperData, initialPaperState } from '@/store/paperReducer';
 
 import { WebGAL } from '@/Core/WebGAL';
+
+/**
+ * Get the storage key for Paper data
+ */
+const getPaperStorageKey = () => `${WebGAL.gameKey}_paper`;
 
 /**
  * 写入本地存储
@@ -92,5 +99,82 @@ export async function getStorageAsync() {
     logger.warn('现在重置数据');
     return await localforage.setItem(WebGAL.gameKey, userDataState);
   } else webgalStore.dispatch(resetUserData(newUserData as IUserData));
+
+  // Also restore Paper data
+  await getPaperStorageAsync();
   return;
+}
+
+// ==================== Paper Data Storage ====================
+
+/**
+ * Save Paper data to local storage (debounced)
+ */
+export const setPaperStorage = debounce(() => {
+  const paperState = webgalStore.getState().paper;
+  const dataToSave: IPersistedPaperData = {
+    paperHistory: paperState.paperHistory,
+    highlights: paperState.highlights,
+    notes: paperState.notes,
+  };
+  localforage.setItem(getPaperStorageKey(), dataToSave).then(() => {
+    logger.info('Paper data saved to storage');
+  });
+}, 100);
+
+/**
+ * Get Paper data from local storage (debounced)
+ */
+export const getPaperStorage = debounce(() => {
+  localforage.getItem(getPaperStorageKey()).then((data) => {
+    if (data && checkPaperDataProperty(data)) {
+      webgalStore.dispatch(restorePaperData(data as IPersistedPaperData));
+      logger.info('Paper data restored from storage');
+    }
+  });
+}, 100);
+
+/**
+ * Save Paper data to local storage (async, immediate)
+ */
+export async function setPaperStorageAsync(): Promise<void> {
+  const paperState = webgalStore.getState().paper;
+  const dataToSave: IPersistedPaperData = {
+    paperHistory: paperState.paperHistory,
+    highlights: paperState.highlights,
+    notes: paperState.notes,
+  };
+  await localforage.setItem(getPaperStorageKey(), dataToSave);
+  logger.info('Paper data saved to storage (async)');
+}
+
+/**
+ * Get Paper data from local storage (async, immediate)
+ */
+export async function getPaperStorageAsync(): Promise<void> {
+  const data = await localforage.getItem(getPaperStorageKey());
+  if (data && checkPaperDataProperty(data)) {
+    webgalStore.dispatch(restorePaperData(data as IPersistedPaperData));
+    logger.info('Paper data restored from storage (async)');
+  }
+}
+
+/**
+ * Check if Paper data has required properties
+ */
+function checkPaperDataProperty(data: any): boolean {
+  if (!data) return false;
+  // Check for essential properties
+  const hasHistory = Array.isArray(data.paperHistory);
+  const hasHighlights = Array.isArray(data.highlights);
+  const hasNotes = Array.isArray(data.notes);
+  return hasHistory && hasHighlights && hasNotes;
+}
+
+/**
+ * Clear Paper data from storage
+ */
+export async function clearPaperStorage(): Promise<void> {
+  await localforage.removeItem(getPaperStorageKey());
+  logger.info('Paper data cleared from storage');
 }

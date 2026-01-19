@@ -20,7 +20,7 @@ export default function useFullScreen(target: Element = document.documentElement
     return () => {
       document.removeEventListener('fullscreenchange', onFullscreenChange);
     };
-  }, []);
+  }, [isSupported]);
 
   const enter = isSupported ? () => target.requestFullscreen() : async () => {};
   const exit = isSupported ? () => document.exitFullscreen() : async () => {};

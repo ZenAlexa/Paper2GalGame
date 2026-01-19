@@ -1,5 +1,5 @@
-import { ISentence } from '@/Core/controller/scene/sceneInterface';
-import { BlinkParam, FocusParam } from '@/Core/live2DCore';
+import type { ISentence } from '@/Core/controller/scene/sceneInterface';
+import type { BlinkParam, FocusParam } from '@/Core/live2DCore';
 
 /**
  * 游戏内变量

@@ -1,12 +1,12 @@
-import { configureStore, getDefaultMiddleware } from '@reduxjs/toolkit';
-import stageReducer from '@/store/stageReducer';
+import { configureStore } from '@reduxjs/toolkit';
 import GUIReducer from '@/store/GUIReducer';
-import userDataReducer from '@/store/userDataReducer';
-import savesReducer from '@/store/savesReducer';
 import paperReducer from '@/store/paperReducer';
+import savesReducer from '@/store/savesReducer';
+import stageReducer from '@/store/stageReducer';
+import userDataReducer from '@/store/userDataReducer';
 
 /**
- * WebGAL 全局状态管理
+ * WebGAL global state management
  */
 export const webgalStore = configureStore({
   reducer: {
@@ -16,9 +16,10 @@ export const webgalStore = configureStore({
     saveData: savesReducer,
     paper: paperReducer,
   },
-  middleware: getDefaultMiddleware({
-    serializableCheck: false,
-  }),
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: false,
+    }),
   devTools: process.env.NODE_ENV !== 'production',
 });
 

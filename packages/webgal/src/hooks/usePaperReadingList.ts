@@ -5,16 +5,16 @@
  * Supports listing, loading, and removing Paper reading entries.
  */
 
-import { useState, useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { loadGame } from '@/Core/controller/storage/loadGame';
 import {
+  clearPaperReadingList,
   getPaperReadingList,
   removePaperReadingEntry,
-  clearPaperReadingList,
 } from '@/Core/controller/storage/storageController';
-import { IPaperReadingEntry, IPaperReadingList } from '@/store/paperInterface';
-import { loadGame } from '@/Core/controller/storage/loadGame';
-import { webgalStore } from '@/store/store';
 import { logger } from '@/Core/util/logger';
+import type { IPaperReadingEntry } from '@/store/paperInterface';
+import { webgalStore } from '@/store/store';
 
 export interface UsePaperReadingListReturn {
   /** List of paper reading entries */
@@ -141,7 +141,7 @@ export function formatProgress(percentage: number): string {
 export function formatDate(isoString: string): string {
   try {
     const date = new Date(isoString);
-    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return `${date.toLocaleDateString()} ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
   } catch {
     return isoString;
   }

@@ -3,26 +3,25 @@
  * 舞台状态是演出结束后的“终态”，在读档时不发生演出，只是将舞台状态替换为读取的状态。
  */
 
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import cloneDeep from 'lodash/cloneDeep';
+import { STAGE_KEYS } from '@/Core/constants';
+import { commandType } from '@/Core/controller/scene/sceneInterface';
 import {
   baseTransform,
-  IEffect,
-  IFigureMetadata,
-  IFreeFigure,
-  ILive2DBlink,
-  ILive2DExpression,
-  ILive2DFocus,
-  ILive2DMotion,
-  IRunPerform,
-  ISetGameVar,
-  ISetStagePayload,
-  IStageAnimationSetting,
-  IStageState,
-  IUpdateAnimationSettingPayload,
+  type IEffect,
+  type IFigureMetadata,
+  type IFreeFigure,
+  type ILive2DBlink,
+  type ILive2DExpression,
+  type ILive2DFocus,
+  type ILive2DMotion,
+  type IRunPerform,
+  type ISetGameVar,
+  type ISetStagePayload,
+  type IStageState,
+  type IUpdateAnimationSettingPayload,
 } from '@/store/stageInterface';
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import cloneDeep from 'lodash/cloneDeep';
-import { commandType } from '@/Core/controller/scene/sceneInterface';
-import { STAGE_KEYS } from '@/Core/constants';
 
 // 初始化舞台数据
 
@@ -96,7 +95,7 @@ const stageSlice = createSlice({
      * @param action 要替换的键值对
      */
     setStage: (state, action: PayloadAction<ISetStagePayload>) => {
-      // @ts-ignore
+      // @ts-expect-error
       state[action.payload.key] = action.payload.value;
     },
     /**
@@ -187,7 +186,7 @@ const stageSlice = createSlice({
     removeAllPerform: (state) => {
       state.PerformList.splice(0, state.PerformList.length);
     },
-    removeAllPixiPerforms: (state, action: PayloadAction<undefined>) => {
+    removeAllPixiPerforms: (state, _action: PayloadAction<undefined>) => {
       for (let i = 0; i < state.PerformList.length; i++) {
         const performItem: IRunPerform = state.PerformList[i];
         if (performItem.script.command === commandType.pixi) {
@@ -205,7 +204,7 @@ const stageSlice = createSlice({
           // 删掉立绘和相关的动画
           currentFreeFigures.splice(index, 1);
           const figureAssociatedAnimationIndex = state.figureAssociatedAnimation.findIndex(
-            (a) => a.targetId === newFigure.key,
+            (a) => a.targetId === newFigure.key
           );
           state.figureAssociatedAnimation.splice(figureAssociatedAnimationIndex, 1);
         } else {

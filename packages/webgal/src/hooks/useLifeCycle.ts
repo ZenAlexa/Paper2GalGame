@@ -4,16 +4,16 @@ import { useEffect } from 'react';
 export function useMounted(callback: Function) {
   useEffect(() => {
     callback();
-  }, []);
+  }, [callback]);
 }
 
 // 卸载
 export function useUnMounted(callback: Function) {
   useEffect(() => {
-    return function () {
+    return () => {
       callback();
     };
-  }, []);
+  }, [callback]);
 }
 
 // 更新

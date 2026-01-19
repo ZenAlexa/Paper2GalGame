@@ -1,8 +1,8 @@
-import { IGameVar, IStageState } from './stageInterface';
-import { language } from '@/config/language';
-import { IBacklogItem } from '@/Core/Modules/backlog';
-import { ISceneEntry } from '@/Core/Modules/scene';
-import { IPaperSaveState } from './paperInterface';
+import type { IBacklogItem } from '@/Core/Modules/backlog';
+import type { ISceneEntry } from '@/Core/Modules/scene';
+import type { language } from '@/config/language';
+import type { IPaperSaveState } from './paperInterface';
+import type { IGameVar, IStageState } from './stageInterface';
 
 /**
  * 播放速度的枚举类型

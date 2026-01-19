@@ -1,6 +1,6 @@
-import { ISaveData } from './userDataInterface';
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import cloneDeep from 'lodash/cloneDeep';
+import type { ISaveData } from './userDataInterface';
 
 export interface ISavesData {
   saveData: Array<ISaveData>; // 用户存档数据

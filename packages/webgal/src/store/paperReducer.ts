@@ -5,22 +5,21 @@
  * Follows the same patterns as other WebGAL reducers.
  */
 
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import cloneDeep from 'lodash/cloneDeep';
-import {
-  IPaperState,
-  IPaperMetadata,
-  IPaperSession,
-  IPaperPlayback,
-  IPaperHighlight,
-  IPaperNote,
-  IPaperProgress,
-  ISetPaperPayload,
-  IUpdateProgressPayload,
+import type {
   IAddHighlightPayload,
   IAddNotePayload,
-  IPersistedPaperData,
+  IPaperHighlight,
+  IPaperNote,
+  IPaperPlayback,
+  IPaperProgress,
   IPaperSaveState,
+  IPaperSession,
+  IPaperState,
+  IPersistedPaperData,
+  ISetPaperPayload,
+  IUpdateProgressPayload,
 } from '@/store/paperInterface';
 
 /**
@@ -45,13 +44,7 @@ export const initialPaperState: IPaperState = {
  * Helper function to determine phase name from index
  */
 function getPhaseNameFromIndex(phaseIndex: number): IPaperProgress['phaseName'] {
-  const phases: IPaperProgress['phaseName'][] = [
-    'introduction',
-    'methods',
-    'results',
-    'discussion',
-    'conclusion',
-  ];
+  const phases: IPaperProgress['phaseName'][] = ['introduction', 'methods', 'results', 'discussion', 'conclusion'];
   return phases[Math.min(phaseIndex, phases.length - 1)] || 'introduction';
 }
 
@@ -150,8 +143,7 @@ const paperSlice = createSlice({
         const { totalDialogues } = state.progress;
 
         state.progress.currentDialogueIndex = currentIndex;
-        state.progress.percentage =
-          totalDialogues > 0 ? Math.round((currentIndex / totalDialogues) * 100) : 0;
+        state.progress.percentage = totalDialogues > 0 ? Math.round((currentIndex / totalDialogues) * 100) : 0;
         state.progress.lastPlayedAt = new Date().toISOString();
 
         // Auto-calculate phase based on progress percentage
@@ -243,10 +235,7 @@ const paperSlice = createSlice({
     /**
      * Update a note
      */
-    updateNote(
-      state,
-      action: PayloadAction<{ id: string; updates: Partial<Omit<IPaperNote, 'id' | 'createdAt'>> }>
-    ) {
+    updateNote(state, action: PayloadAction<{ id: string; updates: Partial<Omit<IPaperNote, 'id' | 'createdAt'>> }>) {
       const { id, updates } = action.payload;
       const index = state.notes.findIndex((n) => n.id === id);
       if (index >= 0) {
@@ -315,9 +304,7 @@ const paperSlice = createSlice({
      */
     savePaperToHistory(state) {
       if (state.currentPaper && state.progress) {
-        const existingIndex = state.paperHistory.findIndex(
-          (h) => h.metadata.paperId === state.currentPaper!.paperId
-        );
+        const existingIndex = state.paperHistory.findIndex((h) => h.metadata.paperId === state.currentPaper?.paperId);
 
         const entry = {
           metadata: cloneDeep(state.currentPaper),

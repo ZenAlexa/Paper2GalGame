@@ -1,6 +1,6 @@
 import { useSelector } from 'react-redux';
-import { RootState, webgalStore } from '@/store/store';
 import { FALLBACK_FONT_FAMILY } from '@/Core/util/fonts/fontOptions';
+import { type RootState, webgalStore } from '@/store/store';
 
 export function useFontFamily(): string {
   return useSelector(selectFontFamily);

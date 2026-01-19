@@ -18,53 +18,50 @@
  * ```
  */
 
-// Types
-export type {
-  TTSProvider,
-  TTSOptions,
-  TTSEmotion,
-  TTSResult,
-  ProviderStatus,
-  CharacterVoiceSettings,
-  AudioFormat,
-  AudioCacheEntry,
-  BatchTTSRequest,
-  BatchTTSResult,
-  MinimaxVoiceId,
-  MinimaxTTSRequest,
-  MinimaxTTSResponse,
-  VoicevoxAudioQuery,
-  VoicevoxSpeaker
-} from './types';
-
 // Providers
 export { MinimaxTTSProvider } from './providers/minimax';
-export { VoicevoxTTSProvider, VOICEVOX_SPEAKERS } from './providers/voicevox';
+export { VOICEVOX_SPEAKERS, VoicevoxTTSProvider } from './providers/voicevox';
+// Types
+export type {
+  AudioCacheEntry,
+  AudioFormat,
+  BatchTTSRequest,
+  BatchTTSResult,
+  CharacterVoiceSettings,
+  MinimaxTTSRequest,
+  MinimaxTTSResponse,
+  MinimaxVoiceId,
+  ProviderStatus,
+  TTSEmotion,
+  TTSOptions,
+  TTSProvider,
+  TTSResult,
+  VoicevoxAudioQuery,
+  VoicevoxSpeaker,
+} from './types';
 
 // Services
-import { TTSService as TTSServiceClass, createTTSService as createService } from './services/tts-service';
+import { createTTSService as createService, TTSService as TTSServiceClass } from './services/tts-service';
 export { TTSServiceClass as TTSService, createService as createTTSService };
-export type { TTSServiceConfig } from './services/tts-service';
-export { BatchTTSProcessor } from './services/batch-processor';
 
 // Cache
 export { AudioCache } from './cache/audio-cache';
-
+export { BatchTTSProcessor } from './services/batch-processor';
+export type { TTSServiceConfig } from './services/tts-service';
+export type { AudioInfo, DetailedEmotionAnalysis } from './utils';
 // Utilities
 export {
+  createSilentWav,
+  detectAudioFormat,
   detectEmotion,
   detectEmotionDetailed,
-  mapEmotionForCharacter,
-  getEmotionIntensity,
-  detectAudioFormat,
-  getWavInfo,
   formatAudioInfo,
   generateAudioFilename,
+  getEmotionIntensity,
+  getWavInfo,
+  mapEmotionForCharacter,
   validateAudioBuffer,
-  createSilentWav
 } from './utils';
-
-export type { DetailedEmotionAnalysis, AudioInfo } from './utils';
 
 /**
  * Default export: Create TTS service with environment configuration

@@ -2,20 +2,18 @@
  * TTS Service Basic Tests
  */
 
+import { AudioCache } from '../cache/audio-cache';
 import {
+  createSilentWav,
+  detectAudioFormat,
   detectEmotion,
   detectEmotionDetailed,
-  mapEmotionForCharacter,
-  getEmotionIntensity,
-  detectAudioFormat,
-  validateAudioBuffer,
-  createSilentWav,
   generateAudioFilename,
-  parseVocalFilename
+  getEmotionIntensity,
+  mapEmotionForCharacter,
+  parseVocalFilename,
+  validateAudioBuffer,
 } from '../utils';
-
-import { AudioCache } from '../cache/audio-cache';
-import type { TTSEmotion } from '../types';
 
 describe('Emotion Detection', () => {
   test('detects happy emotion from keywords', () => {
@@ -83,9 +81,18 @@ describe('Emotion Intensity', () => {
 describe('Audio Format Detection', () => {
   test('detects WAV format', () => {
     const wavHeader = new Uint8Array([
-      0x52, 0x49, 0x46, 0x46, // RIFF
-      0x00, 0x00, 0x00, 0x00, // size
-      0x57, 0x41, 0x56, 0x45  // WAVE
+      0x52,
+      0x49,
+      0x46,
+      0x46, // RIFF
+      0x00,
+      0x00,
+      0x00,
+      0x00, // size
+      0x57,
+      0x41,
+      0x56,
+      0x45, // WAVE
     ]);
     const format = detectAudioFormat(wavHeader.buffer);
     expect(format).toBe('wav');
@@ -93,17 +100,19 @@ describe('Audio Format Detection', () => {
 
   test('detects MP3 with ID3 tag', () => {
     const mp3Header = new Uint8Array([
-      0x49, 0x44, 0x33, // ID3
-      0x04, 0x00, 0x00
+      0x49,
+      0x44,
+      0x33, // ID3
+      0x04,
+      0x00,
+      0x00,
     ]);
     const format = detectAudioFormat(mp3Header.buffer);
     expect(format).toBe('mp3');
   });
 
   test('detects MP3 frame sync', () => {
-    const mp3Header = new Uint8Array([
-      0xff, 0xfb, 0x90, 0x00
-    ]);
+    const mp3Header = new Uint8Array([0xff, 0xfb, 0x90, 0x00]);
     const format = detectAudioFormat(mp3Header.buffer);
     expect(format).toBe('mp3');
   });
@@ -167,7 +176,7 @@ describe('Audio Filename Utilities', () => {
     expect(parsed).toEqual({
       characterId: 'nene',
       index: 1,
-      format: 'mp3'
+      format: 'mp3',
     });
   });
 
@@ -183,7 +192,7 @@ describe('Audio Cache', () => {
   beforeEach(() => {
     cache = new AudioCache({
       cacheDir: '/tmp/test-cache',
-      memoryCacheSize: 10
+      memoryCacheSize: 10,
     });
   });
 

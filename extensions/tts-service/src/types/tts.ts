@@ -7,14 +7,7 @@
 /**
  * Emotion types supported by TTS providers
  */
-export type TTSEmotion =
-  | 'neutral'
-  | 'happy'
-  | 'serious'
-  | 'excited'
-  | 'calm'
-  | 'sad'
-  | 'angry';
+export type TTSEmotion = 'neutral' | 'happy' | 'serious' | 'excited' | 'calm' | 'sad' | 'angry';
 
 /**
  * Audio format options
@@ -141,22 +134,22 @@ export interface ProviderStatus {
  */
 export type MinimaxVoiceId =
   // Japanese female voices
-  | 'Japanese_KindLady'           // Kind Lady - warm, friendly
-  | 'Japanese_GracefulMaiden'     // Graceful Maiden - elegant, soft
-  | 'Japanese_CalmLady'           // Calm Lady - composed, mature
-  | 'Japanese_DecisivePrincess'   // Decisive Princess - confident
-  | 'Japanese_ColdQueen'          // Cold Queen - cool, dignified
-  | 'Japanese_DependableWoman'    // Dependable Woman - reliable
+  | 'Japanese_KindLady' // Kind Lady - warm, friendly
+  | 'Japanese_GracefulMaiden' // Graceful Maiden - elegant, soft
+  | 'Japanese_CalmLady' // Calm Lady - composed, mature
+  | 'Japanese_DecisivePrincess' // Decisive Princess - confident
+  | 'Japanese_ColdQueen' // Cold Queen - cool, dignified
+  | 'Japanese_DependableWoman' // Dependable Woman - reliable
   // Japanese male voices
   | 'Japanese_IntellectualSenior' // Intellectual Senior - wise
-  | 'Japanese_GentleButler'       // Gentle Butler - polite
-  | 'Japanese_LoyalKnight'        // Loyal Knight - loyal
-  | 'Japanese_DominantMan'        // Dominant Man - strong
-  | 'Japanese_SeriousCommander'   // Serious Commander - authoritative
+  | 'Japanese_GentleButler' // Gentle Butler - polite
+  | 'Japanese_LoyalKnight' // Loyal Knight - loyal
+  | 'Japanese_DominantMan' // Dominant Man - strong
+  | 'Japanese_SeriousCommander' // Serious Commander - authoritative
   // Japanese youth voices
-  | 'Japanese_OptimisticYouth'    // Optimistic Youth - energetic
-  | 'Japanese_SportyStudent'      // Sporty Student - active
-  | 'Japanese_InnocentBoy'        // Innocent Boy - innocent
+  | 'Japanese_OptimisticYouth' // Optimistic Youth - energetic
+  | 'Japanese_SportyStudent' // Sporty Student - active
+  | 'Japanese_InnocentBoy' // Innocent Boy - innocent
   | 'Japanese_GenerousIzakayaOwner'; // Izakaya Owner - friendly
 
 /**
@@ -318,11 +311,7 @@ export interface TTSProvider {
   /**
    * Generate audio from text
    */
-  generateAudio(
-    text: string,
-    voiceSettings: CharacterVoiceSettings,
-    options?: TTSOptions
-  ): Promise<ArrayBuffer>;
+  generateAudio(text: string, voiceSettings: CharacterVoiceSettings, options?: TTSOptions): Promise<ArrayBuffer>;
 
   /**
    * Get provider status

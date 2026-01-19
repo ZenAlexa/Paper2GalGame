@@ -33,26 +33,17 @@ export function detectAudioFormat(buffer: ArrayBuffer): AudioFormat | null {
   }
 
   // Check for WAV (RIFF header)
-  if (
-    view[0] === 0x52 && view[1] === 0x49 &&
-    view[2] === 0x46 && view[3] === 0x46
-  ) {
+  if (view[0] === 0x52 && view[1] === 0x49 && view[2] === 0x46 && view[3] === 0x46) {
     return 'wav';
   }
 
   // Check for FLAC
-  if (
-    view[0] === 0x66 && view[1] === 0x4c &&
-    view[2] === 0x61 && view[3] === 0x43
-  ) {
+  if (view[0] === 0x66 && view[1] === 0x4c && view[2] === 0x61 && view[3] === 0x43) {
     return 'flac';
   }
 
   // Check for OGG
-  if (
-    view[0] === 0x4f && view[1] === 0x67 &&
-    view[2] === 0x67 && view[3] === 0x53
-  ) {
+  if (view[0] === 0x4f && view[1] === 0x67 && view[2] === 0x67 && view[3] === 0x53) {
     return 'ogg';
   }
 
@@ -66,25 +57,21 @@ export function getWavInfo(buffer: ArrayBuffer): AudioInfo | null {
   const view = new DataView(buffer);
 
   // Verify RIFF header
-  const riff = String.fromCharCode(
-    view.getUint8(0), view.getUint8(1),
-    view.getUint8(2), view.getUint8(3)
-  );
+  const riff = String.fromCharCode(view.getUint8(0), view.getUint8(1), view.getUint8(2), view.getUint8(3));
   if (riff !== 'RIFF') return null;
 
   // Verify WAVE format
-  const wave = String.fromCharCode(
-    view.getUint8(8), view.getUint8(9),
-    view.getUint8(10), view.getUint8(11)
-  );
+  const wave = String.fromCharCode(view.getUint8(8), view.getUint8(9), view.getUint8(10), view.getUint8(11));
   if (wave !== 'WAVE') return null;
 
   // Find fmt chunk
   let offset = 12;
   while (offset < buffer.byteLength - 8) {
     const chunkId = String.fromCharCode(
-      view.getUint8(offset), view.getUint8(offset + 1),
-      view.getUint8(offset + 2), view.getUint8(offset + 3)
+      view.getUint8(offset),
+      view.getUint8(offset + 1),
+      view.getUint8(offset + 2),
+      view.getUint8(offset + 3)
     );
     const chunkSize = view.getUint32(offset + 4, true);
 
@@ -98,8 +85,10 @@ export function getWavInfo(buffer: ArrayBuffer): AudioInfo | null {
       let dataOffset = offset + 8 + chunkSize;
       while (dataOffset < buffer.byteLength - 8) {
         const dataChunkId = String.fromCharCode(
-          view.getUint8(dataOffset), view.getUint8(dataOffset + 1),
-          view.getUint8(dataOffset + 2), view.getUint8(dataOffset + 3)
+          view.getUint8(dataOffset),
+          view.getUint8(dataOffset + 1),
+          view.getUint8(dataOffset + 2),
+          view.getUint8(dataOffset + 3)
         );
         if (dataChunkId === 'data') {
           dataSize = view.getUint32(dataOffset + 4, true);
@@ -116,7 +105,7 @@ export function getWavInfo(buffer: ArrayBuffer): AudioInfo | null {
         channels,
         duration,
         bitDepth,
-        size: buffer.byteLength
+        size: buffer.byteLength,
       };
     }
 
@@ -130,11 +119,7 @@ export function getWavInfo(buffer: ArrayBuffer): AudioInfo | null {
  * Convert WAV to basic format info string
  */
 export function formatAudioInfo(info: AudioInfo): string {
-  const parts = [
-    info.format.toUpperCase(),
-    `${info.sampleRate}Hz`,
-    `${info.channels}ch`
-  ];
+  const parts = [info.format.toUpperCase(), `${info.sampleRate}Hz`, `${info.channels}ch`];
 
   if (info.bitDepth) {
     parts.push(`${info.bitDepth}bit`);
@@ -150,10 +135,7 @@ export function formatAudioInfo(info: AudioInfo): string {
 /**
  * Estimate audio duration from file size (rough estimate for MP3)
  */
-export function estimateMp3Duration(
-  sizeBytes: number,
-  bitrate: number = 128000
-): number {
+export function estimateMp3Duration(sizeBytes: number, bitrate: number = 128000): number {
   // Duration = Size / (Bitrate / 8)
   return sizeBytes / (bitrate / 8);
 }
@@ -161,11 +143,7 @@ export function estimateMp3Duration(
 /**
  * Generate WebGAL-compatible audio filename
  */
-export function generateAudioFilename(
-  characterId: string,
-  index: number,
-  format: AudioFormat = 'mp3'
-): string {
+export function generateAudioFilename(characterId: string, index: number, format: AudioFormat = 'mp3'): string {
   const paddedIndex = index.toString().padStart(3, '0');
   return `${characterId}_${paddedIndex}.${format}`;
 }
@@ -184,7 +162,7 @@ export function parseVocalFilename(filename: string): {
   return {
     characterId: match[1],
     index: parseInt(match[2], 10),
-    format: match[3]
+    format: match[3],
   };
 }
 
@@ -212,7 +190,7 @@ export function validateAudioBuffer(
   if (expectedFormat && detectedFormat !== expectedFormat) {
     return {
       valid: false,
-      error: `Format mismatch: expected ${expectedFormat}, got ${detectedFormat}`
+      error: `Format mismatch: expected ${expectedFormat}, got ${detectedFormat}`,
     };
   }
 
@@ -222,10 +200,7 @@ export function validateAudioBuffer(
 /**
  * Create silent WAV buffer
  */
-export function createSilentWav(
-  durationMs: number,
-  sampleRate: number = 24000
-): ArrayBuffer {
+export function createSilentWav(durationMs: number, sampleRate: number = 24000): ArrayBuffer {
   const numSamples = Math.floor((sampleRate * durationMs) / 1000);
   const dataSize = numSamples * 2; // 16-bit mono
   const bufferSize = 44 + dataSize; // WAV header + data
@@ -287,8 +262,10 @@ export function concatenateWavBuffers(buffers: ArrayBuffer[]): ArrayBuffer | nul
 
     while (offset < buffer.byteLength - 8) {
       const chunkId = String.fromCharCode(
-        view.getUint8(offset), view.getUint8(offset + 1),
-        view.getUint8(offset + 2), view.getUint8(offset + 3)
+        view.getUint8(offset),
+        view.getUint8(offset + 1),
+        view.getUint8(offset + 2),
+        view.getUint8(offset + 3)
       );
       const chunkSize = view.getUint32(offset + 4, true);
 

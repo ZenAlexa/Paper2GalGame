@@ -5,16 +5,10 @@
  * caching, and character voice management
  */
 
-import type {
-  TTSProvider,
-  TTSOptions,
-  TTSEmotion,
-  ProviderStatus,
-  CharacterVoiceSettings
-} from '../types';
+import { AudioCache } from '../cache/audio-cache';
 import { MinimaxTTSProvider } from '../providers/minimax';
 import { VoicevoxTTSProvider } from '../providers/voicevox';
-import { AudioCache } from '../cache/audio-cache';
+import type { CharacterVoiceSettings, ProviderStatus, TTSEmotion, TTSOptions, TTSProvider } from '../types';
 
 /**
  * TTS Service configuration
@@ -67,7 +61,7 @@ export class TTSService {
       enableFallback: true,
       maxRetries: 3,
       retryDelay: 1000,
-      ...config
+      ...config,
     };
 
     this.providers = new Map();
@@ -80,7 +74,7 @@ export class TTSService {
     if (config.cache?.enabled !== false) {
       this.cache = new AudioCache({
         cacheDir: config.cache?.cacheDir,
-        memoryCacheSize: config.cache?.memoryCacheSize
+        memoryCacheSize: config.cache?.memoryCacheSize,
       });
     } else {
       this.cache = null;
@@ -94,14 +88,14 @@ export class TTSService {
     // Initialize Minimax provider
     const minimaxProvider = new MinimaxTTSProvider({
       apiKey: this.config.minimax?.apiKey,
-      model: this.config.minimax?.model
+      model: this.config.minimax?.model,
     });
     this.providers.set('minimax', minimaxProvider);
 
     // Initialize VOICEVOX provider
     const voicevoxProvider = new VoicevoxTTSProvider({
       baseURL: this.config.voicevox?.baseURL,
-      port: this.config.voicevox?.port
+      port: this.config.voicevox?.port,
     });
     this.providers.set('voicevox', voicevoxProvider);
   }
@@ -135,7 +129,7 @@ export class TTSService {
       return await this.cache.store(cacheKey, audioBuffer, {
         characterId,
         text,
-        emotion
+        emotion,
       });
     }
 
@@ -171,10 +165,7 @@ export class TTSService {
           return await provider.generateAudio(text, voiceSettings, options);
         } catch (error) {
           lastError = error as Error;
-          console.warn(
-            `${providerName} generation failed (attempt ${attempt}):`,
-            error
-          );
+          console.warn(`${providerName} generation failed (attempt ${attempt}):`, error);
 
           if (attempt < (this.config.maxRetries || 3)) {
             await this.delay(this.config.retryDelay || 1000);
@@ -199,10 +190,7 @@ export class TTSService {
     const preferred = this.preferredProvider;
 
     // Put preferred provider first
-    return [
-      preferred,
-      ...allProviders.filter(p => p !== preferred)
-    ];
+    return [preferred, ...allProviders.filter((p) => p !== preferred)];
   }
 
   /**
@@ -219,7 +207,7 @@ export class TTSService {
    * Delay helper
    */
   private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   /**
@@ -297,10 +285,10 @@ export function createTTSService(): TTSService {
     enableFallback: true,
     minimax: {
       apiKey: process.env.MINIMAX_API_KEY,
-      model: process.env.MINIMAX_MODEL || 'speech-2.6-hd'
+      model: process.env.MINIMAX_MODEL || 'speech-2.6-hd',
     },
     voicevox: {
-      port: parseInt(process.env.VOICEVOX_PORT || '50021', 10)
-    }
+      port: parseInt(process.env.VOICEVOX_PORT || '50021', 10),
+    },
   });
 }

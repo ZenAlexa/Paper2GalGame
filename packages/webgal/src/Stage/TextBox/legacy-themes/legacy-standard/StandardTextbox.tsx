@@ -1,8 +1,8 @@
-import styles from './standard.module.scss';
-import { textSize } from '@/store/userDataInterface';
-import { ReactNode, useEffect } from 'react';
+import { useEffect } from 'react';
 import { WebGAL } from '@/Core/WebGAL';
-import { ITextboxProps } from '@/Stage/TextBox/types';
+import type { ITextboxProps } from '@/Stage/TextBox/types';
+import { textSize } from '@/store/userDataInterface';
+import styles from './standard.module.scss';
 
 export default function StandardTextbox(props: ITextboxProps) {
   const {
@@ -40,7 +40,7 @@ export default function StandardTextbox(props: ITextboxProps) {
     };
   }, []);
   const nameElementList = showName.map((e, index) => {
-    let prevLength = currentConcatDialogPrev.length;
+    const prevLength = currentConcatDialogPrev.length;
     if (index < prevLength) {
       return (
         <span key={currentDialogKey + index} className={styles.zhanwei}>
@@ -63,7 +63,7 @@ export default function StandardTextbox(props: ITextboxProps) {
     //   return <br key={`br${index}`} />;
     // }
     let delay = index * textDelay;
-    let prevLength = currentConcatDialogPrev.length;
+    const prevLength = currentConcatDialogPrev.length;
     if (currentConcatDialogPrev !== '' && index >= prevLength) {
       delay = delay - prevLength * textDelay;
     }

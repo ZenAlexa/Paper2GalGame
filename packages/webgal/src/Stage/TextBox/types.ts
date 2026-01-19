@@ -1,4 +1,4 @@
-import { EnhancedNode } from '@/Stage/TextBox/TextBox';
+import type { EnhancedNode } from '@/Stage/TextBox/TextBox';
 
 export interface ITextboxProps {
   textArray: EnhancedNode[][];

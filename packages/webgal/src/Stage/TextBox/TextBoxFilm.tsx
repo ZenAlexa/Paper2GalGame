@@ -1,22 +1,21 @@
-import styles from './textboxFilm.module.scss';
 import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { RootState } from '@/store/store';
-
 import { PERFORM_CONFIG } from '@/config';
+import type { RootState } from '@/store/store';
+import styles from './textboxFilm.module.scss';
 
 export const TextBoxFilm = () => {
   const stageState = useSelector((state: RootState) => state.stage);
   const userDataState = useSelector((state: RootState) => state.userData);
   useEffect(() => {});
   const textDelay = PERFORM_CONFIG.textInitialDelay - 20 * userDataState.optionData.textSpeed;
-  const size = userDataState.optionData.textSize * 50 + 200 + '%';
+  const size = `${userDataState.optionData.textSize * 50 + 200}%`;
 
   // 拆字
   const textArray: Array<string> = stageState.showText.split('');
   const textElementList = textArray.map((e, index) => {
     let delay = index * textDelay;
-    let prevLength = stageState.currentConcatDialogPrev.length;
+    const prevLength = stageState.currentConcatDialogPrev.length;
     if (stageState.currentConcatDialogPrev !== '' && index >= prevLength) {
       delay = delay - prevLength * textDelay;
     }

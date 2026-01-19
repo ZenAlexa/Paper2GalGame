@@ -1,8 +1,8 @@
 import { useSelector } from 'react-redux';
-import { RootState } from '@/store/store';
 import { useSetBg } from '@/Stage/MainStage/useSetBg';
-import { useSetFigure } from '@/Stage/MainStage/useSetFigure';
 import { setStageObjectEffects } from '@/Stage/MainStage/useSetEffects';
+import { useSetFigure } from '@/Stage/MainStage/useSetFigure';
+import type { RootState } from '@/store/store';
 
 export function MainStage() {
   const stageState = useSelector((state: RootState) => state.stage);

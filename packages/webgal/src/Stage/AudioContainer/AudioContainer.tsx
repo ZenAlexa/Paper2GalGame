@@ -1,8 +1,8 @@
-import { useSelector } from 'react-redux';
-import { RootState, webgalStore } from '@/store/store';
-import { setStage } from '@/store/stageReducer';
 import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { logger } from '@/Core/util/logger';
+import { setStage } from '@/store/stageReducer';
+import { type RootState, webgalStore } from '@/store/store';
 
 export const AudioContainer = () => {
   const stageStore = useSelector((webgalStore: RootState) => webgalStore.stage);
@@ -67,7 +67,7 @@ export const AudioContainer = () => {
     if (bgmElement) {
       bgmEnter === 0 ? (bgmElement.volume = bgmVol) : bgmFadeIn(bgmElement, bgmVol, bgmEnter);
     }
-  }, [isShowTitle, titleBgm, stageStore.bgm.src, bgmVol, bgmEnter]);
+  }, [bgmVol, bgmEnter, bgmFadeIn, fadeTimer]);
 
   useEffect(() => {
     logger.debug(`设置背景音量：${bgmVol}`);
@@ -91,12 +91,12 @@ export const AudioContainer = () => {
     uiSeAudioElement.src = uiSoundEffects;
     uiSeAudioElement.loop = false;
     // 设置音量
-    if (!isNaN(uiSeVol)) {
+    if (!Number.isNaN(uiSeVol)) {
       uiSeAudioElement.volume = uiSeVol;
     } else {
       // 针对原来使用 WebGAL version <= 4.4.2 的用户数据中不存在UI音效音量的情况
       logger.error('UI SE Vol is NaN');
-      uiSeAudioElement.volume = isNaN(seVol) ? mainVol / 100 : seVol / 100;
+      uiSeAudioElement.volume = Number.isNaN(seVol) ? mainVol / 100 : seVol / 100;
     }
     // 播放UI音效
     uiSeAudioElement.play();
@@ -105,7 +105,7 @@ export const AudioContainer = () => {
       uiSeAudioElement.remove();
     });
     webgalStore.dispatch(setStage({ key: 'uiSe', value: '' }));
-  }, [uiSoundEffects]);
+  }, [uiSoundEffects, mainVol, seVol, uiSeVol]);
 
   useEffect(() => {
     logger.debug(`设置音效音量: ${seVol}`);

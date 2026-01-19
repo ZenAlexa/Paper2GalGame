@@ -1,12 +1,12 @@
-import styles from './textbox.module.scss';
-import { useEffect } from 'react';
-import { WebGAL } from '@/Core/WebGAL';
-import { ITextboxProps } from './types';
-import useApplyStyle from '@/hooks/useApplyStyle';
 import { css } from '@emotion/css';
-import { textSize } from '@/store/userDataInterface';
+import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { RootState } from '@/store/store';
+import { WebGAL } from '@/Core/WebGAL';
+import useApplyStyle from '@/hooks/useApplyStyle';
+import type { RootState } from '@/store/store';
+import { textSize } from '@/store/userDataInterface';
+import styles from './textbox.module.scss';
+import type { ITextboxProps } from './types';
 
 export default function IMSSTextbox(props: ITextboxProps) {
   const {
@@ -43,13 +43,13 @@ export default function IMSSTextbox(props: ITextboxProps) {
     return () => {
       WebGAL.events.textSettle.off(settleText);
     };
-  }, []);
+  }, [applyStyle]);
   let allTextIndex = 0;
   const nameElementList = showName.map((line, index) => {
     const textline = line.map((en, index) => {
       const e = en.reactNode;
       let style = '';
-      let tips = '';
+      let _tips = '';
       let style_alltext = '';
       let isEnhanced = false;
       if (en.enhancedValue) {
@@ -62,7 +62,7 @@ export default function IMSSTextbox(props: ITextboxProps) {
               style = value;
               break;
             case 'tips':
-              tips = value;
+              _tips = value;
               break;
             case 'style-alltext':
               style_alltext = value;
@@ -70,8 +70,8 @@ export default function IMSSTextbox(props: ITextboxProps) {
           }
         }
       }
-      const styleClassName = ' ' + css(style, { label: 'showname' });
-      const styleAllText = ' ' + css(style_alltext, { label: 'showname' });
+      const styleClassName = ` ${css(style, { label: 'showname' })}`;
+      const styleAllText = ` ${css(style_alltext, { label: 'showname' })}`;
       if (isEnhanced) {
         return (
           <span key={index} style={{ position: 'relative' }}>
@@ -110,7 +110,7 @@ export default function IMSSTextbox(props: ITextboxProps) {
     const textLine = line.map((en, index) => {
       const e = en.reactNode;
       let style = '';
-      let tips = '';
+      let _tips = '';
       let style_alltext = '';
       if (en.enhancedValue) {
         const data = en.enhancedValue;
@@ -121,7 +121,7 @@ export default function IMSSTextbox(props: ITextboxProps) {
               style = value;
               break;
             case 'tips':
-              tips = value;
+              _tips = value;
               break;
             case 'style-alltext':
               style_alltext = value;
@@ -134,12 +134,12 @@ export default function IMSSTextbox(props: ITextboxProps) {
       // }
       let delay = allTextIndex * textDelay;
       allTextIndex++;
-      let prevLength = currentConcatDialogPrev.length;
+      const prevLength = currentConcatDialogPrev.length;
       if (currentConcatDialogPrev !== '' && allTextIndex >= prevLength) {
         delay = delay - prevLength * textDelay;
       }
-      const styleClassName = ' ' + css(style);
-      const styleAllText = ' ' + css(style_alltext);
+      const styleClassName = ` ${css(style)}`;
+      const styleAllText = ` ${css(style_alltext)}`;
       if (allTextIndex < prevLength) {
         return (
           <span

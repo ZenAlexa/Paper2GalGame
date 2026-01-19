@@ -1,10 +1,10 @@
-import styles from './fullScreenPerform.module.scss';
 import { useSelector } from 'react-redux';
-import { RootState } from '@/store/store';
+import type { RootState } from '@/store/store';
+import styles from './fullScreenPerform.module.scss';
 
 export const FullScreenPerform = () => {
   const stageState = useSelector((state: RootState) => state.stage);
-  let stageWidth = '100%';
+  const stageWidth = '100%';
   let stageHeight = '100%';
   let top = '0';
   if (stageState.enableFilm !== '') {

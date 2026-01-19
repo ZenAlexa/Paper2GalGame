@@ -8,15 +8,37 @@
       "correctness": {
         "noUnusedVariables": "warn",
         "noUnusedImports": "warn",
-        "useExhaustiveDependencies": "warn"
+        "noUnusedFunctionParameters": "warn",
+        "useExhaustiveDependencies": "warn",
+        "noUnreachable": "warn",
+        "noEmptyCharacterClassInRegex": "warn",
+        "useHookAtTopLevel": "warn"
       },
       "suspicious": {
         "noExplicitAny": "warn",
-        "noConsole": "off"
+        "noConsole": "off",
+        "noImplicitAnyLet": "warn",
+        "noAssignInExpressions": "warn",
+        "noControlCharactersInRegex": "warn",
+        "noArrayIndexKey": "warn",
+        "useIterableCallbackReturn": "warn"
       },
       "style": {
-        "useConst": "error",
-        "noNonNullAssertion": "warn"
+        "useConst": "warn",
+        "noNonNullAssertion": "warn",
+        "useTemplate": "warn",
+        "useNodejsImportProtocol": "warn"
+      },
+      "complexity": {
+        "noBannedTypes": "warn",
+        "useOptionalChain": "warn",
+        "noImportantStyles": "warn"
+      },
+      "a11y": {
+        "useKeyWithClickEvents": "warn",
+        "noStaticElementInteractions": "warn",
+        "useMediaCaption": "warn",
+        "noRedundantAlt": "warn"
       },
       "security": {
         "noDangerouslySetInnerHtml": "error"

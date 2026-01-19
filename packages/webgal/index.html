@@ -149,7 +149,7 @@
           const zoomW2 = h / targetWidth; // 竖屏时以窗口宽度为基础的变换比
           let mh = (targetHeight - h) / 2; // y轴移动距离
           let mw = (targetWidth - w) / 2; // x轴移动距离
-          let mh2os = targetWidth / 2 - w / 2; // 竖屏时 y轴移动距离
+          const mh2os = targetWidth / 2 - w / 2; // 竖屏时 y轴移动距离
           let mw2os = targetHeight / 2 - h / 2; // 竖屏时 x轴移动距离
           let transform = '';
           let effectBackgroundTransform = '';
@@ -180,13 +180,13 @@
             mw2os = -mw2os;
             if (h * (9 / 16) >= w) {
               effectBackgroundTransform =
-                `rotate(90deg) ` + `translate(${mw2os}px, ${mh2os}px) ` + `scale(${zoomH2 * 1.75}, ${zoomH2 * 1.75}) `;
-              transform = `rotate(90deg) ` + `translate(${mw2os}px, ${mh2os}px) ` + `scale(${zoomH2},${zoomH2}) `;
+                `rotate(90deg) translate(${mw2os}px, ${mh2os}px) scale(${zoomH2 * 1.75}, ${zoomH2 * 1.75}) `;
+              transform = `rotate(90deg) translate(${mw2os}px, ${mh2os}px) scale(${zoomH2},${zoomH2}) `;
             }
             if (h * (9 / 16) < w) {
               effectBackgroundTransform =
-                `rotate(90deg) ` + ` translate(${mw2os}px, ${mh2os}px) ` + `scale(${zoomW2 * 1.75}, ${zoomW2 * 1.75}) `;
-              transform = `rotate(90deg) ` + `translate(${mw2os}px, ${mh2os}px) ` + `scale(${zoomW2},${zoomW2}) `;
+                `rotate(90deg)  translate(${mw2os}px, ${mh2os}px) scale(${zoomW2 * 1.75}, ${zoomW2 * 1.75}) `;
+              transform = `rotate(90deg) translate(${mw2os}px, ${mh2os}px) scale(${zoomW2},${zoomW2}) `;
             }
             // iOS 不强制旋转
             if (isIOS) {
@@ -243,10 +243,10 @@
           navigator.serviceWorker
             .register('./webgal-serviceworker.js')
             .then((reg) => {
-              console.log('Registration succeeded. Scope is ' + reg.scope);
+              console.log(`Registration succeeded. Scope is ${reg.scope}`);
             })
             .catch((error) => {
-              console.log('Registration failed with ' + error);
+              console.log(`Registration failed with ${error}`);
             });
         }
       })();

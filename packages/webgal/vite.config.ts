@@ -1,13 +1,13 @@
-import { defineConfig } from 'vite';
+import { resolve } from 'node:path';
 import react from '@vitejs/plugin-react';
-import loadVersion from 'vite-plugin-package-version';
-import { resolve } from 'path';
 import Info from 'unplugin-info/vite';
+import { defineConfig } from 'vite';
 import viteCompression from 'vite-plugin-compression';
+import loadVersion from 'vite-plugin-package-version';
 
 // https://vitejs.dev/config/
 
-// @ts-ignore
+// @ts-expect-error
 const env = process.env.NODE_ENV;
 console.log(env);
 
@@ -19,7 +19,7 @@ export default defineConfig({
     viteCompression({
       filter: /^(.*assets).*\.(js|css|ttf)$/,
     }),
-    // @ts-ignore
+    // @ts-expect-error
     // visualizer(),
   ],
   resolve: {

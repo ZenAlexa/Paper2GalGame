@@ -28,17 +28,17 @@
     "@rollup/plugin-json": "^5.0.1",
     "@rollup/plugin-node-resolve": "^15.0.1",
     "@rollup/plugin-typescript": "^9.0.2",
-    "@types/lodash": "^4.14.189",
-    "@types/node": "^18.14.0",
-    "@vitest/coverage-c8": "^0.28.5",
-    "rollup": "^3.29.5",
+    "@types/lodash": "^4.17.15",
+    "@types/node": "^22.10.7",
+    "@vitest/coverage-v8": "^2.1.8",
+    "rollup": "^4.30.1",
     "rollup-plugin-babel": "^4.4.0",
     "rollup-plugin-terser": "^7.0.2",
     "rollup-plugin-typescript2": "^0.34.1",
     "ts-node": "^10.9.1",
     "tslib": "^2.4.1",
-    "typescript": "^4.9.3",
-    "vitest": "^0.28.5"
+    "typescript": "^5.8.3",
+    "vitest": "^2.1.8"
   },
   "type": "module"
 }

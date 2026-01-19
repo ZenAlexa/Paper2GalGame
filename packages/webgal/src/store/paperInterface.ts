@@ -173,3 +173,50 @@ export interface IPersistedPaperData {
   /** All notes */
   notes: IPaperNote[];
 }
+
+/**
+ * Paper state snapshot for save/load functionality
+ * This is stored alongside ISaveData when saving in Paper mode
+ */
+export interface IPaperSaveState {
+  /** Flag indicating this is a Paper mode save */
+  isPaperMode: true;
+  /** Paper metadata */
+  metadata: IPaperMetadata;
+  /** Reading progress */
+  progress: IPaperProgress;
+  /** Session ID for API reconnection (may be invalid after time) */
+  sessionId: string;
+  /** Highlights at save time */
+  highlights: IPaperHighlight[];
+  /** Notes at save time */
+  notes: IPaperNote[];
+}
+
+/**
+ * Paper reading list entry for the "Continue Reading" feature
+ */
+export interface IPaperReadingEntry {
+  /** Unique ID for this entry */
+  id: string;
+  /** Paper metadata */
+  metadata: IPaperMetadata;
+  /** Latest progress */
+  progress: IPaperProgress;
+  /** Preview image (WebP base64) */
+  previewImage: string;
+  /** Last save timestamp (ISO 8601) */
+  lastSavedAt: string;
+  /** Associated save slot index (-1 for auto-save) */
+  saveSlot: number;
+}
+
+/**
+ * Paper reading list state for persistence
+ */
+export interface IPaperReadingList {
+  /** List of paper reading entries */
+  entries: IPaperReadingEntry[];
+  /** Maximum entries to keep */
+  maxEntries: number;
+}

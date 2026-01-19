@@ -11,6 +11,7 @@ import cloneDeep from 'lodash/cloneDeep';
 import uniqWith from 'lodash/uniqWith';
 import { scenePrefetcher } from '@/Core/util/prefetcher/scenePrefetcher';
 import { setEbg } from '@/Core/gameScripts/changeBg/setEbg';
+import { restoreFromSave, resetPaperState } from '@/store/paperReducer';
 
 import { WebGAL } from '@/Core/WebGAL';
 
@@ -76,6 +77,22 @@ export function loadGameFromStageData(stageData: ISaveData) {
 
     // Restore blurred background
     setEbg(webgalStore.getState().stage.bgName);
+
+    // Restore Paper mode state if present in save
+    if (loadFile.paperState && loadFile.paperState.isPaperMode) {
+      dispatch(restoreFromSave(loadFile.paperState));
+      logger.info('Paper mode state restored from save', {
+        paperId: loadFile.paperState.metadata.paperId,
+        progress: loadFile.paperState.progress.percentage,
+      });
+    } else {
+      // Not a Paper mode save, ensure Paper mode is disabled
+      const currentPaperState = webgalStore.getState().paper;
+      if (currentPaperState.isPaperMode) {
+        dispatch(resetPaperState());
+        logger.info('Exited Paper mode (loaded non-Paper save)');
+      }
+    }
   }).catch((error) => {
     logger.error('Failed to load game scene:', error);
   });

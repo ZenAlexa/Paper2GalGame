@@ -1,5 +1,10 @@
 import { webgalStore } from '@/store/store';
-import { getStorageAsync, setStorageAsync } from '@/Core/controller/storage/storageController';
+import {
+  getStorageAsync,
+  setStorageAsync,
+  createPaperReadingEntry,
+  updatePaperReadingEntry,
+} from '@/Core/controller/storage/storageController';
 import { ISaveData } from '@/store/userDataInterface';
 import { loadGameFromStageData } from '@/Core/controller/storage/loadGame';
 import { generateCurrentStageData } from '@/Core/controller/storage/saveGame';
@@ -7,6 +12,7 @@ import cloneDeep from 'lodash/cloneDeep';
 import { WebGAL } from '@/Core/WebGAL';
 import { saveActions } from '@/store/savesReducer';
 import { dumpFastSaveToStorage, dumpFastSaveToStorageSync, getFastSaveFromStorage } from '@/Core/controller/storage/savesController';
+import { logger } from '@/Core/util/logger';
 
 export let fastSaveGameKey = '';
 export let isFastSaveKey = '';
@@ -26,6 +32,16 @@ export async function fastSaveGame() {
   const newSaveData = cloneDeep(saveData);
   webgalStore.dispatch(saveActions.setFastSave(newSaveData));
   await dumpFastSaveToStorage();
+
+  // Update Paper reading list if this is a Paper mode save
+  if (newSaveData.paperState) {
+    const readingEntry = createPaperReadingEntry(newSaveData);
+    if (readingEntry) {
+      await updatePaperReadingEntry(readingEntry).catch((error) => {
+        logger.error('Failed to update Paper reading list during fast save:', error);
+      });
+    }
+  }
 }
 
 /**

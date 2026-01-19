@@ -20,6 +20,7 @@ import {
   IAddHighlightPayload,
   IAddNotePayload,
   IPersistedPaperData,
+  IPaperSaveState,
 } from '@/store/paperInterface';
 
 /**
@@ -369,6 +370,29 @@ const paperSlice = createSlice({
     resetPaperState() {
       return cloneDeep(initialPaperState);
     },
+
+    /**
+     * Restore Paper state from a save file
+     * Used when loading a save that contains Paper mode data
+     */
+    restoreFromSave(state, action: PayloadAction<IPaperSaveState>) {
+      const { metadata, progress, sessionId, highlights, notes } = action.payload;
+      state.isPaperMode = true;
+      state.currentPaper = metadata;
+      state.progress = progress;
+      state.highlights = highlights || [];
+      state.notes = notes || [];
+      // Session is partial - only sessionId is restored
+      // Full session reconnection requires API call
+      state.session = sessionId
+        ? {
+            sessionId,
+            apiBaseUrl: '/api', // Default API base URL
+            scriptGenerated: true, // Assume script was generated
+            ttsGenerated: false, // TTS may need regeneration
+          }
+        : null;
+    },
   },
 });
 
@@ -410,6 +434,7 @@ export const {
   // Persistence
   restorePaperData,
   resetPaperState,
+  restoreFromSave,
 } = paperSlice.actions;
 
 // Export all actions as a group

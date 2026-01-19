@@ -1,12 +1,17 @@
 import * as localforage from 'localforage';
-import { IUserData } from '@/store/userDataInterface';
-import { IPersistedPaperData } from '@/store/paperInterface';
+import { IUserData, ISaveData } from '@/store/userDataInterface';
+import { IPersistedPaperData, IPaperReadingList, IPaperReadingEntry } from '@/store/paperInterface';
 import { logger } from '../../util/logger';
 import { webgalStore } from '@/store/store';
 import { initState, resetUserData } from '@/store/userDataReducer';
 import { restorePaperData, initialPaperState } from '@/store/paperReducer';
 
 import { WebGAL } from '@/Core/WebGAL';
+
+/**
+ * Get the storage key for Paper reading list
+ */
+const getPaperReadingListKey = () => `${WebGAL.gameKey}_paper_reading_list`;
 
 /**
  * Get the storage key for Paper data
@@ -177,4 +182,98 @@ function checkPaperDataProperty(data: any): boolean {
 export async function clearPaperStorage(): Promise<void> {
   await localforage.removeItem(getPaperStorageKey());
   logger.info('Paper data cleared from storage');
+}
+
+// ==================== Paper Reading List Storage ====================
+
+const DEFAULT_MAX_READING_ENTRIES = 20;
+
+/**
+ * Get Paper reading list from storage
+ */
+export async function getPaperReadingList(): Promise<IPaperReadingList> {
+  const data = await localforage.getItem(getPaperReadingListKey());
+  if (data && typeof data === 'object' && Array.isArray((data as any).entries)) {
+    return data as IPaperReadingList;
+  }
+  return {
+    entries: [],
+    maxEntries: DEFAULT_MAX_READING_ENTRIES,
+  };
+}
+
+/**
+ * Save Paper reading list to storage
+ */
+export async function savePaperReadingList(list: IPaperReadingList): Promise<void> {
+  await localforage.setItem(getPaperReadingListKey(), list);
+  logger.info('Paper reading list saved', { count: list.entries.length });
+}
+
+/**
+ * Add or update an entry in the Paper reading list
+ * Called when saving a Paper mode game
+ */
+export async function updatePaperReadingEntry(entry: IPaperReadingEntry): Promise<void> {
+  const list = await getPaperReadingList();
+
+  // Find existing entry by paper ID
+  const existingIndex = list.entries.findIndex(
+    (e) => e.metadata.paperId === entry.metadata.paperId
+  );
+
+  if (existingIndex >= 0) {
+    // Update existing entry
+    list.entries[existingIndex] = entry;
+    // Move to front (most recent)
+    const updated = list.entries.splice(existingIndex, 1)[0];
+    list.entries.unshift(updated);
+  } else {
+    // Add new entry at the front
+    list.entries.unshift(entry);
+    // Trim to max size
+    while (list.entries.length > list.maxEntries) {
+      list.entries.pop();
+    }
+  }
+
+  await savePaperReadingList(list);
+}
+
+/**
+ * Remove an entry from the Paper reading list
+ */
+export async function removePaperReadingEntry(paperId: string): Promise<void> {
+  const list = await getPaperReadingList();
+  list.entries = list.entries.filter((e) => e.metadata.paperId !== paperId);
+  await savePaperReadingList(list);
+  logger.info('Paper reading entry removed', { paperId });
+}
+
+/**
+ * Create a reading entry from a save data object
+ */
+export function createPaperReadingEntry(saveData: ISaveData): IPaperReadingEntry | null {
+  if (!saveData.paperState || !saveData.paperState.isPaperMode) {
+    return null;
+  }
+
+  const entry: IPaperReadingEntry = {
+    id: `reading_${saveData.paperState.metadata.paperId}_${Date.now()}`,
+    metadata: saveData.paperState.metadata,
+    progress: saveData.paperState.progress,
+    previewImage: saveData.previewImage || '',
+    lastSavedAt: saveData.saveTime || new Date().toISOString(),
+    saveSlot: saveData.index,
+  };
+
+  return entry;
+}
+
+/**
+ * Clear all Paper reading list entries
+ */
+export async function clearPaperReadingList(): Promise<void> {
+  await localforage.removeItem(getPaperReadingListKey());
+  logger.info('Paper reading list cleared');
 }

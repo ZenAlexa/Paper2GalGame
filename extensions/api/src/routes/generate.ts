@@ -245,7 +245,7 @@ router.post('/', async (req: Request, res: Response) => {
       };
 
       // Helper to format options for WebGAL syntax
-      const formatOptions = (options: Record<string, any> | undefined): string => {
+      const formatOptions = (options: Record<string, string | number | boolean> | undefined): string => {
         if (!options || Object.keys(options).length === 0) return '';
         return Object.entries(options)
           .map(([key, value]) => {
@@ -313,7 +313,13 @@ router.post('/', async (req: Request, res: Response) => {
 
       if (!hasChangeBgAtStart) {
         console.log('[Generate] No changeBg at start, inserting default background');
-        webgalLines.unshift('changeBg:bg.webp;');
+        // Add -next so changeBg auto-advances to next command
+        webgalLines.unshift('changeBg:bg.webp -next;');
+      } else {
+        // Ensure existing changeBg has -next flag
+        if (!webgalLines[0].includes('-next')) {
+          webgalLines[0] = webgalLines[0].replace(/;$/, ' -next;');
+        }
       }
 
       // CRITICAL: Ensure only ONE bgm command at the start of the script
@@ -357,10 +363,17 @@ router.post('/', async (req: Request, res: Response) => {
 
       // CRITICAL: Insert changeFigure commands when speaker changes
       // This ensures the correct character sprite is shown for each dialogue
+      // First, REMOVE all existing changeFigure commands to avoid duplicates
+      // (AI may have already generated them, but we want consistent speaker-based logic)
+      const linesWithoutFigures = webgalLines.filter((line) => !line.toLowerCase().startsWith('changefigure:'));
+      console.log(
+        `[Generate] Removed ${webgalLines.length - linesWithoutFigures.length} existing changeFigure commands`
+      );
+
       const processedLines: string[] = [];
       let currentSpeaker: string | null = null;
 
-      for (const line of webgalLines) {
+      for (const line of linesWithoutFigures) {
         const lowerLine = line.toLowerCase();
 
         // Check if this is a say command
@@ -369,10 +382,11 @@ router.post('/', async (req: Request, res: Response) => {
           const speakerMatch = line.match(/-speaker=(\w+)/i);
           const speaker = speakerMatch ? speakerMatch[1].toLowerCase() : 'unknown';
 
-          // If speaker changed, insert changeFigure command
+          // If speaker changed, insert changeFigure command with -next flag
+          // -next makes changeFigure auto-advance to the next sentence
           if (speaker !== currentSpeaker) {
             const spriteConfig = speakerSpriteMap[speaker] || speakerSpriteMap.unknown;
-            const changeFigureLine = `changeFigure:${spriteConfig.sprite} ${spriteConfig.position};`;
+            const changeFigureLine = `changeFigure:${spriteConfig.sprite} ${spriteConfig.position} -next;`;
 
             console.log(`[Generate] Speaker changed: ${currentSpeaker} → ${speaker}, inserting: ${changeFigureLine}`);
             processedLines.push(changeFigureLine);

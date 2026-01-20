@@ -1,0 +1,157 @@
+/**
+ * Paper Progress Bar Styles
+ * Warm color palette matching project design system
+ * Positioned at top or bottom of the game viewport
+ */
+
+// Design tokens - warm Galgame palette
+$primary-pink: #FFB7C5;
+$primary-cream: #FFF5EE;
+$text-dark: #4A3728;
+$accent-sakura: #FFCCD5;
+$accent-gold: #E8C89D;
+$shadow-warm: rgba(74, 55, 40, 0.3);
+
+.progressBar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  padding: 8px 20px;
+  background: linear-gradient(
+    to bottom,
+    rgba($text-dark, 0.6) 0%,
+    rgba($text-dark, 0.3) 100%
+  );
+  backdrop-filter: blur(5px);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: opacity 0.3s ease;
+
+  &.top {
+    top: 0;
+  }
+
+  &.bottom {
+    bottom: 0;
+    background: linear-gradient(
+      to top,
+      rgba($text-dark, 0.6) 0%,
+      rgba($text-dark, 0.3) 100%
+    );
+  }
+
+  &.compact {
+    padding: 4px 16px;
+    gap: 4px;
+  }
+}
+
+.progressTrack {
+  width: 100%;
+  height: 6px;
+  background: rgba($primary-cream, 0.2);
+  border-radius: 3px;
+  overflow: hidden;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+
+  .compact & {
+    height: 4px;
+  }
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    $primary-pink 0%,
+    $accent-sakura 50%,
+    $accent-gold 100%
+  );
+  border-radius: 3px;
+  transition: width 0.3s ease;
+  box-shadow: 0 0 8px rgba($primary-pink, 0.5);
+}
+
+.progressInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 18px;
+
+  .compact & {
+    min-height: 14px;
+  }
+}
+
+.phase {
+  font-size: 0.85rem;
+  color: $primary-cream;
+  text-shadow: 1px 1px 2px $shadow-warm;
+  opacity: 0.9;
+  letter-spacing: 0.05em;
+
+  .compact & {
+    font-size: 0.75rem;
+  }
+}
+
+.percentage {
+  font-size: 0.8rem;
+  color: rgba($primary-cream, 0.8);
+  text-shadow: 1px 1px 2px $shadow-warm;
+
+  .compact & {
+    font-size: 0.7rem;
+  }
+}
+
+// Animation for progress updates
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+// Hover state for interactivity
+.progressBar:hover {
+  opacity: 1;
+
+  .progressFill {
+    box-shadow: 0 0 12px rgba($primary-pink, 0.7);
+  }
+}
+
+// Auto-hide when not hovering (optional behavior)
+.progressBar.autoHide {
+  opacity: 0.4;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 600px) {
+  .progressBar {
+    padding: 6px 12px;
+    gap: 4px;
+  }
+
+  .progressTrack {
+    height: 4px;
+  }
+
+  .phase {
+    font-size: 0.75rem;
+  }
+
+  .percentage {
+    font-size: 0.7rem;
+  }
+}

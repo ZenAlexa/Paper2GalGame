@@ -154,7 +154,7 @@ const PaperHighlightComponent: React.FC<PaperHighlightProps> = ({ text, note, co
 };
 
 export const paperHighlight = (sentence: ISentence): IPerform => {
-  const performName = `paperHighlight-${Math.random().toString(36).substr(2, 9)}`;
+  const performName = `paperHighlight-${Math.random().toString(36).slice(2, 11)}`;
 
   // Extract arguments
   const highlightText = sentence.content;
@@ -185,6 +185,7 @@ export const paperHighlight = (sentence: ISentence): IPerform => {
   const container = getHighlightContainer();
   if (container) {
     container.style.display = 'block';
+    // Note: Using ReactDOM.render for React 17 compatibility
     // eslint-disable-next-line react/no-deprecated
     ReactDOM.render(
       <PaperHighlightComponent text={highlightText} note={note} color={color} importance={importance} />,

@@ -186,7 +186,7 @@ const paperSlice = createSlice({
     addHighlight(state, action: PayloadAction<IAddHighlightPayload>) {
       const highlight: IPaperHighlight = {
         ...action.payload,
-        id: `hl_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        id: `hl_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
         createdAt: new Date().toISOString(),
       };
       state.highlights.push(highlight);
@@ -219,7 +219,7 @@ const paperSlice = createSlice({
     addNote(state, action: PayloadAction<IAddNotePayload>) {
       const note: IPaperNote = {
         ...action.payload,
-        id: `note_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        id: `note_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
         createdAt: new Date().toISOString(),
       };
       state.notes.push(note);

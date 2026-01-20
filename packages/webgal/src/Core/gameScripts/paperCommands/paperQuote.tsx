@@ -140,7 +140,7 @@ const PaperQuoteComponent: React.FC<PaperQuoteProps> = ({ text, source, style })
 };
 
 export const paperQuote = (sentence: ISentence): IPerform => {
-  const performName = `paperQuote-${Math.random().toString(36).substr(2, 9)}`;
+  const performName = `paperQuote-${Math.random().toString(36).slice(2, 11)}`;
 
   // Extract arguments
   const quoteText = sentence.content;
@@ -167,6 +167,7 @@ export const paperQuote = (sentence: ISentence): IPerform => {
   const container = getQuoteContainer();
   if (container) {
     container.style.display = 'block';
+    // Note: Using ReactDOM.render for React 17 compatibility
     // eslint-disable-next-line react/no-deprecated
     ReactDOM.render(<PaperQuoteComponent text={quoteText} source={source} style={style} />, container);
   }

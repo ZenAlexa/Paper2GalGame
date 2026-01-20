@@ -9,7 +9,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import useApplyStyle from '@/hooks/useApplyStyle';
 import useSoundEffect from '@/hooks/useSoundEffect';
-import useTrans from '@/hooks/useTrans';
 import { getCharacterDisplayName, PAPER_CHARACTERS } from '@/Paper/config/characters';
 import type { RootState } from '@/store/store';
 import styles from './paperSelection.module.scss';
@@ -40,7 +39,6 @@ export function PaperSelection({ onGameStart, onBack }: PaperSelectionProps) {
   const background = GUIState.titleBg;
   const showBackground = background === '' ? 'rgba(0,0,0,1)' : `url("${background}")`;
 
-  const _t = useTrans('title.');
   const { playSeEnter, playSeClick } = useSoundEffect();
   const applyStyle = useApplyStyle('UI/Title/title.scss');
 

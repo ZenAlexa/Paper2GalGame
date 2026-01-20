@@ -1,8 +1,9 @@
 /**
  * 语句类型
  */
-import { fileType } from '@/Core/util/gameAssetsAccess/assetSetter';
-import { ISceneEntry } from '@/Core/Modules/scene';
+
+import type { ISceneEntry } from '@/Core/Modules/scene';
+import type { fileType } from '@/Core/util/gameAssetsAccess/assetSetter';
 
 export enum commandType {
   say, // 对话
@@ -40,6 +41,9 @@ export enum commandType {
   applyStyle,
   wait,
   callSteam, // 调用Steam功能
+  // Paper mode commands
+  paperQuote, // Display paper citation/quote with source reference
+  paperHighlight, // Highlight important paper content with annotation
 }
 
 /**

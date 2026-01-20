@@ -1,13 +1,13 @@
-import { webgalStore } from '@/store/store';
-import { setGlobalVar } from '@/store/userDataReducer';
-import { setEnableAppreciationMode } from '@/store/GUIReducer';
-import { Live2D, WebGAL } from '@/Core/WebGAL';
-import { WebgalParser } from '@/Core/parser/sceneParser';
-import { getStorageAsync, setStorage } from '@/Core/controller/storage/storageController';
+import axios from 'axios';
 import { initKey } from '@/Core/controller/storage/fastSaveLoad';
 import { getFastSaveFromStorage, getSavesFromStorage } from '@/Core/controller/storage/savesController';
+import { getStorageAsync, setStorage } from '@/Core/controller/storage/storageController';
+import { WebgalParser } from '@/Core/parser/sceneParser';
 import { logger } from '@/Core/util/logger';
-import axios from 'axios';
+import { Live2D, WebGAL } from '@/Core/WebGAL';
+import { setEnableAppreciationMode } from '@/store/GUIReducer';
+import { webgalStore } from '@/store/store';
+import { setGlobalVar } from '@/store/userDataReducer';
 
 /**
  * 获取游戏信息
@@ -16,8 +16,8 @@ import axios from 'axios';
 export const infoFetcher = (url: string) => {
   const dispatch = webgalStore.dispatch;
   axios.get(url).then(async (r) => {
-    let gameConfigRaw: string = r.data;
-    let gameConfig = WebgalParser.parseConfig(gameConfigRaw);
+    const gameConfigRaw: string = r.data;
+    const gameConfig = WebgalParser.parseConfig(gameConfigRaw);
     logger.info('获取到游戏信息', gameConfig);
     // 先把 key 找到并设置了
     const keyItem = gameConfig.find((e) => e.command === 'Game_key');
@@ -35,7 +35,7 @@ export const infoFetcher = (url: string) => {
             setGlobalVar({
               key: command,
               value: args.join('|'),
-            }),
+            })
           );
         } else {
           let res: any = args[0].trim();
@@ -49,7 +49,7 @@ export const infoFetcher = (url: string) => {
             setGlobalVar({
               key: command,
               value: res,
-            }),
+            })
           );
 
           if (command === 'Enable_Appreciation') {

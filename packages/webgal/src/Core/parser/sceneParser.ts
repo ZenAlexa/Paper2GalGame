@@ -1,10 +1,8 @@
-import { assetSetter } from '@/Core/util/gameAssetsAccess/assetSetter';
-import { assetsPrefetcher } from '@/Core/util/prefetcher/assetsPrefetcher';
 import SceneParser from 'webgal-parser';
-import { commandType, IScene } from '../controller/scene/sceneInterface';
-import { logger } from '../util/logger';
+import { applyStyle } from '@/Core/gameScripts/applyStyle';
 import { bgm } from '@/Core/gameScripts/bgm';
 import { callSceneScript } from '@/Core/gameScripts/callSceneScript';
+import { callSteam } from '@/Core/gameScripts/callSteam';
 import { changeBg } from '@/Core/gameScripts/changeBg';
 import { changeFigure } from '@/Core/gameScripts/changeFigure';
 import { changeSceneScript } from '@/Core/gameScripts/changeSceneScript';
@@ -15,6 +13,7 @@ import { getUserInput } from '@/Core/gameScripts/getUserInput';
 import { intro } from '@/Core/gameScripts/intro';
 import { label } from '@/Core/gameScripts/label';
 import { miniAvatar } from '@/Core/gameScripts/miniAvatar';
+import { paperHighlight, paperQuote } from '@/Core/gameScripts/paperCommands';
 import { pixi } from '@/Core/gameScripts/pixi';
 import { playEffect } from '@/Core/gameScripts/playEffect';
 import { playVideo } from '@/Core/gameScripts/playVideo';
@@ -27,16 +26,18 @@ import { setTransform } from '@/Core/gameScripts/setTransform';
 import { setTransition } from '@/Core/gameScripts/setTransition';
 import { unlockBgm } from '@/Core/gameScripts/unlockBgm';
 import { unlockCg } from '@/Core/gameScripts/unlockCg';
-import { callSteam } from '@/Core/gameScripts/callSteam';
+import { wait } from '@/Core/gameScripts/wait';
+import { assetSetter } from '@/Core/util/gameAssetsAccess/assetSetter';
+import { assetsPrefetcher } from '@/Core/util/prefetcher/assetsPrefetcher';
+import { commandType, type IScene } from '../controller/scene/sceneInterface';
 import { end } from '../gameScripts/end';
 import { jumpLabel } from '../gameScripts/jumpLabel';
 import { pixiInit } from '../gameScripts/pixi/pixiInit';
 import { say } from '../gameScripts/say';
 import { setVar } from '../gameScripts/setVar';
 import { showVars } from '../gameScripts/showVars';
-import { defineScripts, IConfigInterface, ScriptConfig, ScriptFunction, scriptRegistry } from './utils';
-import { applyStyle } from '@/Core/gameScripts/applyStyle';
-import { wait } from '@/Core/gameScripts/wait';
+import { logger } from '../util/logger';
+import { defineScripts, type IConfigInterface, ScriptConfig, type ScriptFunction, scriptRegistry } from './utils';
 
 export const SCRIPT_TAG_MAP = defineScripts({
   say: ScriptConfig(commandType.say, say),
@@ -74,6 +75,9 @@ export const SCRIPT_TAG_MAP = defineScripts({
   applyStyle: ScriptConfig(commandType.applyStyle, applyStyle, { next: true }),
   wait: ScriptConfig(commandType.wait, wait),
   callSteam: ScriptConfig(commandType.callSteam, callSteam, { next: true }),
+  // Paper mode commands
+  paperQuote: ScriptConfig(commandType.paperQuote, paperQuote),
+  paperHighlight: ScriptConfig(commandType.paperHighlight, paperHighlight),
 });
 
 export const SCRIPT_CONFIG: IConfigInterface[] = Object.values(SCRIPT_TAG_MAP);

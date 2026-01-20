@@ -1,4 +1,4 @@
-import PixiStage from '@/Core/controller/stage/pixi/PixiController';
+import type PixiStage from '@/Core/controller/stage/pixi/PixiController';
 import { PerformController } from '@/Core/Modules/perform/performController';
 
 /**

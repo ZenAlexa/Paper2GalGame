@@ -5,13 +5,8 @@
  * WebGAL script parsing, and progress tracking
  */
 
-import type {
-  TTSEmotion,
-  BatchTTSRequest,
-  BatchTTSResult,
-  CharacterVoiceSettings
-} from '../types';
-import { TTSService } from './tts-service';
+import type { BatchTTSRequest, BatchTTSResult, CharacterVoiceSettings, TTSEmotion } from '../types';
+import type { TTSService } from './tts-service';
 
 /**
  * Parsed say command from WebGAL script
@@ -40,10 +35,7 @@ export class BatchTTSProcessor {
   private ttsService: TTSService;
   private characterConfigs: Map<string, CharacterVoiceSettings>;
 
-  constructor(
-    ttsService: TTSService,
-    characterConfigs?: Map<string, CharacterVoiceSettings>
-  ) {
+  constructor(ttsService: TTSService, characterConfigs?: Map<string, CharacterVoiceSettings>) {
     this.ttsService = ttsService;
     this.characterConfigs = characterConfigs || new Map();
   }
@@ -77,7 +69,7 @@ export class BatchTTSProcessor {
 
     for (const chunk of chunks) {
       const results = await Promise.allSettled(
-        chunk.map(async item => {
+        chunk.map(async (item) => {
           const config = this.characterConfigs.get(item.characterId);
           if (!config) {
             throw new Error(`No voice config for character: ${item.characterId}`);
@@ -85,12 +77,7 @@ export class BatchTTSProcessor {
 
           const emotion = item.emotion || this.detectEmotion(item.text).emotion;
 
-          const url = await this.ttsService.generateSpeech(
-            item.text,
-            item.characterId,
-            config,
-            { emotion }
-          );
+          const url = await this.ttsService.generateSpeech(item.text, item.characterId, config, { emotion });
 
           return { id: item.id, url };
         })
@@ -106,22 +93,18 @@ export class BatchTTSProcessor {
           successful.push({
             id: result.value.id,
             url: result.value.url,
-            cacheKey: `${item.characterId}_${item.emotion || 'neutral'}`
+            cacheKey: `${item.characterId}_${item.emotion || 'neutral'}`,
           });
         } else {
           failed.push({
             id: item.id,
-            error: result.reason?.message || 'Unknown error'
+            error: result.reason?.message || 'Unknown error',
           });
         }
 
         // Report progress
         if (request.onProgress) {
-          request.onProgress(
-            completed,
-            request.items.length,
-            item.text.substring(0, 50)
-          );
+          request.onProgress(completed, request.items.length, item.text.substring(0, 50));
         }
       }
     }
@@ -137,7 +120,7 @@ export class BatchTTSProcessor {
       successful,
       failed,
       totalTime: Date.now() - startTime,
-      cacheHits
+      cacheHits,
     };
   }
 
@@ -153,14 +136,14 @@ export class BatchTTSProcessor {
 
     const batchRequest: BatchTTSRequest = {
       batchId: `script_${Date.now()}`,
-      items: sayCommands.map(cmd => ({
+      items: sayCommands.map((cmd) => ({
         id: cmd.id,
         text: cmd.text,
         characterId: cmd.characterId,
-        emotion: cmd.emotion
+        emotion: cmd.emotion,
       })),
       concurrency: 3,
-      onProgress
+      onProgress,
     };
 
     const result = await this.processBatch(batchRequest);
@@ -192,9 +175,7 @@ export class BatchTTSProcessor {
       // Match say command pattern
       // Format: say:text -speaker=Name -vocal=file.wav;
       // Or simpler: speaker:text;
-      const sayMatch = trimmed.match(
-        /^(?:say:)?(.+?)\s*(?:-speaker=([^-;]+))?(?:-vocal=([^-;]+))?;?\s*$/
-      );
+      const sayMatch = trimmed.match(/^(?:say:)?(.+?)\s*(?:-speaker=([^-;]+))?(?:-vocal=([^-;]+))?;?\s*$/);
 
       if (sayMatch) {
         const text = sayMatch[1].trim();
@@ -211,7 +192,7 @@ export class BatchTTSProcessor {
             speaker,
             characterId,
             emotion: this.detectEmotion(text).emotion,
-            vocalFile
+            vocalFile,
           });
         }
       }
@@ -245,7 +226,7 @@ export class BatchTTSProcessor {
       excited: 0,
       calm: 0,
       sad: 0,
-      angry: 0
+      angry: 0,
     };
 
     // Punctuation scoring
@@ -286,7 +267,7 @@ export class BatchTTSProcessor {
 
     return {
       emotion: maxEmotion,
-      confidence
+      confidence,
     };
   }
 
@@ -303,21 +284,21 @@ export class BatchTTSProcessor {
 
     // Name mappings
     const nameMap: Record<string, string> = {
-      '绫地宁宁': 'nene',
-      'あやちねね': 'nene',
+      绫地宁宁: 'nene',
+      あやちねね: 'nene',
       'ayachi nene': 'nene',
-      '宁宁': 'nene',
-      '丛雨': 'murasame',
-      'むらさめ': 'murasame',
-      'murasame': 'murasame',
-      '在原七海': 'nanami',
-      'ありはらななみ': 'nanami',
+      宁宁: 'nene',
+      丛雨: 'murasame',
+      むらさめ: 'murasame',
+      murasame: 'murasame',
+      在原七海: 'nanami',
+      ありはらななみ: 'nanami',
       'arihara nanami': 'nanami',
-      '七海': 'nanami',
-      '因幡巡': 'meguru',
-      'いなばめぐる': 'meguru',
+      七海: 'nanami',
+      因幡巡: 'meguru',
+      いなばめぐる: 'meguru',
       'inaba meguru': 'meguru',
-      '巡': 'meguru'
+      巡: 'meguru',
     };
 
     // Remove spaces and normalize
@@ -349,16 +330,18 @@ export class BatchTTSProcessor {
    * Clean text for TTS processing
    */
   private cleanTextForTTS(text: string): string {
-    return text
-      // Remove LaTeX formulas (will be handled separately)
-      .replace(/\$\$[\s\S]*?\$\$/g, ' [公式] ')
-      .replace(/\$[^$]+\$/g, ' [公式] ')
-      // Remove WebGAL markup
-      .replace(/-speaker=[^-;]+/g, '')
-      .replace(/-vocal=[^-;]+/g, '')
-      // Clean up whitespace
-      .replace(/\s+/g, ' ')
-      .trim();
+    return (
+      text
+        // Remove LaTeX formulas (will be handled separately)
+        .replace(/\$\$[\s\S]*?\$\$/g, ' [公式] ')
+        .replace(/\$[^$]+\$/g, ' [公式] ')
+        // Remove WebGAL markup
+        .replace(/-speaker=[^-;]+/g, '')
+        .replace(/-vocal=[^-;]+/g, '')
+        // Clean up whitespace
+        .replace(/\s+/g, ' ')
+        .trim()
+    );
   }
 
   /**

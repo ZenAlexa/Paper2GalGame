@@ -5,8 +5,8 @@ import { WebGAL } from '@/Core/WebGAL';
  * @param targetKey 作用目标
  * @param duration 持续时间
  */
-export function generateTemplateAnimationObj(targetKey: string, duration: number) {
-  const target = WebGAL.gameplay.pixiStage!.getStageObjByKey(targetKey);
+export function generateTemplateAnimationObj(targetKey: string, _duration: number) {
+  const target = WebGAL.gameplay.pixiStage?.getStageObjByKey(targetKey);
 
   // 先设置一个通用的初态
 
@@ -26,12 +26,12 @@ export function generateTemplateAnimationObj(targetKey: string, duration: number
    * 在此书写动画每一帧执行的函数
    * @param delta
    */
-  function tickerFunc(delta: number) {
+  function tickerFunc(_delta: number) {
     if (target) {
       // 要操控的精灵
-      const sprite = target.pixiContainer;
+      const _sprite = target.pixiContainer;
       // 每一帧的时间
-      const baseDuration = WebGAL.gameplay.pixiStage!.frameDuration;
+      const _baseDuration = WebGAL.gameplay.pixiStage?.frameDuration;
 
       /**
        * 在下面书写具体的动画

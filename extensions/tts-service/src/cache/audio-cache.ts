@@ -5,9 +5,9 @@
  * Optimizes for > 80% cache hit rate target
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
-import * as crypto from 'crypto';
+import * as crypto from 'node:crypto';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 
 import type { AudioCacheEntry, TTSEmotion } from '../types';
 
@@ -87,22 +87,15 @@ export class AudioCache {
       hits: 0,
       misses: 0,
       diskReads: 0,
-      diskWrites: 0
+      diskWrites: 0,
     };
   }
 
   /**
    * Generate cache key for audio
    */
-  generateKey(
-    text: string,
-    characterId: string,
-    emotion: TTSEmotion
-  ): string {
-    const hash = crypto
-      .createHash('md5')
-      .update(`${text}:${characterId}:${emotion}`)
-      .digest('hex');
+  generateKey(text: string, characterId: string, emotion: TTSEmotion): string {
+    const hash = crypto.createHash('md5').update(`${text}:${characterId}:${emotion}`).digest('hex');
 
     return `${characterId}_${emotion}_${hash.substring(0, 8)}`;
   }
@@ -137,7 +130,7 @@ export class AudioCache {
         emotion: key.split('_')[1] as TTSEmotion,
         size: stats.size,
         createdAt: stats.birthtime,
-        lastAccessed: new Date()
+        lastAccessed: new Date(),
       };
       this.memoryCache.set(key, entry);
 
@@ -181,7 +174,7 @@ export class AudioCache {
       emotion: metadata?.emotion || (key.split('_')[1] as TTSEmotion),
       size: audioBuffer.byteLength,
       createdAt: new Date(),
-      lastAccessed: new Date()
+      lastAccessed: new Date(),
     };
 
     this.memoryCache.set(key, entry);
@@ -229,11 +222,7 @@ export class AudioCache {
 
     try {
       const files = await fs.promises.readdir(this.cacheDir);
-      await Promise.all(
-        files.map(file =>
-          fs.promises.unlink(path.join(this.cacheDir, file))
-        )
-      );
+      await Promise.all(files.map((file) => fs.promises.unlink(path.join(this.cacheDir, file))));
     } catch (error) {
       console.warn('Failed to clear disk cache:', error);
     }
@@ -254,7 +243,7 @@ export class AudioCache {
     return {
       memoryCacheSize: this.memoryCache.size(),
       hitRate: total > 0 ? this.stats.hits / total : 0,
-      ...this.stats
+      ...this.stats,
     };
   }
 
@@ -266,7 +255,7 @@ export class AudioCache {
       hits: 0,
       misses: 0,
       diskReads: 0,
-      diskWrites: 0
+      diskWrites: 0,
     };
   }
 

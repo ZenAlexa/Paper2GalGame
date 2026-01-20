@@ -4,14 +4,7 @@
  * Abstract base class providing common functionality for all document parsers.
  */
 
-import type {
-  BaseParser,
-  ParseResult,
-  ParserConfig,
-  ParsingError,
-  ParsedPaper,
-  ParsingStats
-} from '../types';
+import type { BaseParser, ParsedPaper, ParseResult, ParserConfig, ParsingError, ParsingStats } from '../types';
 
 /**
  * Abstract base parser class with common functionality
@@ -74,7 +67,7 @@ export abstract class BaseParserImpl implements BaseParser {
     return {
       success: true,
       data,
-      errors: []
+      errors: [],
     };
   }
 
@@ -84,7 +77,7 @@ export abstract class BaseParserImpl implements BaseParser {
   protected createErrorResult(errors: ParsingError[], partialData?: Partial<ParsedPaper>): ParseResult {
     const result: ParseResult = {
       success: false,
-      errors
+      errors,
     };
     if (partialData) {
       result.partialData = partialData;
@@ -105,7 +98,7 @@ export abstract class BaseParserImpl implements BaseParser {
     const error: ParsingError = {
       code,
       message,
-      severity
+      severity,
     };
     if (details !== undefined) {
       error.details = details;
@@ -130,7 +123,7 @@ export abstract class BaseParserImpl implements BaseParser {
       equationCount: 0,
       citationCount: 0,
       processingTimeMs: 0,
-      confidence: 0
+      confidence: 0,
     };
   }
 
@@ -138,7 +131,10 @@ export abstract class BaseParserImpl implements BaseParser {
    * Calculate word count from text
    */
   protected calculateWordCount(text: string): number {
-    return text.trim().split(/\s+/).filter(word => word.length > 0).length;
+    return text
+      .trim()
+      .split(/\s+/)
+      .filter((word) => word.length > 0).length;
   }
 
   /**
@@ -155,15 +151,15 @@ export abstract class BaseParserImpl implements BaseParser {
     const bytes = new Uint8Array(buffer.slice(0, 4));
 
     // Check for BOM
-    if (bytes.length >= 3 && bytes[0] === 0xEF && bytes[1] === 0xBB && bytes[2] === 0xBF) {
+    if (bytes.length >= 3 && bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf) {
       return 'utf-8'; // UTF-8 BOM
     }
 
     if (bytes.length >= 2) {
-      if (bytes[0] === 0xFF && bytes[1] === 0xFE) {
+      if (bytes[0] === 0xff && bytes[1] === 0xfe) {
         return 'utf-16le'; // UTF-16 LE BOM
       }
-      if (bytes[0] === 0xFE && bytes[1] === 0xFF) {
+      if (bytes[0] === 0xfe && bytes[1] === 0xff) {
         return 'utf-16be'; // UTF-16 BE BOM
       }
     }
@@ -195,8 +191,8 @@ export abstract class BaseParserImpl implements BaseParser {
       outputFormat: {
         includeRawText: true,
         includeStats: true,
-        includeConfidence: false
-      }
+        includeConfidence: false,
+      },
     };
 
     return { ...defaultConfig, ...config };
@@ -208,7 +204,7 @@ export abstract class BaseParserImpl implements BaseParser {
   protected cleanText(text: string): string {
     return text
       .replace(/\r\n/g, '\n') // Normalize line endings
-      .replace(/\r/g, '\n')   // Handle old Mac line endings
+      .replace(/\r/g, '\n') // Handle old Mac line endings
       .replace(/\n\s*\n/g, '\n\n') // Normalize paragraph breaks
       .replace(/[ \t]+/g, ' ') // Normalize whitespace
       .trim();
@@ -225,10 +221,10 @@ export abstract class BaseParserImpl implements BaseParser {
    * Calculate file hash (simple implementation)
    */
   protected async calculateHash(buffer: ArrayBuffer): Promise<string> {
-    const crypto = globalThis.crypto || (await import('crypto')).webcrypto;
+    const crypto = globalThis.crypto || (await import('node:crypto')).webcrypto;
     const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
   }
 
   /**
@@ -246,7 +242,7 @@ export abstract class BaseParserImpl implements BaseParser {
       metadata: {
         title: '',
         authors: [],
-        keywords: []
+        keywords: [],
       },
       sections: [],
       references: [],
@@ -254,7 +250,7 @@ export abstract class BaseParserImpl implements BaseParser {
       stats,
       timestamp: new Date(),
       parserVersion: this.version,
-      sourceFile
+      sourceFile,
     };
   }
 }

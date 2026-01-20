@@ -4,20 +4,19 @@
  * Exports for dynamic content loading in WebGAL
  */
 
+// Controller
+export { getIncrementalController, IncrementalController, initIncrementalController } from './IncrementalController';
 // Types
 export type {
-  SegmentInfo,
-  SegmentStatus,
-  DynamicContentState,
   DynamicContentEvent,
-  DynamicContentListener,
   DynamicContentEventType,
-  WaitingDialogue,
+  DynamicContentListener,
+  DynamicContentState,
   IncrementalControllerConfig,
   MultiLanguageText,
+  SegmentInfo,
   SegmentMarker,
+  SegmentStatus,
   TransitionOptions,
+  WaitingDialogue,
 } from './types';
-
-// Controller
-export { IncrementalController, getIncrementalController, initIncrementalController } from './IncrementalController';

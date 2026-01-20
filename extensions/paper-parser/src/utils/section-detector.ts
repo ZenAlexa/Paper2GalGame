@@ -43,28 +43,26 @@ export class SectionDetector {
   /**
    * Detect section type for a given text with context
    */
-  detectSection(
-    text: string,
-    context: DetectionContext,
-    language: 'en' | 'zh' | 'ja' = 'en'
-  ): SectionDetectionResult {
+  detectSection(text: string, context: DetectionContext, language: 'en' | 'zh' | 'ja' = 'en'): SectionDetectionResult {
     const candidates = this.getAllCandidates(text, language);
     const contextScores = this.calculateContextScores(candidates, context);
 
     // Combine pattern matching with context
-    const finalScores = candidates.map(candidate => ({
+    const finalScores = candidates.map((candidate) => ({
       ...candidate,
-      confidence: candidate.confidence * 0.7 + (contextScores.get(candidate.type) || 0) * 0.3
+      confidence: candidate.confidence * 0.7 + (contextScores.get(candidate.type) || 0) * 0.3,
     }));
 
     // Sort by confidence and return best match
     finalScores.sort((a, b) => b.confidence - a.confidence);
 
-    return finalScores[0] || {
-      type: 'other',
-      confidence: 0,
-      indicators: []
-    };
+    return (
+      finalScores[0] || {
+        type: 'other',
+        confidence: 0,
+        indicators: [],
+      }
+    );
   }
 
   /**
@@ -80,11 +78,11 @@ export class SectionDetector {
     const contextScores = this.calculateContextScores(candidates, context);
 
     const finalScores = candidates
-      .map(candidate => ({
+      .map((candidate) => ({
         ...candidate,
-        confidence: candidate.confidence * 0.7 + (contextScores.get(candidate.type) || 0) * 0.3
+        confidence: candidate.confidence * 0.7 + (contextScores.get(candidate.type) || 0) * 0.3,
       }))
-      .filter(result => result.confidence > 0.3) // Filter low-confidence results
+      .filter((result) => result.confidence > 0.3) // Filter low-confidence results
       .sort((a, b) => b.confidence - a.confidence)
       .slice(0, maxResults);
 
@@ -96,23 +94,16 @@ export class SectionDetector {
    */
   private initializePatterns(): void {
     // English patterns
-    this.patterns.set('title', [
-      /^[A-Z][A-Za-z\s\-:,]+$/,
-      /^.{10,100}$/
-    ]);
+    this.patterns.set('title', [/^[A-Z][A-Za-z\s\-:,]+$/, /^.{10,100}$/]);
 
-    this.patterns.set('abstract', [
-      /^abstract$/i,
-      /^summary$/i,
-      /^executive\s+summary$/i
-    ]);
+    this.patterns.set('abstract', [/^abstract$/i, /^summary$/i, /^executive\s+summary$/i]);
 
     this.patterns.set('introduction', [
       /^introduction$/i,
       /^1\.?\s*introduction$/i,
       /^background$/i,
       /^overview$/i,
-      /^1\.?\s*background$/i
+      /^1\.?\s*background$/i,
     ]);
 
     this.patterns.set('methods', [
@@ -121,7 +112,7 @@ export class SectionDetector {
       /^approach$/i,
       /^materials?\s+and\s+methods?$/i,
       /^\d+\.?\s*methods?$/i,
-      /^experimental\s+setup$/i
+      /^experimental\s+setup$/i,
     ]);
 
     this.patterns.set('results', [
@@ -129,14 +120,14 @@ export class SectionDetector {
       /^findings?$/i,
       /^experiments?$/i,
       /^\d+\.?\s*results?$/i,
-      /^experimental\s+results?$/i
+      /^experimental\s+results?$/i,
     ]);
 
     this.patterns.set('discussion', [
       /^discussion$/i,
       /^analysis$/i,
       /^\d+\.?\s*discussion$/i,
-      /^results?\s+and\s+discussion$/i
+      /^results?\s+and\s+discussion$/i,
     ]);
 
     this.patterns.set('conclusion', [
@@ -144,21 +135,12 @@ export class SectionDetector {
       /^summary$/i,
       /^final\s+remarks?$/i,
       /^\d+\.?\s*conclusions?$/i,
-      /^concluding\s+remarks?$/i
+      /^concluding\s+remarks?$/i,
     ]);
 
-    this.patterns.set('references', [
-      /^references?$/i,
-      /^bibliography$/i,
-      /^works?\s+cited$/i,
-      /^citations?$/i
-    ]);
+    this.patterns.set('references', [/^references?$/i, /^bibliography$/i, /^works?\s+cited$/i, /^citations?$/i]);
 
-    this.patterns.set('acknowledgments', [
-      /^acknowledgments?$/i,
-      /^acknowledgements?$/i,
-      /^thanks$/i
-    ]);
+    this.patterns.set('acknowledgments', [/^acknowledgments?$/i, /^acknowledgements?$/i, /^thanks$/i]);
 
     // Chinese patterns
     const chinesePatterns = new Map([
@@ -169,7 +151,7 @@ export class SectionDetector {
       ['discussion', [/^讨\s*论$/, /^分\s*析$/, /^\d+\.?\s*讨论$/]],
       ['conclusion', [/^结\s*论$/, /^总\s*结$/, /^结语$/, /^\d+\.?\s*结论$/]],
       ['references', [/^参考文献$/, /^引用文献$/, /^文献$/]],
-      ['acknowledgments', [/^致\s*谢$/, /^鸣\s*谢$/, /^感谢$/]]
+      ['acknowledgments', [/^致\s*谢$/, /^鸣\s*谢$/, /^感谢$/]],
     ]);
 
     // Merge Chinese patterns
@@ -184,32 +166,70 @@ export class SectionDetector {
    */
   private initializeKeywords(): void {
     this.keywords.set('introduction', [
-      'background', 'motivation', 'overview', 'purpose', 'objective',
-      '背景', '动机', '目的', '目标'
+      'background',
+      'motivation',
+      'overview',
+      'purpose',
+      'objective',
+      '背景',
+      '动机',
+      '目的',
+      '目标',
     ]);
 
     this.keywords.set('methods', [
-      'methodology', 'approach', 'procedure', 'technique', 'algorithm',
-      'experimental', 'setup', 'implementation',
-      '方法', '实验', '算法', '技术'
+      'methodology',
+      'approach',
+      'procedure',
+      'technique',
+      'algorithm',
+      'experimental',
+      'setup',
+      'implementation',
+      '方法',
+      '实验',
+      '算法',
+      '技术',
     ]);
 
     this.keywords.set('results', [
-      'findings', 'outcomes', 'data', 'performance', 'evaluation',
-      'measurements', 'observations',
-      '结果', '发现', '数据', '性能'
+      'findings',
+      'outcomes',
+      'data',
+      'performance',
+      'evaluation',
+      'measurements',
+      'observations',
+      '结果',
+      '发现',
+      '数据',
+      '性能',
     ]);
 
     this.keywords.set('discussion', [
-      'analysis', 'interpretation', 'implications', 'limitations',
-      'comparison', 'significance',
-      '分析', '讨论', '意义', '限制'
+      'analysis',
+      'interpretation',
+      'implications',
+      'limitations',
+      'comparison',
+      'significance',
+      '分析',
+      '讨论',
+      '意义',
+      '限制',
     ]);
 
     this.keywords.set('conclusion', [
-      'summary', 'conclusions', 'future work', 'contributions',
-      'implications', 'recommendations',
-      '总结', '结论', '贡献', '未来'
+      'summary',
+      'conclusions',
+      'future work',
+      'contributions',
+      'implications',
+      'recommendations',
+      '总结',
+      '结论',
+      '贡献',
+      '未来',
     ]);
   }
 
@@ -246,7 +266,7 @@ export class SectionDetector {
       const result = this.matchKeywords(text, sectionType, keywords);
       if (result.confidence > 0) {
         // Avoid duplicates, but boost confidence if both pattern and keyword match
-        const existing = candidates.find(c => c.type === sectionType);
+        const existing = candidates.find((c) => c.type === sectionType);
         if (existing) {
           existing.confidence = Math.min(1.0, existing.confidence + result.confidence * 0.3);
           existing.indicators.push(...result.indicators);
@@ -288,7 +308,7 @@ export class SectionDetector {
     return {
       type: sectionType,
       confidence: Math.min(1.0, maxConfidence),
-      indicators
+      indicators,
     };
   }
 
@@ -312,7 +332,7 @@ export class SectionDetector {
     return {
       type: sectionType,
       confidence,
-      indicators
+      indicators,
     };
   }
 
@@ -375,7 +395,7 @@ export class SectionDetector {
       ['discussion', ['conclusion']],
       ['conclusion', ['references', 'acknowledgments']],
       ['references', ['acknowledgments']],
-      ['acknowledgments', []]
+      ['acknowledgments', []],
     ]);
 
     const expectedNext = sequences.get(previous) || [];
@@ -386,13 +406,7 @@ export class SectionDetector {
    * Check if a section type is typically numbered
    */
   private isTypicallyNumbered(type: SectionType): boolean {
-    return [
-      'introduction',
-      'methods',
-      'results',
-      'discussion',
-      'conclusion'
-    ].includes(type);
+    return ['introduction', 'methods', 'results', 'discussion', 'conclusion'].includes(type);
   }
 
   /**
@@ -421,10 +435,10 @@ export class SectionDetector {
       /^\d+\.?\s+/, // Starts with number
       /^[A-Z][A-Z\s]+$/, // All caps
       /^[A-Z][a-z]+(\s+[A-Z][a-z]+)*$/, // Title case
-      /^(Abstract|Introduction|Methods|Results|Discussion|Conclusion|References)/i
+      /^(Abstract|Introduction|Methods|Results|Discussion|Conclusion|References)/i,
     ];
 
-    return positiveIndicators.some(pattern => pattern.test(trimmed));
+    return positiveIndicators.some((pattern) => pattern.test(trimmed));
   }
 
   /**
@@ -452,10 +466,10 @@ export class SectionDetector {
    * Check if text is in title case
    */
   private static isTitleCase(text: string): boolean {
-    const words = text.split(/\s+/).filter(word => word.length > 0);
+    const words = text.split(/\s+/).filter((word) => word.length > 0);
     if (words.length === 0) return false;
 
-    const capitalizedWords = words.filter(word => /^[A-Z]/.test(word));
+    const capitalizedWords = words.filter((word) => /^[A-Z]/.test(word));
     return capitalizedWords.length / words.length > 0.6;
   }
 }

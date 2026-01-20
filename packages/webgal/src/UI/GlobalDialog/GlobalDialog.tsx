@@ -1,9 +1,9 @@
-import styles from './globalDialog.module.scss';
 import ReactDOM from 'react-dom';
 import { useSelector } from 'react-redux';
-import { RootState, webgalStore } from '@/store/store';
-import { setVisibility } from '@/store/GUIReducer';
 import { useSEByWebgalStore } from '@/hooks/useSoundEffect';
+import { setVisibility } from '@/store/GUIReducer';
+import { type RootState, webgalStore } from '@/store/store';
+import styles from './globalDialog.module.scss';
 
 export default function GlobalDialog() {
   const isGlobalDialogShow = useSelector((state: RootState) => state.GUI.showGlobalDialog);

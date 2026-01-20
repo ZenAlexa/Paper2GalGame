@@ -1,14 +1,16 @@
 /**
  * Paper Selection Component - WebGAL Native Style
  * Uses WebGAL's existing UI patterns for seamless integration
+ * Features: Paper upload, character selection, warm color scheme
  */
 
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import type React from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { RootState } from '@/store/store';
-import useTrans from '@/hooks/useTrans';
-import useSoundEffect from '@/hooks/useSoundEffect';
 import useApplyStyle from '@/hooks/useApplyStyle';
+import useSoundEffect from '@/hooks/useSoundEffect';
+import { getCharacterDisplayName, PAPER_CHARACTERS } from '@/Paper/config/characters';
+import type { RootState } from '@/store/store';
 import styles from './paperSelection.module.scss';
 
 interface PaperSelectionProps {
@@ -18,12 +20,16 @@ interface PaperSelectionProps {
 }
 
 type GenerationStatus = 'idle' | 'uploading' | 'generating' | 'ready' | 'error';
+type SelectionStep = 'upload' | 'characters' | 'generating';
 
 // Poll interval and timeout constants
 const POLL_INTERVAL_MS = 2000;
 const GENERATION_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
 const MAX_FILE_SIZE_MB = 20;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
+
+// All available characters
+const ALL_CHARACTER_IDS = Object.keys(PAPER_CHARACTERS);
 
 /**
  * Paper Selection - WebGAL Style
@@ -33,7 +39,6 @@ export function PaperSelection({ onGameStart, onBack }: PaperSelectionProps) {
   const background = GUIState.titleBg;
   const showBackground = background === '' ? 'rgba(0,0,0,1)' : `url("${background}")`;
 
-  const t = useTrans('title.');
   const { playSeEnter, playSeClick } = useSoundEffect();
   const applyStyle = useApplyStyle('UI/Title/title.scss');
 
@@ -43,6 +48,8 @@ export function PaperSelection({ onGameStart, onBack }: PaperSelectionProps) {
   const [progress, setProgress] = useState(0);
   const [errorMessage, setErrorMessage] = useState('');
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const [step, setStep] = useState<SelectionStep>('upload');
+  const [selectedCharacters, setSelectedCharacters] = useState<string[]>(ALL_CHARACTER_IDS);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Handle file selection with validation
@@ -77,7 +84,7 @@ export function PaperSelection({ onGameStart, onBack }: PaperSelectionProps) {
       const file = e.dataTransfer.files[0];
       if (file) handleFileSelect(file);
     },
-    [handleFileSelect],
+    [handleFileSelect]
   );
 
   // Ref for tracking polling state
@@ -101,47 +108,67 @@ export function PaperSelection({ onGameStart, onBack }: PaperSelectionProps) {
 
   // Poll session status
   const pollSessionStatus = useCallback(async (sid: string): Promise<boolean> => {
-    try {
-      const response = await fetch(`/api/session/${sid}`);
-      if (!response.ok) {
-        throw new Error('Failed to get session status');
-      }
-      const result = await response.json();
-      if (!result.success) {
-        throw new Error(result.error?.message || 'Session error');
-      }
-
-      const sessionStatus = result.data.status;
-
-      // Check for completion states
-      if (sessionStatus === 'generated' || sessionStatus === 'ready') {
-        setProgress(100);
-        setStatus('ready');
-        return true; // Stop polling
-      }
-
-      if (sessionStatus === 'error') {
-        throw new Error(result.data.error || 'Generation failed');
-      }
-
-      // Update progress based on status
-      if (sessionStatus === 'parsing') {
-        setProgress(30);
-      } else if (sessionStatus === 'generating') {
-        // Increment progress slowly during generation
-        setProgress(prev => Math.min(prev + 2, 90));
-      }
-
-      return false; // Continue polling
-    } catch (error) {
-      throw error;
+    const response = await fetch(`/api/session/${sid}`);
+    if (!response.ok) {
+      throw new Error('Failed to get session status');
     }
+    const result = await response.json();
+    if (!result.success) {
+      throw new Error(result.error?.message || 'Session error');
+    }
+
+    const sessionStatus = result.data.status;
+
+    // Check for completion states
+    if (sessionStatus === 'generated' || sessionStatus === 'ready') {
+      setProgress(100);
+      setStatus('ready');
+      return true; // Stop polling
+    }
+
+    if (sessionStatus === 'error') {
+      throw new Error(result.data.error || 'Generation failed');
+    }
+
+    // Update progress based on status
+    if (sessionStatus === 'parsing') {
+      setProgress(30);
+    } else if (sessionStatus === 'generating') {
+      // Increment progress slowly during generation
+      setProgress((prev) => Math.min(prev + 2, 90));
+    }
+
+    return false; // Continue polling
   }, []);
+
+  // Handle character toggle
+  const toggleCharacter = useCallback(
+    (characterId: string) => {
+      playSeClick();
+      setSelectedCharacters((prev) => {
+        if (prev.includes(characterId)) {
+          // Must keep at least one character
+          if (prev.length <= 1) return prev;
+          return prev.filter((id) => id !== characterId);
+        }
+        return [...prev, characterId];
+      });
+    },
+    [playSeClick]
+  );
+
+  // Proceed from upload to character selection
+  const handleProceedToCharacters = useCallback(() => {
+    if (!selectedFile) return;
+    playSeClick();
+    setStep('characters');
+  }, [selectedFile, playSeClick]);
 
   // Handle generation
   const handleStartGeneration = useCallback(async () => {
-    if (!selectedFile) return;
+    if (!selectedFile || selectedCharacters.length === 0) return;
 
+    setStep('generating');
     setStatus('uploading');
     setProgress(10);
 
@@ -177,13 +204,13 @@ export function PaperSelection({ onGameStart, onBack }: PaperSelectionProps) {
       // Start generation (non-blocking approach)
       pollingRef.current.startTime = Date.now();
 
-      // Start generation request
+      // Start generation request with selected characters
       const generatePromise = fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           sessionId: newSessionId,
-          characters: ['host', 'energizer', 'analyst', 'interpreter'],
+          characters: selectedCharacters,
           language: 'zh',
         }),
         signal: abortController.signal,
@@ -194,7 +221,9 @@ export function PaperSelection({ onGameStart, onBack }: PaperSelectionProps) {
         try {
           // Check timeout
           if (Date.now() - pollingRef.current.startTime > GENERATION_TIMEOUT_MS) {
-            clearInterval(pollingRef.current.intervalId!);
+            if (pollingRef.current.intervalId) {
+              clearInterval(pollingRef.current.intervalId);
+            }
             pollingRef.current.intervalId = null;
             abortController.abort();
             setStatus('error');
@@ -248,7 +277,7 @@ export function PaperSelection({ onGameStart, onBack }: PaperSelectionProps) {
       setStatus('error');
       setErrorMessage((error as Error).message);
     }
-  }, [selectedFile, pollSessionStatus]);
+  }, [selectedFile, selectedCharacters, pollSessionStatus]);
 
   // Render upload area (WebGAL button style)
   const renderUploadArea = () => (
@@ -277,6 +306,41 @@ export function PaperSelection({ onGameStart, onBack }: PaperSelectionProps) {
     </div>
   );
 
+  // Render character selection
+  const renderCharacterSelection = () => (
+    <div className={styles.characterSelection}>
+      <h3 className={styles.sectionTitle}>Select Characters</h3>
+      <p className={styles.sectionHint}>Choose which characters will narrate your paper</p>
+      <div className={styles.characterGrid}>
+        {ALL_CHARACTER_IDS.map((id) => {
+          const character = PAPER_CHARACTERS[id];
+          const isSelected = selectedCharacters.includes(id);
+          return (
+            <div
+              key={id}
+              className={`${styles.characterCard} ${isSelected ? styles.selected : ''}`}
+              onClick={() => toggleCharacter(id)}
+              onMouseEnter={playSeEnter}
+            >
+              <div className={styles.characterAvatar}>
+                <img
+                  src={`/game/figure/${character.sprite.filename}`}
+                  alt={character.name.en}
+                  className={styles.characterImage}
+                />
+              </div>
+              <div className={styles.characterInfo}>
+                <span className={styles.characterName}>{getCharacterDisplayName(id, 'jp')}</span>
+                <span className={styles.characterRole}>{character.paperRole}</span>
+              </div>
+              <div className={styles.checkmark}>{isSelected ? '✓' : ''}</div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+
   // Render progress
   const renderProgress = () => (
     <div className={styles.progressContainer}>
@@ -284,13 +348,26 @@ export function PaperSelection({ onGameStart, onBack }: PaperSelectionProps) {
         <div className={styles.progressFill} style={{ width: `${progress}%` }} />
       </div>
       <span className={styles.progressText}>
-        {status === 'uploading' && 'Uploading...'}
-        {status === 'generating' && 'Generating script...'}
-        {status === 'ready' && 'Ready!'}
+        {status === 'uploading' && 'Uploading paper...'}
+        {status === 'generating' && `Generating script with ${selectedCharacters.length} characters...`}
+        {status === 'ready' && 'Ready to play!'}
         {status === 'error' && errorMessage}
       </span>
     </div>
   );
+
+  // Back button handler depends on current step
+  const handleBack = () => {
+    playSeClick();
+    if (step === 'characters') {
+      setStep('upload');
+    } else if (step === 'generating' && status === 'error') {
+      setStep('characters');
+      setStatus('idle');
+    } else {
+      onBack?.();
+    }
+  };
 
   return (
     <div
@@ -306,66 +383,81 @@ export function PaperSelection({ onGameStart, onBack }: PaperSelectionProps) {
         <h1 className={styles.title}>Paper2GalGame</h1>
         <p className={styles.subtitle}>Transform academic papers into visual novel experiences</p>
 
-        {status === 'idle' && (
+        {/* Step 1: Upload */}
+        {step === 'upload' && (
           <>
             {renderUploadArea()}
+            {errorMessage && <p className={styles.error}>{errorMessage}</p>}
 
             {selectedFile && (
               <div
                 className={applyStyle('Title_button', styles.actionButton)}
-                onClick={() => {
-                  playSeClick();
-                  handleStartGeneration();
-                }}
+                onClick={handleProceedToCharacters}
                 onMouseEnter={playSeEnter}
               >
-                <div className={applyStyle('Title_button_text', styles.buttonText)}>Start Generation</div>
+                <div className={applyStyle('Title_button_text', styles.buttonText)}>Next: Select Characters</div>
               </div>
             )}
           </>
         )}
 
-        {(status === 'uploading' || status === 'generating') && renderProgress()}
-
-        {status === 'ready' && sessionId && (
-          <div
-            className={applyStyle('Title_button', styles.actionButton)}
-            onClick={() => {
-              playSeClick();
-              onGameStart?.(sessionId);
-            }}
-            onMouseEnter={playSeEnter}
-          >
-            <div className={applyStyle('Title_button_text', styles.buttonText)}>Play Now</div>
-          </div>
-        )}
-
-        {status === 'error' && (
+        {/* Step 2: Character Selection */}
+        {step === 'characters' && (
           <>
-            <p className={styles.error}>{errorMessage}</p>
+            {renderCharacterSelection()}
+
             <div
               className={applyStyle('Title_button', styles.actionButton)}
-              onClick={() => {
-                playSeClick();
-                setStatus('idle');
-                setSelectedFile(null);
-              }}
+              onClick={() => handleStartGeneration()}
               onMouseEnter={playSeEnter}
             >
-              <div className={applyStyle('Title_button_text', styles.buttonText)}>Retry</div>
+              <div className={applyStyle('Title_button_text', styles.buttonText)}>
+                Start Generation ({selectedCharacters.length} characters)
+              </div>
             </div>
           </>
         )}
 
-        <div
-          className={applyStyle('Title_button', styles.backButton)}
-          onClick={() => {
-            playSeClick();
-            onBack?.();
-          }}
-          onMouseEnter={playSeEnter}
-        >
-          <div className={applyStyle('Title_button_text', styles.buttonText)}>Back</div>
+        {/* Step 3: Generating */}
+        {step === 'generating' && (
+          <>
+            {renderProgress()}
+
+            {status === 'ready' && sessionId && (
+              <div
+                className={applyStyle('Title_button', styles.actionButton)}
+                onClick={() => {
+                  playSeClick();
+                  onGameStart?.(sessionId);
+                }}
+                onMouseEnter={playSeEnter}
+              >
+                <div className={applyStyle('Title_button_text', styles.buttonText)}>Play Now</div>
+              </div>
+            )}
+
+            {status === 'error' && (
+              <div
+                className={applyStyle('Title_button', styles.actionButton)}
+                onClick={() => {
+                  playSeClick();
+                  setStep('characters');
+                  setStatus('idle');
+                  setProgress(0);
+                }}
+                onMouseEnter={playSeEnter}
+              >
+                <div className={applyStyle('Title_button_text', styles.buttonText)}>Retry</div>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Back button */}
+        <div className={applyStyle('Title_button', styles.backButton)} onClick={handleBack} onMouseEnter={playSeEnter}>
+          <div className={applyStyle('Title_button_text', styles.buttonText)}>
+            {step === 'upload' ? 'Back' : 'Previous'}
+          </div>
         </div>
       </div>
     </div>

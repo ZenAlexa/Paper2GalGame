@@ -1,15 +1,15 @@
-import { ReactNode, useEffect, useState } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { RootState } from '@/store/store';
+import { getMathRenderer } from '@/Core/controller/textRenderer/MathRenderer';
+import { SCREEN_CONSTANTS } from '@/Core/util/constants';
+import { match } from '@/Core/util/match';
+import useEscape from '@/hooks/useEscape';
 import { useFontFamily } from '@/hooks/useFontFamily';
 import { useTextAnimationDuration, useTextDelay } from '@/hooks/useTextOptions';
-import { getTextSize } from '@/UI/getTextSize';
-import { match } from '@/Core/util/match';
-import { textSize } from '@/store/userDataInterface';
 import IMSSTextbox from '@/Stage/TextBox/IMSSTextbox';
-import { SCREEN_CONSTANTS } from '@/Core/util/constants';
-import useEscape from '@/hooks/useEscape';
-import { getMathRenderer } from '@/Core/controller/textRenderer/MathRenderer';
+import type { RootState } from '@/store/store';
+import { textSize } from '@/store/userDataInterface';
+import { getTextSize } from '@/UI/getTextSize';
 
 const userAgent = navigator.userAgent;
 const isFirefox = /firefox/i.test(userAgent);
@@ -26,12 +26,12 @@ export const TextBox = () => {
   const userDataState = useSelector((state: RootState) => state.userData);
   const textDelay = useTextDelay(userDataState.optionData.textSpeed);
   const textDuration = useTextAnimationDuration(userDataState.optionData.textSpeed);
-  let size = getTextSize(userDataState.optionData.textSize) + '%';
+  let size = `${getTextSize(userDataState.optionData.textSize)}%`;
   const font = useFontFamily();
   const isText = stageState.showText !== '' || stageState.showName !== '';
   let textSizeState = userDataState.optionData.textSize;
   if (isText && stageState.showTextSize !== -1) {
-    size = getTextSize(stageState.showTextSize) + '%';
+    size = `${getTextSize(stageState.showTextSize)}%`;
     textSizeState = stageState.showTextSize;
   }
   const MaxTextLine = Number(userDataState.globalGameVar.Max_line); // congfig定义字体行数
@@ -125,7 +125,7 @@ export function compileSentence(
   sentence: string,
   lineLimit: number,
   ignoreLineLimit?: boolean,
-  replace_space_with_nbsp = true,
+  replace_space_with_nbsp = true
 ): EnhancedNode[][] {
   // 准备数学公式渲染：提取公式并用占位符替换
   const mathRenderer = getMathRenderer();
@@ -168,7 +168,7 @@ export function compileSentence(
           if (val.ruby) {
             // Process ruby text as a single unit
             const enhancedNode = (
-              <span className="__enhanced_text" key={val.text + `${index}`}>
+              <span className="__enhanced_text" key={`${val.text}${index}`}>
                 <ruby key={index + val.text}>
                   {val.text}
                   <rt>{val.ruby}</rt>
@@ -193,7 +193,7 @@ export function compileSentence(
               // eslint-disable-next-line max-nested-callbacks
               chars.forEach((char, charIndex) => {
                 const enhancedNode = (
-                  <span className="__enhanced_text" key={val.text + `${index}-${charIndex}`}>
+                  <span className="__enhanced_text" key={`${val.text}${index}-${charIndex}`}>
                     {char}
                   </span>
                 );
@@ -219,7 +219,7 @@ export function splitChars(sentence: string, replace_space_with_nbsp = true) {
   let cjkFlag = isCJK(sentence[0]);
 
   const isPunctuation = (ch: string): boolean => {
-    const regex = /[!-\/:-@\[-`{-~\u2000-\u206F\u3000-\u303F\uff00-\uffef]/g;
+    const regex = /[!-/:-@[-`{-~\u2000-\u206F\u3000-\u303F\uff00-\uffef]/g;
     return regex.test(ch);
   };
 
@@ -340,7 +340,7 @@ function parseString(input: string): Segment[] {
 }
 
 function parseTextSegment(input: string): Segment[] {
-  const regex = /(\[(.*?)\]\((.*?)\))|([^\[\]]+)/g;
+  const regex = /(\[(.*?)\]\((.*?)\))|([^[\]]+)/g;
   const result: Segment[] = [];
   let match: RegExpExecArray | null;
 

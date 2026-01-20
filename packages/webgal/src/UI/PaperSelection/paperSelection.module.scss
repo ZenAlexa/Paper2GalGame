@@ -1,7 +1,20 @@
 /**
  * Paper Selection Styles - WebGAL Native Look
- * Minimal, clean styling matching Title screen aesthetic
+ * Warm color palette (pink/cream) matching project design system
+ * Features: Upload, character selection, progress display
  */
+
+// Design tokens - warm Galgame palette
+$primary-pink: #FFB7C5;
+$primary-cream: #FFF5EE;
+$text-dark: #4A3728;
+$text-light: #FFFAF0;
+$overlay-warm: rgba(74, 55, 40, 0.4);
+$overlay-warm-dark: rgba(74, 55, 40, 0.6);
+$accent-sakura: #FFCCD5;
+$accent-gold: #E8C89D;
+$border-soft: rgba(255, 183, 197, 0.5);
+$shadow-warm: rgba(74, 55, 40, 0.3);
 
 .paperSelection {
   position: fixed;
@@ -21,7 +34,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.6) 100%);
+  background: linear-gradient(135deg, $overlay-warm 0%, $overlay-warm-dark 100%);
   z-index: 0;
 }
 
@@ -32,43 +45,45 @@
   flex-direction: column;
   align-items: center;
   padding: 40px;
-  max-width: 600px;
+  max-width: 700px;
   width: 90%;
 }
 
 .title {
   font-size: 3rem;
-  color: #fff;
-  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+  color: $primary-cream;
+  text-shadow: 2px 2px 8px $shadow-warm;
   margin-bottom: 0.5rem;
   letter-spacing: 0.1em;
 }
 
 .subtitle {
   font-size: 1.1rem;
-  color: rgba(255, 255, 255, 0.85);
-  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
+  color: rgba($primary-cream, 0.85);
+  text-shadow: 1px 1px 4px $shadow-warm;
   margin-bottom: 2rem;
   text-align: center;
 }
 
+// Upload Area
 .uploadArea {
   width: 100%;
   padding: 60px 40px;
-  border: 2px dashed rgba(255, 255, 255, 0.5);
-  border-radius: 8px;
-  background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(5px);
+  border: 2px dashed $border-soft;
+  border-radius: 12px;
+  background: rgba($primary-cream, 0.1);
+  backdrop-filter: blur(8px);
   cursor: pointer;
   transition: all 0.3s ease;
   text-align: center;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba($primary-cream, 0.9);
   font-size: 1.1rem;
   margin-bottom: 1.5rem;
 
   &:hover {
-    border-color: rgba(255, 255, 255, 0.8);
-    background: rgba(0, 0, 0, 0.4);
+    border-color: $primary-pink;
+    background: rgba($primary-cream, 0.2);
+    box-shadow: 0 0 20px rgba($primary-pink, 0.3);
   }
 }
 
@@ -80,18 +95,133 @@
 
 .fileName {
   font-size: 1.2rem;
-  color: #fff;
+  color: $primary-cream;
   word-break: break-all;
 }
 
 .fileSize {
   font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba($primary-cream, 0.6);
 }
 
+// Section titles
+.sectionTitle {
+  font-size: 1.5rem;
+  color: $primary-cream;
+  text-shadow: 1px 1px 4px $shadow-warm;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.sectionHint {
+  font-size: 0.9rem;
+  color: rgba($primary-cream, 0.7);
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+// Character Selection
+.characterSelection {
+  width: 100%;
+  margin-bottom: 1.5rem;
+}
+
+.characterGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  width: 100%;
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.characterCard {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  background: rgba($primary-cream, 0.1);
+  border: 2px solid transparent;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(5px);
+
+  &:hover {
+    background: rgba($primary-cream, 0.2);
+    border-color: rgba($primary-pink, 0.5);
+    transform: translateY(-2px);
+  }
+
+  &.selected {
+    background: rgba($primary-pink, 0.2);
+    border-color: $primary-pink;
+    box-shadow: 0 0 15px rgba($primary-pink, 0.4);
+  }
+}
+
+.characterAvatar {
+  width: 60px;
+  height: 80px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba($primary-cream, 0.1);
+  flex-shrink: 0;
+}
+
+.characterImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+}
+
+.characterInfo {
+  flex: 1;
+  margin-left: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow: hidden;
+}
+
+.characterName {
+  font-size: 1.1rem;
+  color: $primary-cream;
+  font-weight: 500;
+}
+
+.characterRole {
+  font-size: 0.8rem;
+  color: rgba($primary-cream, 0.6);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.checkmark {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  color: $primary-pink;
+  font-weight: bold;
+}
+
+// Buttons
 .actionButton {
   margin: 1rem 0;
   min-width: 200px;
+
+  // Override WebGAL button with warm colors
+  background: linear-gradient(to right, rgba($text-dark, 0.4), rgba($text-dark, 0.2)) !important;
+
+  &:hover {
+    background: linear-gradient(to right, rgba($primary-pink, 0.3), rgba($primary-pink, 0.1)) !important;
+  }
 }
 
 .backButton {
@@ -103,6 +233,7 @@
   text-align: center;
 }
 
+// Progress
 .progressContainer {
   width: 100%;
   padding: 20px;
@@ -111,32 +242,71 @@
 
 .progressBar {
   width: 100%;
-  height: 8px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
+  height: 10px;
+  background: rgba($primary-cream, 0.2);
+  border-radius: 5px;
   overflow: hidden;
   margin-bottom: 1rem;
 }
 
 .progressFill {
   height: 100%;
-  background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
-  border-radius: 4px;
+  background: linear-gradient(90deg, $primary-pink 0%, $accent-sakura 50%, $accent-gold 100%);
+  border-radius: 5px;
   transition: width 0.3s ease;
+  box-shadow: 0 0 10px rgba($primary-pink, 0.5);
 }
 
 .progressText {
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba($primary-cream, 0.9);
   font-size: 1rem;
   text-align: center;
   display: block;
 }
 
+// Error
 .error {
-  color: #ff6b6b;
-  background: rgba(255, 0, 0, 0.1);
+  color: #FFAAAA;
+  background: rgba(180, 50, 50, 0.2);
+  border: 1px solid rgba(255, 100, 100, 0.3);
   padding: 1rem 2rem;
-  border-radius: 4px;
+  border-radius: 8px;
   margin: 1rem 0;
   text-align: center;
+}
+
+// Responsive adjustments
+@media (max-width: 480px) {
+  .content {
+    padding: 20px;
+  }
+
+  .title {
+    font-size: 2rem;
+  }
+
+  .subtitle {
+    font-size: 0.9rem;
+  }
+
+  .uploadArea {
+    padding: 40px 20px;
+  }
+
+  .characterCard {
+    padding: 10px 12px;
+  }
+
+  .characterAvatar {
+    width: 50px;
+    height: 65px;
+  }
+
+  .characterName {
+    font-size: 1rem;
+  }
+
+  .characterRole {
+    font-size: 0.75rem;
+  }
 }

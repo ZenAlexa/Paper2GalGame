@@ -1,7 +1,7 @@
-import { ISentence } from '@/Core/controller/scene/sceneInterface';
-import { IPerform } from '@/Core/Modules/perform/performInterface';
-import { webgalStore } from '@/store/store';
+import type { ISentence } from '@/Core/controller/scene/sceneInterface';
+import type { IPerform } from '@/Core/Modules/perform/performInterface';
 import { setStage } from '@/store/stageReducer';
+import { webgalStore } from '@/store/store';
 
 /**
  * 语句执行的模板代码

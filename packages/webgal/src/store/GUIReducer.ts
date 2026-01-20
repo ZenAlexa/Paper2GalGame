@@ -1,14 +1,13 @@
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import { getStorage } from '@/Core/controller/storage/storageController';
-import {
-  FontOption,
-  GuiAsset,
-  IGuiState,
-  MenuPanelTag,
-  setAssetPayload,
-  setVisibilityPayload,
-} from '@/store/guiInterface';
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { DEFAULT_FONT_OPTIONS } from '@/Core/util/fonts/fontOptions';
+import {
+  type FontOption,
+  type IGuiState,
+  MenuPanelTag,
+  type setAssetPayload,
+  type setVisibilityPayload,
+} from '@/store/guiInterface';
 
 /**
  * 初始GUI状态表

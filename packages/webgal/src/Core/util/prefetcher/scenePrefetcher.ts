@@ -2,11 +2,11 @@
  * 场景预加载
  * @param sceneList 需要预加载的场景文件列表
  */
+
+import { logger } from '@/Core/util/logger';
+import { WebGAL } from '@/Core/WebGAL';
 import { sceneFetcher } from '../../controller/scene/sceneFetcher';
 import { sceneParser } from '../../parser/sceneParser';
-import { logger } from '@/Core/util/logger';
-
-import { WebGAL } from '@/Core/WebGAL';
 
 export const scenePrefetcher = (sceneList: Array<string>): void => {
   for (const e of sceneList) {

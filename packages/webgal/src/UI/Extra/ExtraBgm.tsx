@@ -1,12 +1,10 @@
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '@/store/store';
-import React from 'react';
-import styles from '@/UI/Extra/extra.module.scss';
-import { useValue } from '@/hooks/useValue';
-import { setStage } from '@/store/stageReducer';
 import { GoEnd, GoStart, MusicList, PlayOne, SquareSmall } from '@icon-park/react';
+import { useDispatch, useSelector } from 'react-redux';
 import useSoundEffect from '@/hooks/useSoundEffect';
+import { useValue } from '@/hooks/useValue';
 import { setGuiAsset } from '@/store/GUIReducer';
+import type { RootState } from '@/store/store';
+import styles from '@/UI/Extra/extra.module.scss';
 
 export function ExtraBgm() {
   const { playSeClick, playSeEnter } = useSoundEffect();
@@ -42,7 +40,7 @@ export function ExtraBgm() {
   const showBgmList = extraState.bgm.map((e, i) => {
     let className = styles.bgmElement;
     if (e.name === currentPlayingBgmName.value) {
-      className = className + ' ' + styles.bgmElement_active;
+      className = `${className} ${styles.bgmElement_active}`;
     }
     return (
       <div

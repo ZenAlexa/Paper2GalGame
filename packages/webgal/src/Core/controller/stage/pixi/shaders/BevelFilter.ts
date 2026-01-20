@@ -1,8 +1,8 @@
-import { Filter, FilterState, FilterSystem, RenderTexture } from '@pixi/core';
+import { Filter, type FilterState, type FilterSystem, type RenderTexture } from '@pixi/core';
 import { DEG_TO_RAD } from '@pixi/math';
-import { rgb2hex, hex2rgb } from '@pixi/utils';
-import { MotionBlurFilter } from 'pixi-filters';
+import { hex2rgb, rgb2hex } from '@pixi/utils';
 import { CLEAR_MODES } from 'pixi.js';
+import { MotionBlurFilter } from 'pixi-filters';
 
 interface BevelFilterOptions {
   rotation: number;
@@ -84,7 +84,7 @@ void main(void) {
         shadowColor: 0x000000,
         shadowAlpha: 0.7,
       },
-      options,
+      options
     );
 
     // Workaround: https://github.com/pixijs/filters/issues/230
@@ -101,7 +101,7 @@ void main(void) {
     input: RenderTexture,
     output: RenderTexture,
     clearMode?: CLEAR_MODES,
-    _currentState?: FilterState,
+    _currentState?: FilterState
   ): void {
     if (this.softness > 0) {
       const blurTexture = filterManager.getFilterTexture();
@@ -129,7 +129,7 @@ void main(void) {
   private _updateBlur() {
     this._blurFilter.velocity.set(
       Math.cos(this._angle) * this.thickness * this.softness * -1,
-      Math.sin(this._angle) * this.thickness * this.softness * -1,
+      Math.sin(this._angle) * this.thickness * this.softness * -1
     );
   }
 

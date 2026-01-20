@@ -1,4 +1,4 @@
-import {commandType} from '../interface/sceneInterface';
+import { commandType } from '../interface/sceneInterface';
 
 export const SCRIPT_CONFIG = [
   { scriptString: 'say', scriptType: commandType.say },
@@ -39,6 +39,9 @@ export const SCRIPT_CONFIG = [
   { scriptString: 'applyStyle', scriptType: commandType.applyStyle },
   { scriptString: 'wait', scriptType: commandType.wait },
   { scriptString: 'callSteam', scriptType: commandType.callSteam },
+  // Paper mode commands
+  { scriptString: 'paperQuote', scriptType: commandType.paperQuote },
+  { scriptString: 'paperHighlight', scriptType: commandType.paperHighlight },
 ];
 export const ADD_NEXT_ARG_LIST = [
   commandType.bgm,

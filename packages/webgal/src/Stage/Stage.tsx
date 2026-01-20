@@ -1,21 +1,24 @@
-import React, { FC } from 'react';
-import styles from './stage.module.scss';
-import { TextBox } from './TextBox/TextBox';
-import { AudioContainer } from './AudioContainer/AudioContainer';
-import { FullScreenPerform } from './FullScreenPerform/FullScreenPerform';
-import { nextSentence } from '@/Core/controller/gamePlay/nextSentence';
-import { stopAll } from '@/Core/controller/gamePlay/fastSkip';
+import type React from 'react';
+import type { FC } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState, webgalStore } from '@/store/store';
-import { setVisibility } from '@/store/GUIReducer';
-import { TextBoxFilm } from '@/Stage/TextBox/TextBoxFilm';
-import { useHotkey } from '@/hooks/useHotkey';
-import { MainStage } from '@/Stage/MainStage/MainStage';
-import IntroContainer from '@/Stage/introContainer/IntroContainer';
+import { stopAll } from '@/Core/controller/gamePlay/fastSkip';
+import { nextSentence } from '@/Core/controller/gamePlay/nextSentence';
 import { isIOS } from '@/Core/initializeScript';
 import { WebGAL } from '@/Core/WebGAL';
-import { IGuiState } from '@/store/guiInterface';
-import { IStageState } from '@/store/stageInterface';
+import { useHotkey } from '@/hooks/useHotkey';
+import IntroContainer from '@/Stage/introContainer/IntroContainer';
+import { MainStage } from '@/Stage/MainStage/MainStage';
+import { TextBoxFilm } from '@/Stage/TextBox/TextBoxFilm';
+import { setVisibility } from '@/store/GUIReducer';
+import type { IGuiState } from '@/store/guiInterface';
+import type { IStageState } from '@/store/stageInterface';
+import { type RootState, webgalStore } from '@/store/store';
+import { PaperProgressBar } from '@/UI/PaperProgressBar';
+import { AudioContainer } from './AudioContainer/AudioContainer';
+import { FullScreenPerform } from './FullScreenPerform/FullScreenPerform';
+import styles from './stage.module.scss';
+import { TextBox } from './TextBox/TextBox';
+
 // import OldStage from '@/Components/Stage/OldStage/OldStage';
 
 let timeoutEventHandle: ReturnType<typeof setTimeout> | null = null;
@@ -39,9 +42,9 @@ const CLICK_DEBOUNCE_MS = 150;
 // eslint-disable-next-line max-params
 function updateControlsVisibility(
   event: React.MouseEvent,
-  stageState: IStageState,
+  _stageState: IStageState,
   GUIState: IGuiState,
-  dispatch: ReturnType<typeof useDispatch>,
+  dispatch: ReturnType<typeof useDispatch>
 ) {
   // 新逻辑：超过阈值的鼠标移动立刻显示，2s 无操作后隐藏（未锁定时）
   const { clientX, clientY } = event;
@@ -87,6 +90,8 @@ export const Stage: FC = () => {
   return (
     <div className={styles.MainStage_main}>
       <FullScreenPerform />
+      {/* Paper mode progress bar - only visible in Paper mode */}
+      <PaperProgressBar position="top" compact />
       {/* 已弃用旧的立绘与背景舞台 */}
       {/* <OldStage /> */}
       <MainStage />

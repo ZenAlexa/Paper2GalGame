@@ -1,0 +1,12 @@
+{
+  "*.{js,jsx,ts,tsx}": ["biome check --write --unsafe", "biome format --write"],
+  "*.{json,jsonc}": ["biome format --write"],
+  "packages/webgal/src/**/*.{ts,tsx}": ["bash -c 'npx tsc -p packages/webgal/tsconfig.json --noEmit'"],
+  "packages/parser/src/**/*.ts": ["bash -c 'npx tsc -p packages/parser/tsconfig.json --noEmit'"],
+  "extensions/api/src/**/*.ts": ["bash -c 'npx tsc -p extensions/api/tsconfig.json --noEmit'"],
+  "extensions/script-generator/src/**/*.ts": [
+    "bash -c 'npx tsc -p extensions/script-generator/tsconfig.json --noEmit'"
+  ],
+  "extensions/tts-service/src/**/*.ts": ["bash -c 'npx tsc -p extensions/tts-service/tsconfig.json --noEmit'"],
+  "extensions/paper-parser/src/**/*.ts": ["bash -c 'npx tsc -p extensions/paper-parser/tsconfig.json --noEmit'"]
+}

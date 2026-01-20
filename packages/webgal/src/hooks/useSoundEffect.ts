@@ -1,11 +1,10 @@
-import { setStage } from '@/store/stageReducer';
-
+import { useDispatch } from 'react-redux';
+import click_se from '@/assets/se/click.mp3';
+import dialog_se from '@/assets/se/dialog.mp3';
+import mouse_enter from '@/assets/se/mouse-enter.mp3';
 import page_flip_1 from '@/assets/se/page-flip-1.mp3';
 import switch_1 from '@/assets/se/switch-1.mp3';
-import mouse_enter from '@/assets/se/mouse-enter.mp3';
-import dialog_se from '@/assets/se/dialog.mp3';
-import click_se from '@/assets/se/click.mp3';
-import { useDispatch } from 'react-redux';
+import { setStage } from '@/store/stageReducer';
 import { webgalStore } from '@/store/store';
 
 /**

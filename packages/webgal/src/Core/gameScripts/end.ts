@@ -1,21 +1,21 @@
-import { ISentence } from '@/Core/controller/scene/sceneInterface';
-import { IPerform } from '@/Core/Modules/perform/performInterface';
-import { assetSetter, fileType } from '@/Core/util/gameAssetsAccess/assetSetter';
 import { sceneFetcher } from '@/Core/controller/scene/sceneFetcher';
-import { sceneParser } from '@/Core/parser/sceneParser';
-import { resetStage } from '@/Core/controller/stage/resetStage';
-import { webgalStore } from '@/store/store';
-import { setVisibility } from '@/store/GUIReducer';
+import type { ISentence } from '@/Core/controller/scene/sceneInterface';
 import { playBgm } from '@/Core/controller/stage/playBgm';
-import { WebGAL } from '@/Core/WebGAL';
+import { resetStage } from '@/Core/controller/stage/resetStage';
 import { dumpToStorageFast } from '@/Core/controller/storage/storageController';
+import type { IPerform } from '@/Core/Modules/perform/performInterface';
+import { sceneParser } from '@/Core/parser/sceneParser';
+import { assetSetter, fileType } from '@/Core/util/gameAssetsAccess/assetSetter';
+import { WebGAL } from '@/Core/WebGAL';
+import { setVisibility } from '@/store/GUIReducer';
 import { saveActions } from '@/store/savesReducer';
+import { webgalStore } from '@/store/store';
 
 /**
  * 结束游戏
  * @param sentence
  */
-export const end = (sentence: ISentence): IPerform => {
+export const end = (_sentence: ISentence): IPerform => {
   resetStage(true);
   const dispatch = webgalStore.dispatch;
   // 重新获取初始场景

@@ -1,5 +1,5 @@
-import { FontOption } from '@/store/guiInterface';
-import { TemplateFontDescriptor } from '@/types/template';
+import type { FontOption } from '@/store/guiInterface';
+import type { TemplateFontDescriptor } from '@/types/template';
 
 export const DEFAULT_FONT_OPTIONS: FontOption[] = [
   {

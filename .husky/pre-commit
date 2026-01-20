@@ -1,0 +1,11 @@
+#!/usr/bin/env sh
+
+# Paper2GalGame Pre-commit Hook
+# Based on 2026 best practices
+# References:
+# - https://addyosmani.com/blog/ai-coding-workflow/
+# - https://biomejs.dev/
+# - https://www.thisdot.co/blog/linting-formatting-and-type-checking-commits-in-an-nx-monorepo-with-husky
+
+# Run lint-staged for format, lint, and type-check on staged files
+npx lint-staged

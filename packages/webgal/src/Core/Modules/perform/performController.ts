@@ -1,12 +1,10 @@
-import { IPerform } from '@/Core/Modules/perform/performInterface';
-import { ISentence } from '@/Core/controller/scene/sceneInterface';
-import { webgalStore } from '@/store/store';
-import cloneDeep from 'lodash/cloneDeep';
-import { resetStageState, stageActions } from '@/store/stageReducer';
-import { nextSentence } from '@/Core/controller/gamePlay/nextSentence';
-import { IRunPerform } from '@/store/stageInterface';
 import { WEBGAL_NONE } from '@/Core/constants';
+import { nextSentence } from '@/Core/controller/gamePlay/nextSentence';
+import type { ISentence } from '@/Core/controller/scene/sceneInterface';
+import type { IPerform } from '@/Core/Modules/perform/performInterface';
 import { getBooleanArgByKey } from '@/Core/util/getSentenceArg';
+import { stageActions } from '@/store/stageReducer';
+import { webgalStore } from '@/store/store';
 
 /**
  * 获取随机演出名称

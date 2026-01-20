@@ -85,7 +85,6 @@ function isEmptyLine(line: string): boolean {
   return line.trim() === '';
 }
 
-
 /**
  * Pass two.
  *
@@ -98,13 +97,13 @@ function isEmptyLine(line: string): boolean {
  */
 function sceneTextPreProcessPassTwo(lines: string[]): string[] {
   const processedLines: string[] = [];
-  let currentMultilineContent = "";
+  let currentMultilineContent = '';
   let placeHolderLines: string[] = [];
 
   function concat(line: string) {
     let trimmed = line.trim();
     if (trimmed.startsWith('-')) {
-      trimmed = " " + trimmed;
+      trimmed = ` ${trimmed}`;
     }
     currentMultilineContent = currentMultilineContent + trimmed;
     placeHolderLines.push(placeholderLine(line));
@@ -115,7 +114,7 @@ function sceneTextPreProcessPassTwo(lines: string[]): string[] {
     if (line.endsWith('\\')) {
       const trueLine = line.slice(0, -1);
 
-      if (currentMultilineContent === "") {
+      if (currentMultilineContent === '') {
         // first line
         currentMultilineContent = trueLine;
       } else {
@@ -125,14 +124,14 @@ function sceneTextPreProcessPassTwo(lines: string[]): string[] {
       continue;
     }
 
-    if (currentMultilineContent !== "") {
+    if (currentMultilineContent !== '') {
       // end line
       concat(line);
       processedLines.push(currentMultilineContent);
       processedLines.push(...placeHolderLines);
 
       placeHolderLines = [];
-      currentMultilineContent = "";
+      currentMultilineContent = '';
       continue;
     }
 
@@ -149,8 +148,8 @@ function sceneTextPreProcessPassTwo(lines: string[]): string[] {
  * @param content The original content on this line
  * @returns The placeholder line
  */
-function placeholderLine(content = "") {
-  return ";_WEBGAL_LINE_BREAK_" + content;
+function placeholderLine(content = '') {
+  return `;_WEBGAL_LINE_BREAK_${content}`;
 }
 
 // export function sceneTextPreProcess(sceneText: string): string {

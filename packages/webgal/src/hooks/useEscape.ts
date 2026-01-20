@@ -26,7 +26,7 @@ const escapeMap = [
 ];
 const useEscape = (val: string): string => {
   let _res = val;
-  for (let i of escapeMap) {
+  for (const i of escapeMap) {
     _res = _res.replaceAll(i.reg, i.val);
   }
   return _res;

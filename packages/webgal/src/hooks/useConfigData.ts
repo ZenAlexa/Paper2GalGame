@@ -1,19 +1,19 @@
+import { useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import { getFastSaveFromStorage, getSavesFromStorage } from '@/Core/controller/storage/savesController';
 import { getStorage } from '@/Core/controller/storage/storageController';
 import { setEbg } from '@/Core/gameScripts/changeBg/setEbg';
 import { assetSetter, fileType } from '@/Core/util/gameAssetsAccess/assetSetter';
 import { WebGAL } from '@/Core/WebGAL';
 import { setGuiAsset, setLogoImage } from '@/store/GUIReducer';
-import { RootState, webgalStore } from '@/store/store';
-import { useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import { type RootState, webgalStore } from '@/store/store';
 
 const useConfigData = () => {
   const _map = ['Title_img', 'Game_Logo', 'Title_bgm', 'Game_name', 'Game_key'];
   const configData = useSelector((state: RootState) => state.userData.globalGameVar);
   return useEffect(() => {
     // configData发生变化
-    for (let i in configData) {
+    for (const i in configData) {
       if (!_map.includes(i)) {
         continue;
       }
@@ -55,6 +55,13 @@ const useConfigData = () => {
       }
     }
     return () => {};
-  }, [configData.Game_Logo, configData.Game_key, configData.Game_name, configData.Title_bgm, configData.Title_img]);
+  }, [
+    configData.Game_Logo,
+    configData.Game_key,
+    configData.Game_name,
+    configData.Title_bgm,
+    configData.Title_img,
+    configData,
+  ]);
 };
 export default useConfigData;

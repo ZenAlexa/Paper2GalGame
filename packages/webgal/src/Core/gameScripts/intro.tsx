@@ -1,14 +1,9 @@
-import { ISentence } from '@/Core/controller/scene/sceneInterface';
-import { IPerform } from '@/Core/Modules/perform/performInterface';
-import React from 'react';
 import ReactDOM from 'react-dom';
-import styles from '@/Stage/FullScreenPerform/fullScreenPerform.module.scss';
-import { nextSentence } from '@/Core/controller/gamePlay/nextSentence';
-import { PerformController } from '@/Core/Modules/perform/performController';
-import { logger } from '@/Core/util/logger';
+import type { ISentence } from '@/Core/controller/scene/sceneInterface';
+import type { IPerform } from '@/Core/Modules/perform/performInterface';
 import { WebGAL } from '@/Core/WebGAL';
-import { get, replace } from 'lodash';
 import useEscape from '@/hooks/useEscape';
+import styles from '@/Stage/FullScreenPerform/fullScreenPerform.module.scss';
 import { getBooleanArgByKey, getNumberArgByKey, getStringArgByKey } from '../util/getSentenceArg';
 /**
  * 显示一小段黑屏演示
@@ -39,7 +34,7 @@ export const intro = (sentence: ISentence): IPerform => {
   const backgroundColor = getStringArgByKey(sentence, 'backgroundColor') ?? 'rgba(0, 0, 0, 1)';
   const color = getStringArgByKey(sentence, 'fontColor') ?? 'rgba(255, 255, 255, 1)';
   const animationFromArgs = getStringArgByKey(sentence, 'animation') ?? '';
-  let animationClass: any = (type: string, length = 0) => {
+  const animationClass: any = (type: string, length = 0) => {
     switch (type) {
       case 'fadeIn':
         return styles.fadeIn;
@@ -55,10 +50,10 @@ export const intro = (sentence: ISentence): IPerform => {
         return styles.fadeIn;
     }
   };
-  let chosenAnimationClass = animationClass(animationFromArgs);
+  const chosenAnimationClass = animationClass(animationFromArgs);
   let delayTime = getNumberArgByKey(sentence, 'delayTime') ?? 1500;
   let isHold = getBooleanArgByKey(sentence, 'hold') ?? false;
-  let isUserForward = getBooleanArgByKey(sentence, 'userForward') ?? false;
+  const isUserForward = getBooleanArgByKey(sentence, 'userForward') ?? false;
   // 设置一个很大的延迟，这样自然就看起来不自动继续了
   delayTime = isUserForward ? 99999999 : delayTime;
   // 用户手动控制向前步进，所以必须是 hold
@@ -74,7 +69,7 @@ export const intro = (sentence: ISentence): IPerform => {
   };
   const introArray: Array<string> = sentence.content.split(/(?<!\\)\|/).map((val: string) => useEscape(val));
 
-  let endWait = 1000;
+  const endWait = 1000;
   let baseDuration = endWait + delayTime * introArray.length;
   const duration = isHold ? 1000 * 60 * 60 * 24 : 1000 + delayTime * introArray.length;
   let isBlocking = true;
@@ -155,7 +150,7 @@ export const intro = (sentence: ISentence): IPerform => {
 
   const showIntro = introArray.map((e, i) => (
     <div
-      key={'introtext' + i + Math.random().toString()}
+      key={`introtext${i}${Math.random().toString()}`}
       style={{ animationDelay: `${delayTime * i}ms` }}
       className={chosenAnimationClass}
     >

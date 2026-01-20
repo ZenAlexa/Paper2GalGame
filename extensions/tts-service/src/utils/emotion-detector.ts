@@ -43,101 +43,142 @@ const EMOTION_CONFIGS: Record<TTSEmotion, EmotionConfig> = {
   happy: {
     keywords: [
       // Chinese
-      '开心', '高兴', '太好了', '太棒了', '真好', '很好', '喜欢', '爱',
+      '开心',
+      '高兴',
+      '太好了',
+      '太棒了',
+      '真好',
+      '很好',
+      '喜欢',
+      '爱',
       // Japanese
-      '嬉しい', '楽しい', 'うれしい', 'たのしい', '好き', '大好き',
+      '嬉しい',
+      '楽しい',
+      'うれしい',
+      'たのしい',
+      '好き',
+      '大好き',
       // Expressions
-      '哈哈', 'ふふ', 'わーい', 'やった'
+      '哈哈',
+      'ふふ',
+      'わーい',
+      'やった',
     ],
-    patterns: [
-      /[♪♫♬]/,
-      /～+/,
-      /[笑]/
-    ],
-    weight: 1.5
+    patterns: [/[♪♫♬]/, /～+/, /[笑]/],
+    weight: 1.5,
   },
 
   excited: {
     keywords: [
       // Chinese
-      '哇', '诶', '居然', '真的吗', '太厉害了', '不可思议', '惊人',
+      '哇',
+      '诶',
+      '居然',
+      '真的吗',
+      '太厉害了',
+      '不可思议',
+      '惊人',
       // Japanese
-      'すごい', 'えー', 'わあ', 'びっくり', '驚き', 'まじで', '信じられない'
+      'すごい',
+      'えー',
+      'わあ',
+      'びっくり',
+      '驚き',
+      'まじで',
+      '信じられない',
     ],
-    patterns: [
-      /[！!]{2,}/,
-      /[？?][！!]/,
-      /诶{2,}/,
-      /えー+/
-    ],
-    weight: 2.0
+    patterns: [/[！!]{2,}/, /[？?][！!]/, /诶{2,}/, /えー+/],
+    weight: 2.0,
   },
 
   serious: {
     keywords: [
       // Chinese
-      '但是', '然而', '不过', '虽然', '问题', '需要', '必须', '重要',
+      '但是',
+      '然而',
+      '不过',
+      '虽然',
+      '问题',
+      '需要',
+      '必须',
+      '重要',
       // Japanese
-      'しかし', 'ただし', 'けれども', '問題', '必要', '重要', '大切'
+      'しかし',
+      'ただし',
+      'けれども',
+      '問題',
+      '必要',
+      '重要',
+      '大切',
     ],
-    patterns: [
-      /\.{3,}/,
-      /…+/,
-      /、+$/
-    ],
-    weight: 1.3
+    patterns: [/\.{3,}/, /…+/, /、+$/],
+    weight: 1.3,
   },
 
   calm: {
     keywords: [
       // Chinese
-      '好的', '明白', '了解', '这样', '所以', '因此',
+      '好的',
+      '明白',
+      '了解',
+      '这样',
+      '所以',
+      '因此',
       // Japanese
-      'そうですね', 'なるほど', '分かりました', 'では', 'さて'
+      'そうですね',
+      'なるほど',
+      '分かりました',
+      'では',
+      'さて',
     ],
-    patterns: [
-      /^[^！!？?]+[。\.]$/,
-      /ですね$/,
-      /呢$/
-    ],
-    weight: 1.0
+    patterns: [/^[^！!？?]+[。.]$/, /ですね$/, /呢$/],
+    weight: 1.0,
   },
 
   sad: {
     keywords: [
       // Chinese
-      '可惜', '遗憾', '难过', '伤心', '不幸', '失望',
+      '可惜',
+      '遗憾',
+      '难过',
+      '伤心',
+      '不幸',
+      '失望',
       // Japanese
-      '残念', '悲しい', 'かなしい', 'さびしい', '寂しい'
+      '残念',
+      '悲しい',
+      'かなしい',
+      'さびしい',
+      '寂しい',
     ],
-    patterns: [
-      /[泪涙]/,
-      /呜+/,
-      /うう+/
-    ],
-    weight: 1.5
+    patterns: [/[泪涙]/, /呜+/, /うう+/],
+    weight: 1.5,
   },
 
   angry: {
     keywords: [
       // Chinese
-      '生气', '愤怒', '可恶', '讨厌', '烦人',
+      '生气',
+      '愤怒',
+      '可恶',
+      '讨厌',
+      '烦人',
       // Japanese
-      '怒り', 'むかつく', 'いらいら', 'うざい', '腹が立つ'
+      '怒り',
+      'むかつく',
+      'いらいら',
+      'うざい',
+      '腹が立つ',
     ],
-    patterns: [
-      /[！!]{3,}/,
-      /くそ/,
-      /该死/
-    ],
-    weight: 1.8
+    patterns: [/[！!]{3,}/, /くそ/, /该死/],
+    weight: 1.8,
   },
 
   neutral: {
     keywords: [],
     patterns: [],
-    weight: 1.0
-  }
+    weight: 1.0,
+  },
 };
 
 /**
@@ -151,13 +192,13 @@ export function detectEmotionDetailed(text: string): DetailedEmotionAnalysis {
     serious: 0,
     calm: 0,
     sad: 0,
-    angry: 0
+    angry: 0,
   };
 
   const factors = {
     punctuation: 0,
     keywords: 0,
-    patterns: 0
+    patterns: 0,
   };
 
   const indicators: string[] = [];
@@ -231,7 +272,7 @@ export function detectEmotionDetailed(text: string): DetailedEmotionAnalysis {
     emotion: maxEmotion,
     confidence,
     factors,
-    indicators
+    indicators,
   };
 }
 

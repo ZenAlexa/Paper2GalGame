@@ -6,17 +6,15 @@
 
 // Base parser
 export { BaseParserImpl } from './base-parser';
-
-// Specific parser implementations
-export { PDFParserImpl } from './pdf-parser';
-export { WordParserImpl } from './word-parser';
-export { TxtParserImpl } from './txt-parser';
-
 // Parser factory
 export {
-  ParserFactoryImpl,
-  defaultParserFactory,
+  createParserByContent,
   createParserByExtension,
   createParserByMimeType,
-  createParserByContent
+  defaultParserFactory,
+  ParserFactoryImpl,
 } from './parser-factory';
+// Specific parser implementations
+export { PDFParserImpl } from './pdf-parser';
+export { TxtParserImpl } from './txt-parser';
+export { WordParserImpl } from './word-parser';

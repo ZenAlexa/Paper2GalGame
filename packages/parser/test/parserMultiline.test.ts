@@ -1,77 +1,75 @@
-import { sceneTextPreProcess } from "../src/sceneTextPreProcessor";
-import { expect, test } from "vitest";
+import { expect, test } from 'vitest';
+import { sceneTextPreProcess } from '../src/sceneTextPreProcessor';
 
-test("parser-multiline-basic", async () => {
-    const testScene = `changeFigure:a.png -left
+test('parser-multiline-basic', async () => {
+  const testScene = `changeFigure:a.png -left
   -next
   -id=id1
 
 saySomething`;
-    const expected = `changeFigure:a.png -left -next -id=id1
+  const expected = `changeFigure:a.png -left -next -id=id1
 ;_WEBGAL_LINE_BREAK_  -next
 ;_WEBGAL_LINE_BREAK_  -id=id1
 
 saySomething`;
 
-    const preprocessedScene = sceneTextPreProcess(testScene);
-    expect(preprocessedScene).toEqual(expected);
+  const preprocessedScene = sceneTextPreProcess(testScene);
+  expect(preprocessedScene).toEqual(expected);
 });
 
-
-test("parser-multiline-disable-when-encounter-concat-1", async () => {
-    const testScene = `intro:aaa
+test('parser-multiline-disable-when-encounter-concat-1', async () => {
+  const testScene = `intro:aaa
   |bbb -concat
 `;
-    const expected = `intro:aaa
+  const expected = `intro:aaa
   |bbb -concat
 `;
 
-    const preprocessedScene = sceneTextPreProcess(testScene);
-    expect(preprocessedScene).toEqual(expected);
+  const preprocessedScene = sceneTextPreProcess(testScene);
+  expect(preprocessedScene).toEqual(expected);
 });
 
-
-test("parser-multiline-disable-when-encounter-concat-2", async () => {
-    const testScene = `intro:aaa
+test('parser-multiline-disable-when-encounter-concat-2', async () => {
+  const testScene = `intro:aaa
   |bbb
   |ccc -concat
 `;
-    const expected = `intro:aaa|bbb
+  const expected = `intro:aaa|bbb
 ;_WEBGAL_LINE_BREAK_  |bbb
   |ccc -concat
 `;
 
-    const preprocessedScene = sceneTextPreProcess(testScene);
-    expect(preprocessedScene).toEqual(expected);
+  const preprocessedScene = sceneTextPreProcess(testScene);
+  expect(preprocessedScene).toEqual(expected);
 });
 
-test("parser-multiline-user-force-allow-multiline-in-concat", async () => {
-    const testScene = String.raw`intro:aaa\
+test('parser-multiline-user-force-allow-multiline-in-concat', async () => {
+  const testScene = String.raw`intro:aaa\
 |bbb\
 |ccc -concat
 `;
-    const expected = `intro:aaa|bbb|ccc -concat
+  const expected = `intro:aaa|bbb|ccc -concat
 ;_WEBGAL_LINE_BREAK_|bbb
 ;_WEBGAL_LINE_BREAK_|ccc -concat
 `;
 
-    const preprocessedScene = sceneTextPreProcess(testScene);
-    expect(preprocessedScene).toEqual(expected);
+  const preprocessedScene = sceneTextPreProcess(testScene);
+  expect(preprocessedScene).toEqual(expected);
 });
 
-test("parser-multiline-others-same-as-before", async () => {
-    const testScene = `听起来是不是非常吸引人？ -v4.wav;
+test('parser-multiline-others-same-as-before', async () => {
+  const testScene = `听起来是不是非常吸引人？ -v4.wav;
 changeFigure:none -right -next;
 setAnimation:l2c -target=fig-left -next;
 WebGAL 引擎也具有动画系统和特效系统，使用 WebGAL 开发的游戏可以拥有很好的表现效果。 -v5.wav;
 `;
 
-    const preprocessedScene = sceneTextPreProcess(testScene);
-    expect(preprocessedScene).toEqual(testScene);
+  const preprocessedScene = sceneTextPreProcess(testScene);
+  expect(preprocessedScene).toEqual(testScene);
 });
 
-test("parser-multiline-full", async () => {
-    const testScene = `changeFigure:a.png -left
+test('parser-multiline-full', async () => {
+  const testScene = `changeFigure:a.png -left
   -next
   -id=id1
 
@@ -107,7 +105,7 @@ WebGAL 引擎也具有动画系统和特效系统，使用 WebGAL 开发的游�
   -v5.wav;
 `;
 
-    const expected = `changeFigure:a.png -left -next -id=id1
+  const expected = `changeFigure:a.png -left -next -id=id1
 ;_WEBGAL_LINE_BREAK_  -next
 ;_WEBGAL_LINE_BREAK_  -id=id1
 
@@ -143,6 +141,6 @@ WebGAL 引擎也具有动画系统和特效系统，使用 WebGAL 开发的游�
 ;_WEBGAL_LINE_BREAK_  -v5.wav;
 `;
 
-    const preprocessedScene = sceneTextPreProcess(testScene);
-    expect(preprocessedScene).toEqual(expected);
+  const preprocessedScene = sceneTextPreProcess(testScene);
+  expect(preprocessedScene).toEqual(expected);
 });

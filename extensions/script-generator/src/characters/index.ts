@@ -7,7 +7,7 @@
 export {
   CHARACTER_CONFIGS,
   CHARACTER_INTERACTIONS,
-  getCharacter,
   getAvailableCharacters,
-  validateCharacterSelection
+  getCharacter,
+  validateCharacterSelection,
 } from './character-configs';

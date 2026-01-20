@@ -1,8 +1,8 @@
 /* eslint-disable max-params */
 import * as PIXI from 'pixi.js';
+import { SCREEN_CONSTANTS } from '@/Core/util/constants';
 import { registerPerform } from '@/Core/util/pixiPerformManager/pixiPerformManager';
 import { WebGAL } from '@/Core/WebGAL';
-import { SCREEN_CONSTANTS } from '@/Core/util/constants';
 
 type ContainerType = 'foreground' | 'background';
 
@@ -20,7 +20,7 @@ const pixiCherryBlossoms = (
   horizontal: number, // 横向摆动幅度
   maxNumber: number, // 最大数量
   scale: number, // 缩放
-  angle: number, // 角度
+  angle: number // 角度
 ) => {
   const pixiStage = WebGAL.gameplay.pixiStage!;
 
@@ -122,7 +122,7 @@ const pixiCherryBlossoms = (
       setEndState: () => {},
       tickerFunc: tickerFn,
     },
-    tickerKey,
+    tickerKey
   );
 
   return { container, tickerKey };

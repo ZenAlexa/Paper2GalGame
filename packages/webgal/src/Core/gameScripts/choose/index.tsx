@@ -1,19 +1,17 @@
-import { ISentence } from '@/Core/controller/scene/sceneInterface';
-import { IPerform } from '@/Core/Modules/perform/performInterface';
-import { changeScene } from '@/Core/controller/scene/changeScene';
-import { jmp } from '@/Core/gameScripts/label/jmp';
 import ReactDOM from 'react-dom';
-import React from 'react';
-import styles from './choose.module.scss';
-import { webgalStore } from '@/store/store';
-import { PerformController } from '@/Core/Modules/perform/performController';
-import { useSEByWebgalStore } from '@/hooks/useSoundEffect';
-import { WebGAL } from '@/Core/WebGAL';
-import { whenChecker } from '@/Core/controller/gamePlay/scriptExecutor';
-import useEscape from '@/hooks/useEscape';
-import useApplyStyle from '@/hooks/useApplyStyle';
 import { Provider } from 'react-redux';
+import { whenChecker } from '@/Core/controller/gamePlay/scriptExecutor';
+import { changeScene } from '@/Core/controller/scene/changeScene';
+import type { ISentence } from '@/Core/controller/scene/sceneInterface';
+import { jmp } from '@/Core/gameScripts/label/jmp';
+import type { IPerform } from '@/Core/Modules/perform/performInterface';
+import { WebGAL } from '@/Core/WebGAL';
+import useApplyStyle from '@/hooks/useApplyStyle';
+import useEscape from '@/hooks/useEscape';
 import { useFontFamily } from '@/hooks/useFontFamily';
+import { useSEByWebgalStore } from '@/hooks/useSoundEffect';
+import { webgalStore } from '@/store/store';
+import styles from './choose.module.scss';
 
 class ChooseOption {
   /**
@@ -45,6 +43,7 @@ class ChooseOption {
   public enableCondition?: string;
 
   public constructor(text: string, jump: string) {
+    // biome-ignore lint/correctness/useHookAtTopLevel: useEscape is not a React hook, just a naming convention issue from original code
     this.text = useEscape(text);
     this.jump = jump;
     this.jumpToScene = jump.match(/(?<!\\)\./) !== null;
@@ -64,7 +63,7 @@ export const choose = (sentence: ISentence): IPerform => {
     <Provider store={webgalStore}>
       <Choose chooseOptions={chooseOptions} />
     </Provider>,
-    document.getElementById('chooseContainer'),
+    document.getElementById('chooseContainer')
   );
   return {
     performName: 'choose',
@@ -87,7 +86,7 @@ function Choose(props: { chooseOptions: ChooseOption[] }) {
   // 运行时计算JSX.Element[]
   const runtimeBuildList = (chooseListFull: ChooseOption[]) => {
     return chooseListFull
-      .filter((e, i) => whenChecker(e.showCondition))
+      .filter((e, _i) => whenChecker(e.showCondition))
       .map((e, i) => {
         const enable = whenChecker(e.enableCondition);
         const className = enable

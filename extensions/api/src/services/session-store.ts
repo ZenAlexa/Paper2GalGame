@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { Session, SessionStatus, ParsedPaperData, GeneratedScriptData, AudioData } from '../types/index.js';
+import type { AudioData, GeneratedScriptData, ParsedPaperData, Session, SessionStatus } from '../types/index.js';
 
 class SessionStore {
   private sessions: Map<string, Session> = new Map();
@@ -20,7 +20,7 @@ class SessionStore {
       id: uuidv4(),
       createdAt: new Date(),
       updatedAt: new Date(),
-      status: 'created'
+      status: 'created',
     };
     this.sessions.set(session.id, session);
     this.cleanup();

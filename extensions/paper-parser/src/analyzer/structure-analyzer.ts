@@ -6,14 +6,14 @@
  */
 
 import type {
-  PaperSection,
-  SectionType,
-  Figure,
-  Table,
+  BibliographicReference,
   Citation,
   Equation,
-  BibliographicReference,
-  ParsedPaper
+  Figure,
+  PaperSection,
+  ParsedPaper,
+  SectionType,
+  Table,
 } from '../types';
 
 /**
@@ -41,158 +41,40 @@ export interface AnalyzerConfig {
  */
 const SECTION_PATTERNS = {
   en: {
-    title: [
-      /^([A-Z][A-Za-z\s,:\-–—]+)$/,
-      /^(.{10,100})$/
-    ],
-    abstract: [
-      /^abstract$/i,
-      /^summary$/i,
-      /^executive\s+summary$/i
-    ],
-    introduction: [
-      /^introduction$/i,
-      /^1\.?\s*introduction$/i,
-      /^background$/i,
-      /^overview$/i
-    ],
-    methods: [
-      /^methods?$/i,
-      /^methodology$/i,
-      /^approach$/i,
-      /^materials?\s+and\s+methods?$/i,
-      /^\d+\.?\s*methods?$/i
-    ],
-    results: [
-      /^results?$/i,
-      /^findings?$/i,
-      /^experiments?$/i,
-      /^\d+\.?\s*results?$/i
-    ],
-    discussion: [
-      /^discussion$/i,
-      /^analysis$/i,
-      /^\d+\.?\s*discussion$/i,
-      /^results?\s+and\s+discussion$/i
-    ],
-    conclusion: [
-      /^conclusions?$/i,
-      /^summary$/i,
-      /^final\s+remarks?$/i,
-      /^\d+\.?\s*conclusions?$/i
-    ],
-    references: [
-      /^references?$/i,
-      /^bibliography$/i,
-      /^works?\s+cited$/i,
-      /^citations?$/i
-    ],
-    acknowledgments: [
-      /^acknowledgments?$/i,
-      /^acknowledgements?$/i,
-      /^thanks$/i
-    ]
+    title: [/^([A-Z][A-Za-z\s,:\-–—]+)$/, /^(.{10,100})$/],
+    abstract: [/^abstract$/i, /^summary$/i, /^executive\s+summary$/i],
+    introduction: [/^introduction$/i, /^1\.?\s*introduction$/i, /^background$/i, /^overview$/i],
+    methods: [/^methods?$/i, /^methodology$/i, /^approach$/i, /^materials?\s+and\s+methods?$/i, /^\d+\.?\s*methods?$/i],
+    results: [/^results?$/i, /^findings?$/i, /^experiments?$/i, /^\d+\.?\s*results?$/i],
+    discussion: [/^discussion$/i, /^analysis$/i, /^\d+\.?\s*discussion$/i, /^results?\s+and\s+discussion$/i],
+    conclusion: [/^conclusions?$/i, /^summary$/i, /^final\s+remarks?$/i, /^\d+\.?\s*conclusions?$/i],
+    references: [/^references?$/i, /^bibliography$/i, /^works?\s+cited$/i, /^citations?$/i],
+    acknowledgments: [/^acknowledgments?$/i, /^acknowledgements?$/i, /^thanks$/i],
   },
   zh: {
-    title: [
-      /^([^\x00-\x7F]{5,50})$/,
-      /^(.{10,100})$/
-    ],
-    abstract: [
-      /^摘\s*要$/,
-      /^概\s*述$/,
-      /^内容提要$/
-    ],
-    introduction: [
-      /^引\s*言$/,
-      /^前\s*言$/,
-      /^绪\s*论$/,
-      /^背景$/,
-      /^\d+\.?\s*引言$/
-    ],
-    methods: [
-      /^方\s*法$/,
-      /^研究方法$/,
-      /^实验方法$/,
-      /^\d+\.?\s*方法$/
-    ],
-    results: [
-      /^结\s*果$/,
-      /^实验结果$/,
-      /^研究结果$/,
-      /^\d+\.?\s*结果$/
-    ],
-    discussion: [
-      /^讨\s*论$/,
-      /^分\s*析$/,
-      /^\d+\.?\s*讨论$/
-    ],
-    conclusion: [
-      /^结\s*论$/,
-      /^总\s*结$/,
-      /^结语$/,
-      /^\d+\.?\s*结论$/
-    ],
-    references: [
-      /^参考文献$/,
-      /^引用文献$/,
-      /^文献$/
-    ],
-    acknowledgments: [
-      /^致\s*谢$/,
-      /^鸣\s*谢$/,
-      /^感谢$/
-    ]
+    // biome-ignore lint/suspicious/noControlCharactersInRegex: Pattern matches non-ASCII characters (Chinese)
+    title: [/^([^\x00-\x7F]{5,50})$/, /^(.{10,100})$/],
+    abstract: [/^摘\s*要$/, /^概\s*述$/, /^内容提要$/],
+    introduction: [/^引\s*言$/, /^前\s*言$/, /^绪\s*论$/, /^背景$/, /^\d+\.?\s*引言$/],
+    methods: [/^方\s*法$/, /^研究方法$/, /^实验方法$/, /^\d+\.?\s*方法$/],
+    results: [/^结\s*果$/, /^实验结果$/, /^研究结果$/, /^\d+\.?\s*结果$/],
+    discussion: [/^讨\s*论$/, /^分\s*析$/, /^\d+\.?\s*讨论$/],
+    conclusion: [/^结\s*论$/, /^总\s*结$/, /^结语$/, /^\d+\.?\s*结论$/],
+    references: [/^参考文献$/, /^引用文献$/, /^文献$/],
+    acknowledgments: [/^致\s*谢$/, /^鸣\s*谢$/, /^感谢$/],
   },
   ja: {
-    title: [
-      /^([^\x00-\x7F]{5,50})$/,
-      /^(.{10,100})$/
-    ],
-    abstract: [
-      /^要約$/,
-      /^概要$/,
-      /^抄録$/
-    ],
-    introduction: [
-      /^はじめに$/,
-      /^序論$/,
-      /^導入$/,
-      /^\d+\.?\s*はじめに$/
-    ],
-    methods: [
-      /^方法$/,
-      /^手法$/,
-      /^実験方法$/,
-      /^\d+\.?\s*方法$/
-    ],
-    results: [
-      /^結果$/,
-      /^実験結果$/,
-      /^\d+\.?\s*結果$/
-    ],
-    discussion: [
-      /^考察$/,
-      /^議論$/,
-      /^\d+\.?\s*考察$/
-    ],
-    conclusion: [
-      /^結論$/,
-      /^まとめ$/,
-      /^終わりに$/,
-      /^\d+\.?\s*結論$/
-    ],
-    references: [
-      /^参考文献$/,
-      /^文献$/,
-      /^引用文献$/
-    ],
-    acknowledgments: [
-      /^謝辞$/,
-      /^感謝$/,
-      /^あとがき$/
-    ]
-  }
+    // biome-ignore lint/suspicious/noControlCharactersInRegex: Pattern matches non-ASCII characters (Japanese)
+    title: [/^([^\x00-\x7F]{5,50})$/, /^(.{10,100})$/],
+    abstract: [/^要約$/, /^概要$/, /^抄録$/],
+    introduction: [/^はじめに$/, /^序論$/, /^導入$/, /^\d+\.?\s*はじめに$/],
+    methods: [/^方法$/, /^手法$/, /^実験方法$/, /^\d+\.?\s*方法$/],
+    results: [/^結果$/, /^実験結果$/, /^\d+\.?\s*結果$/],
+    discussion: [/^考察$/, /^議論$/, /^\d+\.?\s*考察$/],
+    conclusion: [/^結論$/, /^まとめ$/, /^終わりに$/, /^\d+\.?\s*結論$/],
+    references: [/^参考文献$/, /^文献$/, /^引用文献$/],
+    acknowledgments: [/^謝辞$/, /^感謝$/, /^あとがき$/],
+  },
 };
 
 /**
@@ -209,7 +91,7 @@ export class StructureAnalyzer {
       extractTables: true,
       extractEquations: true,
       extractCitations: true,
-      ...config
+      ...config,
     };
   }
 
@@ -241,8 +123,9 @@ export class StructureAnalyzer {
     const figures = this.config.extractFigures ? this.extractFigures(rawText) : [];
     const tables = this.config.extractTables ? this.extractTables(rawText) : [];
     const equations = this.config.extractEquations ? this.extractEquations(rawText) : [];
-    const { citations, references } = this.config.extractCitations ?
-      this.extractCitationsAndReferences(rawText) : { citations: [], references: [] };
+    const { citations, references } = this.config.extractCitations
+      ? this.extractCitationsAndReferences(rawText)
+      : { citations: [], references: [] };
 
     return {
       sections,
@@ -250,7 +133,7 @@ export class StructureAnalyzer {
       tables,
       equations,
       citations,
-      references
+      references,
     };
   }
 
@@ -270,8 +153,8 @@ export class StructureAnalyzer {
         figureCount: analysis.figures.length,
         tableCount: analysis.tables.length,
         equationCount: analysis.equations.length,
-        citationCount: analysis.citations.length
-      }
+        citationCount: analysis.citations.length,
+      },
     };
   }
 
@@ -284,7 +167,7 @@ export class StructureAnalyzer {
     const charCounts = {
       chinese: (sample.match(/[\u4e00-\u9fff]/g) || []).length,
       japanese: (sample.match(/[\u3040-\u309f\u30a0-\u30ff]/g) || []).length,
-      english: (sample.match(/[a-zA-Z]/g) || []).length
+      english: (sample.match(/[a-zA-Z]/g) || []).length,
     };
 
     if (charCounts.chinese > charCounts.english * 0.1) return 'zh';
@@ -296,11 +179,14 @@ export class StructureAnalyzer {
    * Split text into lines and clean
    */
   private splitIntoLines(text: string): Array<{ text: string; number: number; position: number }> {
-    return text.split('\n').map((line, index) => ({
-      text: line.trim(),
-      number: index + 1,
-      position: text.split('\n').slice(0, index).join('\n').length
-    })).filter(line => line.text.length > 0);
+    return text
+      .split('\n')
+      .map((line, index) => ({
+        text: line.trim(),
+        number: index + 1,
+        position: text.split('\n').slice(0, index).join('\n').length,
+      }))
+      .filter((line) => line.text.length > 0);
   }
 
   /**
@@ -340,7 +226,7 @@ export class StructureAnalyzer {
                 line,
                 type: sectionType as SectionType,
                 confidence,
-                level
+                level,
               });
               break; // Only match first pattern
             }
@@ -441,11 +327,12 @@ export class StructureAnalyzer {
       const endLine = nextCandidate ? nextCandidate.line.number - 1 : allLines.length;
 
       // Extract content
-      const contentLines = allLines.filter(line =>
-        line.number > startLine && line.number <= endLine
-      );
+      const contentLines = allLines.filter((line) => line.number > startLine && line.number <= endLine);
 
-      const content = contentLines.map(line => line.text).join('\n').trim();
+      const content = contentLines
+        .map((line) => line.text)
+        .join('\n')
+        .trim();
 
       // Create section
       const section: PaperSection = {
@@ -454,7 +341,7 @@ export class StructureAnalyzer {
         content,
         level: candidate.level,
         position: candidate.line.position,
-        confidence: candidate.confidence
+        confidence: candidate.confidence,
       };
 
       sections.push(section);
@@ -469,22 +356,21 @@ export class StructureAnalyzer {
   private extractFigures(text: string): Figure[] {
     const figures: Figure[] = [];
     const figurePatterns = [
-      /Figure\s+(\d+)[:\.]?\s*([^\n]*)/gi,
-      /Fig\.\s*(\d+)[:\.]?\s*([^\n]*)/gi,
-      /图\s*(\d+)[：:]?\s*([^\n]*)/g
+      /Figure\s+(\d+)[:.]?\s*([^\n]*)/gi,
+      /Fig\.\s*(\d+)[:.]?\s*([^\n]*)/gi,
+      /图\s*(\d+)[：:]?\s*([^\n]*)/g,
     ];
 
     let figureCount = 0;
     for (const pattern of figurePatterns) {
-      let match;
-      while ((match = pattern.exec(text)) !== null) {
+      for (const match of text.matchAll(pattern)) {
         figureCount++;
         figures.push({
           id: `fig_${figureCount}`,
           caption: match[2] ? match[2].trim() : `Figure ${match[1]}`,
           type: 'image', // Default type
-          position: match.index || 0,
-          label: `Figure ${match[1]}`
+          position: match.index ?? 0,
+          label: `Figure ${match[1]}`,
         });
       }
     }
@@ -497,23 +383,19 @@ export class StructureAnalyzer {
    */
   private extractTables(text: string): Table[] {
     const tables: Table[] = [];
-    const tablePatterns = [
-      /Table\s+(\d+)[:\.]?\s*([^\n]*)/gi,
-      /表\s*(\d+)[：:]?\s*([^\n]*)/g
-    ];
+    const tablePatterns = [/Table\s+(\d+)[:.]?\s*([^\n]*)/gi, /表\s*(\d+)[：:]?\s*([^\n]*)/g];
 
     let tableCount = 0;
     for (const pattern of tablePatterns) {
-      let match;
-      while ((match = pattern.exec(text)) !== null) {
+      for (const match of text.matchAll(pattern)) {
         tableCount++;
         tables.push({
           id: `table_${tableCount}`,
           caption: match[2] ? match[2].trim() : `Table ${match[1]}`,
-          position: match.index || 0,
+          position: match.index ?? 0,
           headers: [], // Would need more sophisticated parsing
-          rows: [],   // Would need more sophisticated parsing
-          label: `Table ${match[1]}`
+          rows: [], // Would need more sophisticated parsing
+          label: `Table ${match[1]}`,
         });
       }
     }
@@ -529,22 +411,21 @@ export class StructureAnalyzer {
 
     // LaTeX equation patterns
     const latexPatterns = [
-      /\$\$([^$]+)\$\$/g,  // Display math
-      /\\\[([^\]]+)\\\]/g,  // Display math alternative
-      /\$([^$]+)\$/g       // Inline math
+      /\$\$([^$]+)\$\$/g, // Display math
+      /\\\[([^\]]+)\\\]/g, // Display math alternative
+      /\$([^$]+)\$/g, // Inline math
     ];
 
     let equationCount = 0;
     for (const pattern of latexPatterns) {
-      let match;
-      while ((match = pattern.exec(text)) !== null) {
+      for (const match of text.matchAll(pattern)) {
         equationCount++;
         equations.push({
           id: `eq_${equationCount}`,
           latex: match[1].trim(),
           text: match[1].trim(), // Simplified - would need proper LaTeX to text conversion
-          position: match.index || 0,
-          inline: pattern.source.includes('\\$') && !pattern.source.includes('\\$\\$')
+          position: match.index ?? 0,
+          inline: pattern.source.includes('\\$') && !pattern.source.includes('\\$\\$'),
         });
       }
     }
@@ -564,19 +445,18 @@ export class StructureAnalyzer {
 
     // Citation patterns
     const citationPatterns = [
-      /\[(\d+)\]/g,           // [1], [2], etc.
+      /\[(\d+)\]/g, // [1], [2], etc.
       /\(([^)]*\d{4}[^)]*)\)/g, // (Author, 2020)
     ];
 
     let citationCount = 0;
     for (const pattern of citationPatterns) {
-      let match;
-      while ((match = pattern.exec(text)) !== null) {
+      for (const match of text.matchAll(pattern)) {
         citationCount++;
         citations.push({
           id: `cite_${citationCount}`,
           display: match[0],
-          position: match.index || 0
+          position: match.index ?? 0,
         });
       }
     }
@@ -584,7 +464,7 @@ export class StructureAnalyzer {
     // Reference extraction (simplified)
     const referenceSection = this.extractReferenceSection(text);
     if (referenceSection) {
-      const refLines = referenceSection.split('\n').filter(line => line.trim().length > 0);
+      const refLines = referenceSection.split('\n').filter((line) => line.trim().length > 0);
       let refCount = 0;
 
       for (const line of refLines) {
@@ -595,7 +475,7 @@ export class StructureAnalyzer {
             id: `ref_${refCount}`,
             title: this.extractTitleFromReference(line),
             authors: this.extractAuthorsFromReference(line),
-            type: 'other' // Default type
+            type: 'other', // Default type
           });
         }
       }
@@ -609,7 +489,7 @@ export class StructureAnalyzer {
    */
   private extractReferenceSection(text: string): string | null {
     const referencePatterns = [
-      /(?:^|\n)\s*(?:REFERENCES?|BIBLIOGRAPHY|WORKS?\s+CITED|参考文献)\s*\n([\s\S]*?)(?:\n\n|\n(?=[A-Z]{2,})|$)/i
+      /(?:^|\n)\s*(?:REFERENCES?|BIBLIOGRAPHY|WORKS?\s+CITED|参考文献)\s*\n([\s\S]*?)(?:\n\n|\n(?=[A-Z]{2,})|$)/i,
     ];
 
     for (const pattern of referencePatterns) {
@@ -628,8 +508,8 @@ export class StructureAnalyzer {
   private extractTitleFromReference(refLine: string): string {
     // Try to find title patterns - often in quotes or after authors
     const titlePatterns = [
-      /"([^"]+)"/,  // In quotes
-      /\.\s*([^.]+)\.\s*[A-Z]/,  // Between dots
+      /"([^"]+)"/, // In quotes
+      /\.\s*([^.]+)\.\s*[A-Z]/, // Between dots
     ];
 
     for (const pattern of titlePatterns) {
@@ -640,7 +520,7 @@ export class StructureAnalyzer {
     }
 
     // Fallback: take first substantial part
-    const parts = refLine.split('.').filter(part => part.trim().length > 10);
+    const parts = refLine.split('.').filter((part) => part.trim().length > 10);
     return parts.length > 0 ? parts[0].trim() : 'Unknown';
   }
 
@@ -653,7 +533,10 @@ export class StructureAnalyzer {
     const match = refLine.match(authorPattern);
 
     if (match) {
-      return match[1].split(/,|and|\&/).map(author => author.trim()).filter(author => author.length > 0);
+      return match[1]
+        .split(/,|and|&/)
+        .map((author) => author.trim())
+        .filter((author) => author.length > 0);
     }
 
     return [];

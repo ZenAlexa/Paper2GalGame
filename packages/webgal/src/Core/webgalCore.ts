@@ -1,11 +1,10 @@
-import { BacklogManager } from '@/Core/Modules/backlog';
-import mitt from 'mitt';
-import { SceneManager } from '@/Core/Modules/scene';
-import { AnimationManager } from '@/Core/Modules/animations';
-import { Gameplay } from './Modules/gamePlay';
-import { Events } from '@/Core/Modules/events';
 import { SteamIntegration } from '@/Core/integration/steamIntegration';
-import { WebgalTemplate } from '@/types/template';
+import { AnimationManager } from '@/Core/Modules/animations';
+import { BacklogManager } from '@/Core/Modules/backlog';
+import { Events } from '@/Core/Modules/events';
+import { SceneManager } from '@/Core/Modules/scene';
+import type { WebgalTemplate } from '@/types/template';
+import { Gameplay } from './Modules/gamePlay';
 
 export class WebgalCore {
   public sceneManager = new SceneManager();

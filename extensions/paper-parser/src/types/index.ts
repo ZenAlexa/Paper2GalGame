@@ -6,29 +6,29 @@
 
 // Core paper structure types
 export type {
-  SectionType,
-  Figure,
-  Table,
-  Equation,
-  Citation,
   BibliographicReference,
-  PaperSection,
+  Citation,
+  Equation,
+  Figure,
   PaperMetadata,
-  ParsingStats,
+  PaperSection,
   ParsedPaper,
-  ParsingError,
   ParseResult,
-  ParserConfig
+  ParserConfig,
+  ParsingError,
+  ParsingStats,
+  SectionType,
+  Table,
 } from './paper';
 
 // Parser interface types
 export type {
   BaseParser,
-  PDFParser,
-  WordParser,
-  TxtParser,
+  ExtendedParserOptions,
   ParserFactory,
   ParserOptions,
-  ExtendedParserOptions,
-  ProgressCallback
+  PDFParser,
+  ProgressCallback,
+  TxtParser,
+  WordParser,
 } from './parsers';

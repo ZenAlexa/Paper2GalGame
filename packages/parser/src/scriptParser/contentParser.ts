@@ -1,5 +1,5 @@
-import { commandType } from '../interface/sceneInterface';
 import { fileType } from '../interface/assets';
+import { commandType } from '../interface/sceneInterface';
 
 /**
  * 解析语句内容的函数，主要作用是把文件名改为绝对地址或相对地址（根据使用情况而定）
@@ -8,11 +8,7 @@ import { fileType } from '../interface/assets';
  * @param assetSetter
  * @return {string} 解析后的语句内容
  */
-export const contentParser = (
-  contentRaw: string,
-  type: commandType,
-  assetSetter: any,
-) => {
+export const contentParser = (contentRaw: string, type: commandType, assetSetter: any) => {
   if (contentRaw === 'none' || contentRaw === '') {
     return '';
   }
@@ -62,9 +58,9 @@ function getChooseContent(contentRaw: string, assetSetter: any): string {
   let ret = '';
   for (let i = 0; i < chooseKeyList.length; i++) {
     if (i !== 0) {
-      ret = ret + '|';
+      ret = `${ret}|`;
     }
-    ret = ret + `${chooseKeyList[i]}:${parsedChooseList[i]}`;
+    ret = `${ret}${chooseKeyList[i]}:${parsedChooseList[i]}`;
   }
   return ret;
 }

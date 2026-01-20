@@ -1,7 +1,7 @@
 import './slider.css';
-import { ISlider } from '@/UI/Menu/Options/OptionInterface';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import useSoundEffect from '@/hooks/useSoundEffect';
+import type { ISlider } from '@/UI/Menu/Options/OptionInterface';
 
 export const OptionSlider = (props: ISlider) => {
   const { playSeEnter } = useSoundEffect();

@@ -1,12 +1,11 @@
-import { ISentence } from '@/Core/controller/scene/sceneInterface';
-import { IPerform } from '@/Core/Modules/perform/performInterface';
-import { getNumberArgByKey, getStringArgByKey } from '@/Core/util/getSentenceArg';
+import type { ISentence } from '@/Core/controller/scene/sceneInterface';
 import { webgalAnimations } from '@/Core/controller/stage/pixi/animations';
-import { IAnimationObject } from '@/Core/controller/stage/pixi/PixiController';
+import type { IAnimationObject } from '@/Core/controller/stage/pixi/PixiController';
+import type { IPerform } from '@/Core/Modules/perform/performInterface';
+import { getNumberArgByKey, getStringArgByKey } from '@/Core/util/getSentenceArg';
 import { logger } from '@/Core/util/logger';
-import { webgalStore } from '@/store/store';
-
 import { WebGAL } from '@/Core/WebGAL';
+import { webgalStore } from '@/store/store';
 
 /**
  * 设置背景动画
@@ -28,7 +27,7 @@ export const setComplexAnimation = (sentence: ISentence): IPerform => {
     WebGAL.gameplay.pixiStage?.registerAnimation(animationObj, key, target);
     stopFunction = () => {
       const endDialogKey = webgalStore.getState().stage.currentDialogKey;
-      const isHasNext = startDialogKey !== endDialogKey;
+      const _isHasNext = startDialogKey !== endDialogKey;
       WebGAL.gameplay.pixiStage?.removeAnimationWithSetEffects(key);
     };
   }

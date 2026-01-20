@@ -1,15 +1,17 @@
 // spineHandlers.ts
-import { WebGALPixiContainer } from '@/Core/controller/stage/pixi/WebGALPixiContainer';
-import { v4 as uuid } from 'uuid';
+
 import * as PIXI from 'pixi.js';
-import PixiStage from '@/Core/controller/stage/pixi/PixiController';
+import { v4 as uuid } from 'uuid';
+import type PixiStage from '@/Core/controller/stage/pixi/PixiController';
+import { WebGALPixiContainer } from '@/Core/controller/stage/pixi/WebGALPixiContainer';
 import { logger } from '@/Core/util/logger';
 import { webgalStore } from '@/store/store';
+
 // utils/loadPixiSpine.ts
-// @ts-ignore
-let pixiSpineModule: typeof import('pixi-spine') | null = null;
-// @ts-ignore
-let pixiSpineLoading: Promise<typeof import('pixi-spine') | null> | null = null;
+// @ts-expect-error
+const pixiSpineModule: typeof import('pixi-spine') | null = null;
+// @ts-expect-error
+const pixiSpineLoading: Promise<typeof import('pixi-spine') | null> | null = null;
 
 let spineLoader: undefined | PIXI.Loader;
 
@@ -17,7 +19,7 @@ let spineLoader: undefined | PIXI.Loader;
  * 动态加载 'pixi-spine' 模块，并缓存结果
  * @returns {Promise<typeof import('pixi-spine') | null>}
  */
-// @ts-ignore
+// @ts-expect-error
 export async function loadPixiSpine(): Promise<typeof import('pixi-spine') | null> {
   if (pixiSpineModule) {
     return pixiSpineModule;
@@ -27,7 +29,6 @@ export async function loadPixiSpine(): Promise<typeof import('pixi-spine') | nul
     return pixiSpineLoading;
   }
 
-  // @ts-ignore
   // pixiSpineLoading = import('pixi-spine')
   //   .then((module) => {
   //     spineLoader = new PIXI.Loader();
@@ -56,7 +57,7 @@ export async function addSpineFigureImpl(
   this: PixiStage,
   key: string,
   url: string,
-  presetPosition: 'left' | 'center' | 'right' = 'center',
+  presetPosition: 'left' | 'center' | 'right' = 'center'
 ) {
   const spineId = `spine-${url}`;
   // 准备用于存放这个立绘的 Container
@@ -94,7 +95,7 @@ export async function addSpineFigureImpl(
   // 完成图片加载后执行的函数
   const setup = async () => {
     setTimeout(() => {
-      console.log('Setting up Spine' + key + url);
+      console.log(`Setting up Spine${key}${url}`);
       if (!pixiSpine) {
         // 无法加载 'pixi-spine'，跳过 Spine 相关逻辑
         logger.warn(`Spine module not loaded. Skipping Spine figure: ${key}`);
@@ -102,7 +103,7 @@ export async function addSpineFigureImpl(
       }
 
       const { Spine } = pixiSpine;
-      const spineResource: any = spineLoader!.resources?.[spineId];
+      const spineResource: any = spineLoader?.resources?.[spineId];
       if (spineResource && this.getStageObjByUuid(figureUuid)) {
         const figureSpine = new Spine(spineResource.spineData);
         const spineBounds = figureSpine.getLocalBounds();
@@ -178,8 +179,8 @@ export async function addSpineFigureImpl(
    * 但为了避免性能问题，我们继续使用现有的 loader，并确保资源只加载一次
    */
   this.cacheGC();
-  if (!spineLoader!.resources?.[spineId]) {
-    spineLoader!.add(spineId, url).load(setup);
+  if (!spineLoader?.resources?.[spineId]) {
+    spineLoader?.add(spineId, url).load(setup);
   } else {
     // 复用
     await setup();
@@ -228,12 +229,12 @@ export async function addSpineBgImpl(this: PixiStage, key: string, url: string) 
     }
 
     const { Spine } = pixiSpine;
-    const spineResource: any = spineLoader!.resources?.[spineId];
+    const spineResource: any = spineLoader?.resources?.[spineId];
     // TODO：找一个更好的解法，现在的解法是无论是否复用原来的资源，都设置一个延时以让动画工作正常！
     setTimeout(() => {
       if (spineResource && this.getStageObjByUuid(bgUuid)) {
         const bgSpine = new Spine(spineResource.spineData);
-        const transY = spineResource?.spineData?.y ?? 0;
+        const _transY = spineResource?.spineData?.y ?? 0;
         /**
          * 重设大小
          */
@@ -270,8 +271,8 @@ export async function addSpineBgImpl(this: PixiStage, key: string, url: string) 
    * 但为了避免性能问题，我们继续使用现有的 loader，并确保资源只加载一次
    */
   this.cacheGC();
-  if (!spineLoader!.resources?.[spineId]) {
-    spineLoader!.add(spineId, url).load(setup);
+  if (!spineLoader?.resources?.[spineId]) {
+    spineLoader?.add(spineId, url).load(setup);
   } else {
     // 复用
     await setup();

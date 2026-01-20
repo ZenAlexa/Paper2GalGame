@@ -17,7 +17,20 @@
     "parser:test": "cd packages/parser && yarn test",
     "parser:test-coverage": "cd packages/parser && yarn coverage",
     "parser:build": "cd packages/parser && yarn build",
-    "parser:build-ci": "cd packages/parser && yarn build-ci"
+    "parser:build-ci": "cd packages/parser && yarn build-ci",
+    "prepare": "husky",
+    "lint": "biome lint .",
+    "lint:fix": "biome lint --write .",
+    "format": "biome format .",
+    "format:fix": "biome format --write .",
+    "check": "biome check .",
+    "check:fix": "biome check --write .",
+    "typecheck": "yarn typecheck:webgal && yarn typecheck:parser && yarn typecheck:api && yarn typecheck:extensions",
+    "typecheck:webgal": "tsc -p packages/webgal/tsconfig.json --noEmit",
+    "typecheck:parser": "tsc -p packages/parser/tsconfig.json --noEmit",
+    "typecheck:api": "tsc -p extensions/api/tsconfig.json --noEmit",
+    "typecheck:extensions": "tsc -p extensions/script-generator/tsconfig.json --noEmit && tsc -p extensions/tts-service/tsconfig.json --noEmit && tsc -p extensions/paper-parser/tsconfig.json --noEmit",
+    "quality": "yarn check && yarn typecheck"
   },
   "license": "MPL-2.0",
   "workspaces": {
@@ -32,6 +45,15 @@
   },
   "packageManager": "yarn@1.22.22",
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "@biomejs/biome": "^2.3.11",
+    "@commitlint/cli": "^20.3.1",
+    "@commitlint/config-conventional": "^20.3.1",
+    "concurrently": "^8.2.2",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7"
+  },
+  "resolutions": {
+    "@types/react": "^17.0.80",
+    "@types/react-dom": "^17.0.25"
   }
 }

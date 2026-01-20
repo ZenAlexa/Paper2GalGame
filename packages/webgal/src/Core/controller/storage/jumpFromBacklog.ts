@@ -1,17 +1,16 @@
-import { logger } from '../../util/logger';
-import { sceneFetcher } from '../scene/sceneFetcher';
-import { sceneParser } from '../../parser/sceneParser';
-import { IStageState } from '@/store/stageInterface';
-import { webgalStore } from '@/store/store';
-import { resetStageState, stageActions } from '@/store/stageReducer';
-import { setVisibility } from '@/store/GUIReducer';
-import { runScript } from '@/Core/controller/gamePlay/runScript';
-import { stopAllPerform } from '@/Core/controller/gamePlay/stopAllPerform';
 import cloneDeep from 'lodash/cloneDeep';
 import uniqWith from 'lodash/uniqWith';
+import { runScript } from '@/Core/controller/gamePlay/runScript';
+import { stopAllPerform } from '@/Core/controller/gamePlay/stopAllPerform';
 import { scenePrefetcher } from '@/Core/util/prefetcher/scenePrefetcher';
-
 import { WebGAL } from '@/Core/WebGAL';
+import { setVisibility } from '@/store/GUIReducer';
+import type { IStageState } from '@/store/stageInterface';
+import { resetStageState, stageActions } from '@/store/stageReducer';
+import { webgalStore } from '@/store/store';
+import { sceneParser } from '../../parser/sceneParser';
+import { logger } from '../../util/logger';
+import { sceneFetcher } from '../scene/sceneFetcher';
 
 /**
  * 恢复演出
@@ -42,7 +41,7 @@ export const jumpFromBacklog = (index: number, refetchScene = true) => {
       WebGAL.sceneManager.sceneData.currentScene = sceneParser(
         rawScene,
         backlogFile.saveScene.sceneName,
-        backlogFile.saveScene.sceneUrl,
+        backlogFile.saveScene.sceneUrl
       );
       // 开始场景的预加载
       const subSceneList = WebGAL.sceneManager.sceneData.currentScene.subSceneList;

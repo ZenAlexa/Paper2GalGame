@@ -1,12 +1,12 @@
-import { generateUniversalSoftInAnimationObj } from '@/Core/controller/stage/pixi/animations/universalSoftIn';
-import { logger } from '@/Core/util/logger';
-import { generateUniversalSoftOffAnimationObj } from '@/Core/controller/stage/pixi/animations/universalSoftOff';
-import { webgalStore } from '@/store/store';
 import cloneDeep from 'lodash/cloneDeep';
-import { baseTransform } from '@/store/stageInterface';
 import { generateTimelineObj } from '@/Core/controller/stage/pixi/animations/timeline';
+import { generateUniversalSoftInAnimationObj } from '@/Core/controller/stage/pixi/animations/universalSoftIn';
+import { generateUniversalSoftOffAnimationObj } from '@/Core/controller/stage/pixi/animations/universalSoftOff';
+import PixiStage, { type IAnimationObject } from '@/Core/controller/stage/pixi/PixiController';
+import { logger } from '@/Core/util/logger';
 import { WebGAL } from '@/Core/WebGAL';
-import PixiStage, { IAnimationObject } from '@/Core/controller/stage/pixi/PixiController';
+import { baseTransform } from '@/store/stageInterface';
+import { webgalStore } from '@/store/store';
 import {
   DEFAULT_BG_IN_DURATION,
   DEFAULT_BG_OUT_DURATION,
@@ -56,7 +56,7 @@ export function getEnterExitAnimation(
   target: string,
   type: 'enter' | 'exit',
   isBg = false,
-  realTarget?: string, // 用于立绘和背景移除时，以当前时间打上特殊标记
+  realTarget?: string // 用于立绘和背景移除时，以当前时间打上特殊标记
 ): {
   duration: number;
   animation: IAnimationObject | null;
@@ -91,13 +91,13 @@ export function getEnterExitAnimation(
       duration = DEFAULT_BG_OUT_DURATION;
     }
     duration =
-      webgalStore.getState().stage.animationSettings.find((setting) => setting.target + '-off' === target)
+      webgalStore.getState().stage.animationSettings.find((setting) => `${setting.target}-off` === target)
         ?.exitDuration ?? duration;
     // 走默认动画
     let animation: IAnimationObject | null = generateUniversalSoftOffAnimationObj(realTarget ?? target, duration);
     const animationName = webgalStore
       .getState()
-      .stage.animationSettings.find((setting) => setting.target + '-off' === target)?.exitAnimationName;
+      .stage.animationSettings.find((setting) => `${setting.target}-off` === target)?.exitAnimationName;
     if (animationName) {
       logger.debug('取代默认退出动画', target);
       animation = getAnimationObject(animationName, realTarget ?? target, getAnimateDuration(animationName), false);

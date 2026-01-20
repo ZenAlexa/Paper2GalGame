@@ -1,11 +1,10 @@
-import { IStageState } from '@/store/stageInterface';
 import { useEffect } from 'react';
-import { logger } from '@/Core/util/logger';
-import { IStageObject } from '@/Core/controller/stage/pixi/PixiController';
+import type { IStageObject } from '@/Core/controller/stage/pixi/PixiController';
 import { setEbg } from '@/Core/gameScripts/changeBg/setEbg';
-
 import { getEnterExitAnimation } from '@/Core/Modules/animationFunctions';
+import { logger } from '@/Core/util/logger';
 import { WebGAL } from '@/Core/WebGAL';
+import type { IStageState } from '@/store/stageInterface';
 
 export function useSetBg(stageState: IStageState) {
   const bgName = stageState.bgName;
@@ -26,42 +25,42 @@ export function useSetBg(stageState: IStageState) {
       setEbg(bgName);
       logger.debug('重设背景');
       const { duration, animation } = getEnterExitAnimation('bg-main', 'enter', true);
-      WebGAL.gameplay.pixiStage!.registerPresetAnimation(animation, 'bg-main-softin', thisBgKey, stageState.effects);
-      setTimeout(() => WebGAL.gameplay.pixiStage!.removeAnimationWithSetEffects('bg-main-softin'), duration);
+      WebGAL.gameplay.pixiStage?.registerPresetAnimation(animation, 'bg-main-softin', thisBgKey, stageState.effects);
+      setTimeout(() => WebGAL.gameplay.pixiStage?.removeAnimationWithSetEffects('bg-main-softin'), duration);
     } else {
       const currentBg = WebGAL.gameplay.pixiStage?.getStageObjByKey(thisBgKey);
       if (currentBg) {
         removeBg(currentBg);
       }
     }
-  }, [bgName]);
+  }, [bgName, stageState.effects]);
 }
 
 function removeBg(bgObject: IStageObject) {
   WebGAL.gameplay.pixiStage?.removeAnimationWithSetEffects('bg-main-softin');
   const oldBgKey = bgObject.key;
-  bgObject.key = 'bg-main-off' + String(new Date().getTime());
+  bgObject.key = `bg-main-off${String(Date.now())}`;
   const bgKey = bgObject.key;
-  const bgAniKey = bgObject.key + '-softoff';
+  const bgAniKey = `${bgObject.key}-softoff`;
   WebGAL.gameplay.pixiStage?.removeStageObjectByKey(oldBgKey);
   const { duration, animation } = getEnterExitAnimation('bg-main-off', 'exit', true, bgKey);
-  WebGAL.gameplay.pixiStage!.registerAnimation(animation, bgAniKey, bgKey);
+  WebGAL.gameplay.pixiStage?.registerAnimation(animation, bgAniKey, bgKey);
   setTimeout(() => {
     WebGAL.gameplay.pixiStage?.removeAnimation(bgAniKey);
     WebGAL.gameplay.pixiStage?.removeStageObjectByKey(bgKey);
   }, duration);
 }
 
-function addBg(type?: 'image' | 'spine', ...args: any[]) {
+function addBg(_type?: 'image' | 'spine', ...args: any[]) {
   const url: string = args[1];
   if (['mp4', 'webm', 'mkv'].some((e) => url.toLocaleLowerCase().endsWith(e))) {
-    // @ts-ignore
+    // @ts-expect-error
     return WebGAL.gameplay.pixiStage?.addVideoBg(...args);
   } else if (url.toLocaleLowerCase().endsWith('.skel')) {
-    // @ts-ignore
+    // @ts-expect-error
     return WebGAL.gameplay.pixiStage?.addSpineBg(...args);
   } else {
-    // @ts-ignore
+    // @ts-expect-error
     return WebGAL.gameplay.pixiStage?.addBg(...args);
   }
 }

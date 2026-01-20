@@ -1,10 +1,10 @@
-import { webgalStore } from '@/store/store';
-import { setStage } from '@/store/stageReducer';
-import { setVisibility } from '@/store/GUIReducer';
-import { stopAllPerform } from '@/Core/controller/gamePlay/stopAllPerform';
 import { stopAuto } from '@/Core/controller/gamePlay/autoPlay';
 import { stopFast } from '@/Core/controller/gamePlay/fastSkip';
+import { stopAllPerform } from '@/Core/controller/gamePlay/stopAllPerform';
 import { setEbg } from '@/Core/gameScripts/changeBg/setEbg';
+import { setVisibility } from '@/store/GUIReducer';
+import { setStage } from '@/store/stageReducer';
+import { webgalStore } from '@/store/store';
 
 export const backToTitle = () => {
   if (webgalStore.getState().GUI.showTitle) return;

@@ -1,5 +1,5 @@
-import { commandType, ISentence } from '@/Core/controller/scene/sceneInterface';
-import { IPerform } from '@/Core/Modules/perform/performInterface';
+import type { commandType, ISentence } from '@/Core/controller/scene/sceneInterface';
+import type { IPerform } from '@/Core/Modules/perform/performInterface';
 
 /**
  * 规范函数的类型
@@ -20,7 +20,7 @@ export interface IConfigInterface extends ScriptConfig {
 export function ScriptConfig(
   scriptType: commandType,
   scriptFunction: ScriptFunction,
-  config?: Omit<ScriptConfig, 'scriptType' | 'scriptFunction'>,
+  config?: Omit<ScriptConfig, 'scriptType' | 'scriptFunction'>
 ): ScriptConfig {
   return { scriptType, scriptFunction, ...config };
 }
@@ -28,7 +28,7 @@ export function ScriptConfig(
 export const scriptRegistry: Record<commandType, IConfigInterface> = {} as any;
 
 export function defineScripts<R extends Record<string, Omit<IConfigInterface, 'scriptString'>>>(
-  record: R,
+  record: R
 ): {
   [K in keyof R]: IConfigInterface;
 } {

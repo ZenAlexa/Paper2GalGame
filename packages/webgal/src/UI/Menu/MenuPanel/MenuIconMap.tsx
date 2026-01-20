@@ -1,5 +1,5 @@
-import { IMenuPanel } from '@/UI/Menu/MenuPanel/menuPanelInterface';
 import { FolderOpen, Home, Logout, Save, SettingTwo } from '@icon-park/react';
+import type { IMenuPanel } from '@/UI/Menu/MenuPanel/menuPanelInterface';
 
 /**
  * 通过图标名称返回正确的图标

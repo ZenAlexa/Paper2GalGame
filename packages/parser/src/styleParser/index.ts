@@ -32,7 +32,7 @@ function parseCSS(css: string): [Record<string, string>, string] {
   }
 
   while ((matches = specialRegex.exec(css)) !== null) {
-    specialRules += matches[1].trim() + '\n';
+    specialRules += `${matches[1].trim()}\n`;
   }
 
   return [result, specialRules.trim()];

@@ -1,8 +1,9 @@
 /**
  * 语句类型
  */
-import { sceneEntry, ISceneEntry } from './runtimeInterface';
-import { fileType } from './assets';
+
+import type { fileType } from './assets';
+import type { ISceneEntry } from './runtimeInterface';
 
 export enum commandType {
   say, // 对话
@@ -40,6 +41,9 @@ export enum commandType {
   applyStyle,
   wait,
   callSteam, // 调用Steam功能
+  // Paper mode commands
+  paperQuote, // Display paper citation/quote with source reference
+  paperHighlight, // Highlight important paper content with annotation
 }
 
 /**

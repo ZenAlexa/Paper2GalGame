@@ -3,22 +3,21 @@
  * 这些状态会在指定的生命周期与本地存储发生交换，比如打开存档界面、存档、修改设置时。
  * 在引擎初始化时会将这些状态从本地存储加载到运行时状态。
  */
+
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import cloneDeep from 'lodash/cloneDeep';
 import { language } from '@/config/language';
 import {
-  IAppreciationAsset,
-  IOptionData,
-  ISaveData,
-  ISetOptionDataPayload,
-  ISetUserDataPayload,
-  IUserData,
   fullScreenOption,
-  playSpeed,
+  type IAppreciationAsset,
+  type IOptionData,
+  type ISetOptionDataPayload,
+  type ISetUserDataPayload,
+  type IUserData,
   textSize,
   voiceOption,
 } from '@/store/userDataInterface';
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import cloneDeep from 'lodash/cloneDeep';
-import { ISetGameVar } from './stageInterface';
+import type { ISetGameVar } from './stageInterface';
 
 const initialOptionSet: IOptionData = {
   slPage: 1,
@@ -114,13 +113,13 @@ const userDataSlice = createSlice({
      * @param action 要改变或添加的变量
      */
     setGlobalVar: (state, action: PayloadAction<ISetGameVar>) => {
-      const isRegistedInUserData = state.scriptManagedGlobalVar.findIndex((key) => key === action.payload.key) >= 0;
+      const isRegistedInUserData = state.scriptManagedGlobalVar.indexOf(action.payload.key) >= 0;
       if (!isRegistedInUserData) {
         state.globalGameVar[action.payload.key] = action.payload.value;
       }
     },
     setScriptManagedGlobalVar: (state, action: PayloadAction<ISetGameVar>) => {
-      const isRegistedInUserData = state.scriptManagedGlobalVar.findIndex((key) => key === action.payload.key) >= 0;
+      const isRegistedInUserData = state.scriptManagedGlobalVar.indexOf(action.payload.key) >= 0;
       state.globalGameVar[action.payload.key] = action.payload.value;
       if (!isRegistedInUserData) {
         state.scriptManagedGlobalVar.push(action.payload.key);

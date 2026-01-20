@@ -1,1 +1,572 @@
-/**\n * MinerU Engine - Professional PDF Analysis with AI\n *\n * Integrates MinerU 2.5 for advanced academic paper parsing\n * with specialized formula recognition capabilities.\n */\n\nimport fetch from 'node-fetch';\nimport { createHash } from 'crypto';\nimport { promises as fs } from 'fs';\nimport { join, dirname } from 'path';\nimport type { \n  EnhancedParsedPaper, \n  EnhancedEquation, \n  EnhancedFigure,\n  EnhancedTable,\n  EnhancedParserConfig,\n  ProgressCallback,\n  ParsingProgress\n} from '../../types/enhanced-paper';\n\n/**\n * MinerU block structure as returned by the service\n */\ninterface MinerUBlock {\n  type: string;\n  bbox: [number, number, number, number];\n  text?: string;\n  content?: string;\n  confidence?: number;\n  metadata?: Record<string, any>;\n}\n\n/**\n * MinerU service response structure\n */\ninterface MinerUResponse {\n  success: boolean;\n  blocks: MinerUBlock[];\n  metadata: {\n    pages: number;\n    processingTime: number;\n    version: string;\n  };\n  error?: string;\n}\n\n/**\n * Configuration for MinerU engine\n */\nexport interface MinerUEngineConfig {\n  /** MinerU service endpoint */\n  serviceUrl: string;\n  \n  /** Request timeout in milliseconds */\n  timeout: number;\n  \n  /** Enable recursive layout analysis */\n  enableRecursiveAnalysis: boolean;\n  \n  /** Maximum recursion depth */\n  maxRecursionDepth: number;\n  \n  /** Target block types for subimage processing */\n  subimageTypes: string[];\n}\n\n/**\n * Professional PDF parsing engine using MinerU\n */\nexport class MinerUEngine {\n  private config: MinerUEngineConfig;\n  private progressCallback?: ProgressCallback;\n\n  constructor(config: Partial<MinerUEngineConfig> = {}) {\n    this.config = {\n      serviceUrl: 'http://127.0.0.1:8010',\n      timeout: 120000, // 2 minutes\n      enableRecursiveAnalysis: true,\n      maxRecursionDepth: 2,\n      subimageTypes: ['formula', 'equation', 'table', 'figure', 'image'],\n      ...config\n    };\n  }\n\n  /**\n   * Set progress callback for long-running operations\n   */\n  setProgressCallback(callback: ProgressCallback): void {\n    this.progressCallback = callback;\n  }\n\n  /**\n   * Parse PDF using MinerU service\n   */\n  async parsePDF(pdfPath: string): Promise<Partial<EnhancedParsedPaper>> {\n    this.reportProgress({\n      stage: 'init',\n      progress: 0,\n      description: 'Initializing MinerU PDF processing'\n    });\n\n    try {\n      // 1. Upload PDF to MinerU service\n      const uploadResult = await this.uploadPDF(pdfPath);\n      \n      this.reportProgress({\n        stage: 'pdf-extraction',\n        progress: 20,\n        description: 'Processing PDF with MinerU'\n      });\n\n      // 2. Process with MinerU\n      const mineruResult = await this.callMinerUService(uploadResult.fileId);\n      \n      this.reportProgress({\n        stage: 'structure-analysis',\n        progress: 50,\n        description: 'Analyzing document structure'\n      });\n\n      // 3. Extract structured content\n      const structuredContent = await this.extractStructuredContent(mineruResult);\n      \n      this.reportProgress({\n        stage: 'formula-processing',\n        progress: 80,\n        description: 'Processing mathematical formulas'\n      });\n\n      // 4. Process formulas specifically\n      const enhancedFormulas = await this.processFormulas(mineruResult.blocks);\n      \n      this.reportProgress({\n        stage: 'finalization',\n        progress: 100,\n        description: 'Finalizing parsed content'\n      });\n\n      return {\n        ...structuredContent,\n        sections: structuredContent.sections?.map(section => ({\n          ...section,\n          equations: enhancedFormulas.filter(eq => \n            this.isEquationInSection(eq, section)\n          )\n        }))\n      };\n\n    } catch (error) {\n      throw new Error(`MinerU parsing failed: ${error instanceof Error ? error.message : 'Unknown error'}`);\n    }\n  }\n\n  /**\n   * Upload PDF to MinerU service\n   */\n  private async uploadPDF(pdfPath: string): Promise<{ fileId: string; size: number }> {\n    const formData = new FormData();\n    const fileBuffer = await fs.readFile(pdfPath);\n    const fileName = pdfPath.split('/').pop() || 'document.pdf';\n    \n    // Create a Blob from the buffer for FormData\n    const blob = new Blob([fileBuffer], { type: 'application/pdf' });\n    formData.append('file', blob, fileName);\n\n    const response = await fetch(`${this.config.serviceUrl}/upload`, {\n      method: 'POST',\n      body: formData,\n      timeout: this.config.timeout\n    });\n\n    if (!response.ok) {\n      throw new Error(`Upload failed: ${response.status} ${response.statusText}`);\n    }\n\n    const result = await response.json();\n    return {\n      fileId: result.fileId,\n      size: fileBuffer.length\n    };\n  }\n\n  /**\n   * Call MinerU processing service\n   */\n  private async callMinerUService(fileId: string): Promise<MinerUResponse> {\n    const response = await fetch(`${this.config.serviceUrl}/process`, {\n      method: 'POST',\n      headers: {\n        'Content-Type': 'application/json'\n      },\n      body: JSON.stringify({\n        fileId,\n        options: {\n          enableFormulaDetection: true,\n          enableLayoutAnalysis: true,\n          recursiveDepth: this.config.maxRecursionDepth\n        }\n      }),\n      timeout: this.config.timeout\n    });\n\n    if (!response.ok) {\n      throw new Error(`MinerU service error: ${response.status} ${response.statusText}`);\n    }\n\n    const result: MinerUResponse = await response.json();\n    \n    if (!result.success) {\n      throw new Error(`MinerU processing failed: ${result.error || 'Unknown error'}`);\n    }\n\n    return result;\n  }\n\n  /**\n   * Extract structured content from MinerU blocks\n   */\n  private async extractStructuredContent(\n    mineruResult: MinerUResponse\n  ): Promise<Partial<EnhancedParsedPaper>> {\n    const blocks = mineruResult.blocks;\n    \n    // Group blocks by type\n    const blocksByType = this.groupBlocksByType(blocks);\n    \n    // Extract sections\n    const sections = this.extractSections(blocksByType);\n    \n    // Extract metadata\n    const metadata = this.extractMetadata(blocksByType);\n    \n    // Extract figures and tables\n    const figures = this.extractFigures(blocksByType.figure || []);\n    const tables = this.extractTables(blocksByType.table || []);\n    \n    // Calculate stats\n    const stats = {\n      pageCount: mineruResult.metadata.pages,\n      wordCount: this.calculateWordCount(blocks),\n      charCount: this.calculateCharCount(blocks),\n      sectionCount: sections.length,\n      figureCount: figures.length,\n      tableCount: tables.length,\n      equationCount: (blocksByType.formula || []).length,\n      citationCount: 0, // TODO: implement citation detection\n      processingTimeMs: mineruResult.metadata.processingTime,\n      confidence: this.calculateOverallConfidence(blocks),\n      detectedLanguage: this.detectLanguage(blocks),\n      \n      // Enhanced AI processing stats\n      aiProcessing: {\n        apiCalls: 1, // MinerU call\n        aiProcessingTimeMs: mineruResult.metadata.processingTime,\n        estimatedCost: 0.01, // Placeholder\n        modelsUsed: [`MinerU-${mineruResult.metadata.version}`],\n        overallAiConfidence: this.calculateOverallConfidence(blocks)\n      },\n      \n      quality: {\n        formulaAccuracy: 0.95, // MinerU is quite good\n        layoutAccuracy: 0.90,\n        structureAccuracy: 0.85\n      },\n      \n      processingMethod: 'mineru' as const\n    };\n\n    return {\n      metadata,\n      sections,\n      stats,\n      rawText: this.extractRawText(blocks),\n      timestamp: new Date(),\n      parserVersion: 'enhanced-2026-v1.0'\n    };\n  }\n\n  /**\n   * Process formulas with enhanced metadata\n   */\n  private async processFormulas(blocks: MinerUBlock[]): Promise<EnhancedEquation[]> {\n    const formulaBlocks = blocks.filter(block => \n      ['formula', 'equation', 'math'].includes(block.type.toLowerCase())\n    );\n\n    const enhancedFormulas: EnhancedEquation[] = [];\n    \n    for (const [index, block] of formulaBlocks.entries()) {\n      try {\n        const enhanced = await this.enhanceFormula(block, index);\n        enhancedFormulas.push(enhanced);\n        \n        // Report progress\n        this.reportProgress({\n          stage: 'formula-processing',\n          progress: 80 + (index / formulaBlocks.length) * 15,\n          description: `Processing formula ${index + 1} of ${formulaBlocks.length}`,\n          itemsProcessed: {\n            current: index + 1,\n            total: formulaBlocks.length,\n            type: 'formulas'\n          }\n        });\n        \n      } catch (error) {\n        console.warn(`Failed to enhance formula ${index}:`, error);\n        \n        // Create basic enhanced formula as fallback\n        enhancedFormulas.push({\n          id: `formula-${index}`,\n          latex: block.text || block.content || '',\n          text: block.text || block.content || '',\n          position: index,\n          inline: this.isInlineFormula(block),\n          bbox: block.bbox,\n          confidence: block.confidence || 0.7,\n          complexity: this.assessComplexity(block.text || block.content || ''),\n          mathType: this.classifyMathType(block.text || block.content || '')\n        });\n      }\n    }\n\n    return enhancedFormulas;\n  }\n\n  /**\n   * Enhance individual formula with AI analysis\n   */\n  private async enhanceFormula(block: MinerUBlock, index: number): Promise<EnhancedEquation> {\n    const latex = block.text || block.content || '';\n    \n    return {\n      id: `formula-${index}`,\n      latex,\n      text: latex, // MinerU usually provides LaTeX directly\n      position: index,\n      inline: this.isInlineFormula(block),\n      bbox: block.bbox,\n      confidence: block.confidence || 0.85,\n      complexity: this.assessComplexity(latex),\n      mathType: this.classifyMathType(latex),\n      \n      aiMetadata: {\n        model: 'MinerU-2.5',\n        processingTime: 100, // Estimated\n        method: 'structural',\n        quality: {\n          latexAccuracy: block.confidence || 0.85,\n          semanticRelevance: 0.8,\n          contextAlignment: 0.75\n        }\n      },\n      \n      educational: {\n        difficulty: this.assessDifficulty(latex),\n        concepts: this.extractConcepts(latex),\n        explanation: this.generateExplanation(latex)\n      }\n    };\n  }\n\n  /**\n   * Group blocks by their type\n   */\n  private groupBlocksByType(blocks: MinerUBlock[]): Record<string, MinerUBlock[]> {\n    return blocks.reduce((acc, block) => {\n      const type = block.type.toLowerCase();\n      if (!acc[type]) {\n        acc[type] = [];\n      }\n      acc[type].push(block);\n      return acc;\n    }, {} as Record<string, MinerUBlock[]>);\n  }\n\n  /**\n   * Extract sections from blocks\n   */\n  private extractSections(blocksByType: Record<string, MinerUBlock[]>): any[] {\n    // Combine text blocks and analyze structure\n    const textBlocks = [\n      ...(blocksByType.title || []),\n      ...(blocksByType.heading || []),\n      ...(blocksByType.paragraph || []),\n      ...(blocksByType.text || [])\n    ];\n\n    // Sort by position (using bbox y-coordinate)\n    textBlocks.sort((a, b) => (a.bbox?.[1] || 0) - (b.bbox?.[1] || 0));\n\n    // Use existing section detection logic but with enhanced types\n    return this.detectSections(textBlocks);\n  }\n\n  /**\n   * Extract metadata from title and author blocks\n   */\n  private extractMetadata(blocksByType: Record<string, MinerUBlock[]>): any {\n    const titleBlocks = blocksByType.title || [];\n    const authorBlocks = blocksByType.author || [];\n    \n    return {\n      title: titleBlocks[0]?.text || titleBlocks[0]?.content || 'Unknown Title',\n      authors: authorBlocks.map(block => block.text || block.content).filter(Boolean),\n      keywords: [], // TODO: extract from blocks\n      language: 'auto'\n    };\n  }\n\n  /**\n   * Extract enhanced figures\n   */\n  private extractFigures(figureBlocks: MinerUBlock[]): EnhancedFigure[] {\n    return figureBlocks.map((block, index) => ({\n      id: `figure-${index}`,\n      caption: block.text || block.content || '',\n      type: 'image' as const,\n      position: index,\n      bbox: block.bbox,\n      aiDescription: `AI-analyzed figure content: ${block.text || 'No description available'}`\n    }));\n  }\n\n  /**\n   * Extract enhanced tables\n   */\n  private extractTables(tableBlocks: MinerUBlock[]): EnhancedTable[] {\n    return tableBlocks.map((block, index) => ({\n      id: `table-${index}`,\n      caption: block.text || block.content || '',\n      position: index,\n      headers: [], // TODO: parse table structure\n      rows: [],    // TODO: parse table structure\n      bbox: block.bbox,\n      structure: {\n        columnTypes: [],\n        patterns: [],\n        summary: 'Table structure analysis pending'\n      }\n    }));\n  }\n\n  // Helper methods\n  private isInlineFormula(block: MinerUBlock): boolean {\n    // Heuristic: inline formulas are typically smaller\n    const bbox = block.bbox;\n    if (!bbox) return false;\n    \n    const height = bbox[3] - bbox[1];\n    return height < 0.05; // Less than 5% of page height\n  }\n\n  private assessComplexity(latex: string): 'simple' | 'medium' | 'complex' {\n    if (latex.length < 20) return 'simple';\n    if (latex.includes('\\\\int') || latex.includes('\\\\sum') || latex.includes('\\\\prod')) return 'complex';\n    if (latex.includes('\\\\frac') || latex.includes('^') || latex.includes('_')) return 'medium';\n    return 'simple';\n  }\n\n  private classifyMathType(latex: string): EnhancedEquation['mathType'] {\n    if (latex.includes('\\\\int') || latex.includes('\\\\partial')) return 'calculus';\n    if (latex.includes('\\\\sum') || latex.includes('\\\\mu') || latex.includes('\\\\sigma')) return 'statistics';\n    if (latex.includes('\\\\frac') || latex.includes('^') || latex.includes('_')) return 'algebra';\n    if (latex.includes('\\\\angle') || latex.includes('\\\\triangle')) return 'geometry';\n    return 'other';\n  }\n\n  private assessDifficulty(latex: string): 'beginner' | 'intermediate' | 'advanced' {\n    const complexity = this.assessComplexity(latex);\n    if (complexity === 'simple') return 'beginner';\n    if (complexity === 'medium') return 'intermediate';\n    return 'advanced';\n  }\n\n  private extractConcepts(latex: string): string[] {\n    const concepts: string[] = [];\n    \n    if (latex.includes('\\\\int')) concepts.push('integration');\n    if (latex.includes('\\\\frac')) concepts.push('fractions');\n    if (latex.includes('\\\\sum')) concepts.push('summation');\n    if (latex.includes('^')) concepts.push('exponentiation');\n    if (latex.includes('_')) concepts.push('subscripts');\n    \n    return concepts;\n  }\n\n  private generateExplanation(latex: string): string {\n    const complexity = this.assessComplexity(latex);\n    const mathType = this.classifyMathType(latex);\n    \n    return `This is a ${complexity} ${mathType} expression that would benefit from step-by-step explanation in the visual novel format.`;\n  }\n\n  private calculateWordCount(blocks: MinerUBlock[]): number {\n    return blocks.reduce((count, block) => {\n      const text = block.text || block.content || '';\n      return count + text.split(/\\s+/).filter(word => word.length > 0).length;\n    }, 0);\n  }\n\n  private calculateCharCount(blocks: MinerUBlock[]): number {\n    return blocks.reduce((count, block) => {\n      const text = block.text || block.content || '';\n      return count + text.length;\n    }, 0);\n  }\n\n  private calculateOverallConfidence(blocks: MinerUBlock[]): number {\n    if (blocks.length === 0) return 0;\n    \n    const totalConfidence = blocks.reduce((sum, block) => {\n      return sum + (block.confidence || 0.8); // Default confidence\n    }, 0);\n    \n    return totalConfidence / blocks.length;\n  }\n\n  private detectLanguage(blocks: MinerUBlock[]): string {\n    // Simple heuristic based on character patterns\n    const text = blocks.map(block => block.text || block.content || '').join(' ');\n    \n    const chineseChars = (text.match(/[\\u4e00-\\u9fff]/g) || []).length;\n    const japaneseChars = (text.match(/[\\u3040-\\u309f\\u30a0-\\u30ff]/g) || []).length;\n    const totalChars = text.length;\n    \n    if (chineseChars / totalChars > 0.1) return 'zh';\n    if (japaneseChars / totalChars > 0.1) return 'ja';\n    return 'en';\n  }\n\n  private extractRawText(blocks: MinerUBlock[]): string {\n    return blocks\n      .map(block => block.text || block.content || '')\n      .filter(text => text.trim().length > 0)\n      .join('\\n');\n  }\n\n  private detectSections(textBlocks: MinerUBlock[]): any[] {\n    // Placeholder implementation - should use more sophisticated analysis\n    // This would integrate with existing section detection logic\n    return [];\n  }\n\n  private isEquationInSection(equation: EnhancedEquation, section: any): boolean {\n    // Placeholder - implement proper position-based matching\n    return true;\n  }\n\n  private reportProgress(progress: ParsingProgress): void {\n    if (this.progressCallback) {\n      this.progressCallback(progress);\n    }\n  }\n\n  /**\n   * Test connection to MinerU service\n   */\n  async testConnection(): Promise<boolean> {\n    try {\n      const response = await fetch(`${this.config.serviceUrl}/health`, {\n        method: 'GET',\n        timeout: 5000\n      });\n      \n      return response.ok;\n    } catch {\n      return false;\n    }\n  }\n}\n"
+/**
+ * MinerU Engine - Professional PDF Analysis with AI
+ *
+ * Integrates MinerU 2.5 for advanced academic paper parsing
+ * with specialized formula recognition capabilities.
+ */
+
+import { promises as fs } from 'node:fs';
+import fetch from 'node-fetch';
+import type {
+  EnhancedEquation,
+  EnhancedFigure,
+  EnhancedParsedPaper,
+  EnhancedTable,
+  ParsingProgress,
+  ProgressCallback,
+} from '../../types/enhanced-paper';
+
+/**
+ * MinerU block structure as returned by the service
+ */
+interface MinerUBlock {
+  type: string;
+  bbox: [number, number, number, number];
+  text?: string;
+  content?: string;
+  confidence?: number;
+  metadata?: Record<string, unknown>;
+}
+
+/**
+ * MinerU service response structure
+ */
+interface MinerUResponse {
+  success: boolean;
+  blocks: MinerUBlock[];
+  metadata: {
+    pages: number;
+    processingTime: number;
+    version: string;
+  };
+  error?: string;
+}
+
+/**
+ * Configuration for MinerU engine
+ */
+export interface MinerUEngineConfig {
+  /** MinerU service endpoint */
+  serviceUrl: string;
+
+  /** Request timeout in milliseconds */
+  timeout: number;
+
+  /** Enable recursive layout analysis */
+  enableRecursiveAnalysis: boolean;
+
+  /** Maximum recursion depth */
+  maxRecursionDepth: number;
+
+  /** Target block types for subimage processing */
+  subimageTypes: string[];
+}
+
+/**
+ * Professional PDF parsing engine using MinerU
+ */
+export class MinerUEngine {
+  private config: MinerUEngineConfig;
+  private progressCallback?: ProgressCallback;
+
+  constructor(config: Partial<MinerUEngineConfig> = {}) {
+    this.config = {
+      serviceUrl: 'http://127.0.0.1:8010',
+      timeout: 120000, // 2 minutes
+      enableRecursiveAnalysis: true,
+      maxRecursionDepth: 2,
+      subimageTypes: ['formula', 'equation', 'table', 'figure', 'image'],
+      ...config,
+    };
+  }
+
+  /**
+   * Set progress callback for long-running operations
+   */
+  setProgressCallback(callback: ProgressCallback): void {
+    this.progressCallback = callback;
+  }
+
+  /**
+   * Parse PDF using MinerU service
+   */
+  async parsePDF(pdfPath: string): Promise<Partial<EnhancedParsedPaper>> {
+    this.reportProgress({
+      stage: 'init',
+      progress: 0,
+      description: 'Initializing MinerU PDF processing',
+    });
+
+    try {
+      // 1. Upload PDF to MinerU service
+      const uploadResult = await this.uploadPDF(pdfPath);
+
+      this.reportProgress({
+        stage: 'pdf-extraction',
+        progress: 20,
+        description: 'Processing PDF with MinerU',
+      });
+
+      // 2. Process with MinerU
+      const mineruResult = await this.callMinerUService(uploadResult.fileId);
+
+      this.reportProgress({
+        stage: 'structure-analysis',
+        progress: 50,
+        description: 'Analyzing document structure',
+      });
+
+      // 3. Extract structured content
+      const structuredContent = await this.extractStructuredContent(mineruResult);
+
+      this.reportProgress({
+        stage: 'formula-processing',
+        progress: 80,
+        description: 'Processing mathematical formulas',
+      });
+
+      // 4. Process formulas specifically
+      const enhancedFormulas = await this.processFormulas(mineruResult.blocks);
+
+      this.reportProgress({
+        stage: 'finalization',
+        progress: 100,
+        description: 'Finalizing parsed content',
+      });
+
+      return {
+        ...structuredContent,
+        sections: structuredContent.sections?.map((section) => ({
+          ...section,
+          equations: enhancedFormulas.filter((eq) => this.isEquationInSection(eq, section)),
+        })),
+      };
+    } catch (error) {
+      throw new Error(`MinerU parsing failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  /**
+   * Upload PDF to MinerU service
+   */
+  private async uploadPDF(pdfPath: string): Promise<{ fileId: string; size: number }> {
+    const formData = new FormData();
+    const fileBuffer = await fs.readFile(pdfPath);
+    const fileName = pdfPath.split('/').pop() || 'document.pdf';
+
+    // Create a Blob from the buffer for FormData
+    const blob = new Blob([fileBuffer], { type: 'application/pdf' });
+    formData.append('file', blob, fileName);
+
+    const response = await fetch(`${this.config.serviceUrl}/upload`, {
+      method: 'POST',
+      body: formData,
+      timeout: this.config.timeout,
+    });
+
+    if (!response.ok) {
+      throw new Error(`Upload failed: ${response.status} ${response.statusText}`);
+    }
+
+    const result = await response.json();
+    return {
+      fileId: result.fileId,
+      size: fileBuffer.length,
+    };
+  }
+
+  /**
+   * Call MinerU processing service
+   */
+  private async callMinerUService(fileId: string): Promise<MinerUResponse> {
+    const response = await fetch(`${this.config.serviceUrl}/process`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        fileId,
+        options: {
+          enableFormulaDetection: true,
+          enableLayoutAnalysis: true,
+          recursiveDepth: this.config.maxRecursionDepth,
+        },
+      }),
+      timeout: this.config.timeout,
+    });
+
+    if (!response.ok) {
+      throw new Error(`MinerU service error: ${response.status} ${response.statusText}`);
+    }
+
+    const result: MinerUResponse = await response.json();
+
+    if (!result.success) {
+      throw new Error(`MinerU processing failed: ${result.error || 'Unknown error'}`);
+    }
+
+    return result;
+  }
+
+  /**
+   * Extract structured content from MinerU blocks
+   */
+  private async extractStructuredContent(mineruResult: MinerUResponse): Promise<Partial<EnhancedParsedPaper>> {
+    const blocks = mineruResult.blocks;
+
+    // Group blocks by type
+    const blocksByType = this.groupBlocksByType(blocks);
+
+    // Extract sections
+    const sections = this.extractSections(blocksByType);
+
+    // Extract metadata
+    const metadata = this.extractMetadata(blocksByType);
+
+    // Extract figures and tables
+    const figures = this.extractFigures(blocksByType.figure || []);
+    const tables = this.extractTables(blocksByType.table || []);
+
+    // Calculate stats
+    const stats = {
+      pageCount: mineruResult.metadata.pages,
+      wordCount: this.calculateWordCount(blocks),
+      charCount: this.calculateCharCount(blocks),
+      sectionCount: sections.length,
+      figureCount: figures.length,
+      tableCount: tables.length,
+      equationCount: (blocksByType.formula || []).length,
+      citationCount: 0, // TODO: implement citation detection
+      processingTimeMs: mineruResult.metadata.processingTime,
+      confidence: this.calculateOverallConfidence(blocks),
+      detectedLanguage: this.detectLanguage(blocks),
+
+      // Enhanced AI processing stats
+      aiProcessing: {
+        apiCalls: 1, // MinerU call
+        aiProcessingTimeMs: mineruResult.metadata.processingTime,
+        estimatedCost: 0.01, // Placeholder
+        modelsUsed: [`MinerU-${mineruResult.metadata.version}`],
+        overallAiConfidence: this.calculateOverallConfidence(blocks),
+      },
+
+      quality: {
+        formulaAccuracy: 0.95, // MinerU is quite good
+        layoutAccuracy: 0.9,
+        structureAccuracy: 0.85,
+      },
+
+      processingMethod: 'mineru' as const,
+    };
+
+    return {
+      metadata,
+      sections,
+      stats,
+      rawText: this.extractRawText(blocks),
+      timestamp: new Date(),
+      parserVersion: 'enhanced-2026-v1.0',
+    };
+  }
+
+  /**
+   * Process formulas with enhanced metadata
+   */
+  private async processFormulas(blocks: MinerUBlock[]): Promise<EnhancedEquation[]> {
+    const formulaBlocks = blocks.filter((block) => ['formula', 'equation', 'math'].includes(block.type.toLowerCase()));
+
+    const enhancedFormulas: EnhancedEquation[] = [];
+
+    for (const [index, block] of formulaBlocks.entries()) {
+      try {
+        const enhanced = await this.enhanceFormula(block, index);
+        enhancedFormulas.push(enhanced);
+
+        // Report progress
+        this.reportProgress({
+          stage: 'formula-processing',
+          progress: 80 + (index / formulaBlocks.length) * 15,
+          description: `Processing formula ${index + 1} of ${formulaBlocks.length}`,
+          itemsProcessed: {
+            current: index + 1,
+            total: formulaBlocks.length,
+            type: 'formulas',
+          },
+        });
+      } catch (error) {
+        console.warn(`Failed to enhance formula ${index}:`, error);
+
+        // Create basic enhanced formula as fallback
+        enhancedFormulas.push({
+          id: `formula-${index}`,
+          latex: block.text || block.content || '',
+          text: block.text || block.content || '',
+          position: index,
+          inline: this.isInlineFormula(block),
+          bbox: block.bbox,
+          confidence: block.confidence || 0.7,
+          complexity: this.assessComplexity(block.text || block.content || ''),
+          mathType: this.classifyMathType(block.text || block.content || ''),
+        });
+      }
+    }
+
+    return enhancedFormulas;
+  }
+
+  /**
+   * Enhance individual formula with AI analysis
+   */
+  private async enhanceFormula(block: MinerUBlock, index: number): Promise<EnhancedEquation> {
+    const latex = block.text || block.content || '';
+
+    return {
+      id: `formula-${index}`,
+      latex,
+      text: latex, // MinerU usually provides LaTeX directly
+      position: index,
+      inline: this.isInlineFormula(block),
+      bbox: block.bbox,
+      confidence: block.confidence || 0.85,
+      complexity: this.assessComplexity(latex),
+      mathType: this.classifyMathType(latex),
+
+      aiMetadata: {
+        model: 'MinerU-2.5',
+        processingTime: 100, // Estimated
+        method: 'structural',
+        quality: {
+          latexAccuracy: block.confidence || 0.85,
+          semanticRelevance: 0.8,
+          contextAlignment: 0.75,
+        },
+      },
+
+      educational: {
+        difficulty: this.assessDifficulty(latex),
+        concepts: this.extractConcepts(latex),
+        explanation: this.generateExplanation(latex),
+      },
+    };
+  }
+
+  /**
+   * Group blocks by their type
+   */
+  private groupBlocksByType(blocks: MinerUBlock[]): Record<string, MinerUBlock[]> {
+    return blocks.reduce(
+      (acc, block) => {
+        const type = block.type.toLowerCase();
+        if (!acc[type]) {
+          acc[type] = [];
+        }
+        acc[type].push(block);
+        return acc;
+      },
+      {} as Record<string, MinerUBlock[]>
+    );
+  }
+
+  /**
+   * Extract sections from blocks
+   */
+  private extractSections(blocksByType: Record<string, MinerUBlock[]>): MinerUBlock[] {
+    // Combine text blocks and analyze structure
+    const textBlocks = [
+      ...(blocksByType.title || []),
+      ...(blocksByType.heading || []),
+      ...(blocksByType.paragraph || []),
+      ...(blocksByType.text || []),
+    ];
+
+    // Sort by position (using bbox y-coordinate)
+    textBlocks.sort((a, b) => (a.bbox?.[1] || 0) - (b.bbox?.[1] || 0));
+
+    // Use existing section detection logic but with enhanced types
+    return this.detectSections(textBlocks);
+  }
+
+  /**
+   * Extract metadata from title and author blocks
+   */
+  private extractMetadata(blocksByType: Record<string, MinerUBlock[]>): {
+    title: string;
+    authors: (string | undefined)[];
+    keywords: string[];
+    language: string;
+  } {
+    const titleBlocks = blocksByType.title || [];
+    const authorBlocks = blocksByType.author || [];
+
+    return {
+      title: titleBlocks[0]?.text || titleBlocks[0]?.content || 'Unknown Title',
+      authors: authorBlocks.map((block) => block.text || block.content).filter(Boolean),
+      keywords: [], // TODO: extract from blocks
+      language: 'auto',
+    };
+  }
+
+  /**
+   * Extract enhanced figures
+   */
+  private extractFigures(figureBlocks: MinerUBlock[]): EnhancedFigure[] {
+    return figureBlocks.map((block, index) => ({
+      id: `figure-${index}`,
+      caption: block.text || block.content || '',
+      type: 'image' as const,
+      position: index,
+      bbox: block.bbox,
+      aiDescription: `AI-analyzed figure content: ${block.text || 'No description available'}`,
+    }));
+  }
+
+  /**
+   * Extract enhanced tables
+   */
+  private extractTables(tableBlocks: MinerUBlock[]): EnhancedTable[] {
+    return tableBlocks.map((block, index) => ({
+      id: `table-${index}`,
+      caption: block.text || block.content || '',
+      position: index,
+      headers: [], // TODO: parse table structure
+      rows: [], // TODO: parse table structure
+      bbox: block.bbox,
+      structure: {
+        columnTypes: [],
+        patterns: [],
+        summary: 'Table structure analysis pending',
+      },
+    }));
+  }
+
+  // Helper methods
+  private isInlineFormula(block: MinerUBlock): boolean {
+    // Heuristic: inline formulas are typically smaller
+    const bbox = block.bbox;
+    if (!bbox) return false;
+
+    const height = bbox[3] - bbox[1];
+    return height < 0.05; // Less than 5% of page height
+  }
+
+  private assessComplexity(latex: string): 'simple' | 'medium' | 'complex' {
+    if (latex.length < 20) return 'simple';
+    if (latex.includes('\\\\int') || latex.includes('\\\\sum') || latex.includes('\\\\prod')) return 'complex';
+    if (latex.includes('\\\\frac') || latex.includes('^') || latex.includes('_')) return 'medium';
+    return 'simple';
+  }
+
+  private classifyMathType(latex: string): EnhancedEquation['mathType'] {
+    if (latex.includes('\\\\int') || latex.includes('\\\\partial')) return 'calculus';
+    if (latex.includes('\\\\sum') || latex.includes('\\\\mu') || latex.includes('\\\\sigma')) return 'statistics';
+    if (latex.includes('\\\\frac') || latex.includes('^') || latex.includes('_')) return 'algebra';
+    if (latex.includes('\\\\angle') || latex.includes('\\\\triangle')) return 'geometry';
+    return 'other';
+  }
+
+  private assessDifficulty(latex: string): 'beginner' | 'intermediate' | 'advanced' {
+    const complexity = this.assessComplexity(latex);
+    if (complexity === 'simple') return 'beginner';
+    if (complexity === 'medium') return 'intermediate';
+    return 'advanced';
+  }
+
+  private extractConcepts(latex: string): string[] {
+    const concepts: string[] = [];
+
+    if (latex.includes('\\\\int')) concepts.push('integration');
+    if (latex.includes('\\\\frac')) concepts.push('fractions');
+    if (latex.includes('\\\\sum')) concepts.push('summation');
+    if (latex.includes('^')) concepts.push('exponentiation');
+    if (latex.includes('_')) concepts.push('subscripts');
+
+    return concepts;
+  }
+
+  private generateExplanation(latex: string): string {
+    const complexity = this.assessComplexity(latex);
+    const mathType = this.classifyMathType(latex);
+
+    return `This is a ${complexity} ${mathType} expression that would benefit from step-by-step explanation in the visual novel format.`;
+  }
+
+  private calculateWordCount(blocks: MinerUBlock[]): number {
+    return blocks.reduce((count, block) => {
+      const text = block.text || block.content || '';
+      return count + text.split(/\\s+/).filter((word) => word.length > 0).length;
+    }, 0);
+  }
+
+  private calculateCharCount(blocks: MinerUBlock[]): number {
+    return blocks.reduce((count, block) => {
+      const text = block.text || block.content || '';
+      return count + text.length;
+    }, 0);
+  }
+
+  private calculateOverallConfidence(blocks: MinerUBlock[]): number {
+    if (blocks.length === 0) return 0;
+
+    const totalConfidence = blocks.reduce((sum, block) => {
+      return sum + (block.confidence || 0.8); // Default confidence
+    }, 0);
+
+    return totalConfidence / blocks.length;
+  }
+
+  private detectLanguage(blocks: MinerUBlock[]): string {
+    // Simple heuristic based on character patterns
+    const text = blocks.map((block) => block.text || block.content || '').join(' ');
+
+    const chineseChars = (text.match(/[\\u4e00-\\u9fff]/g) || []).length;
+    const japaneseChars = (text.match(/[\\u3040-\\u309f\\u30a0-\\u30ff]/g) || []).length;
+    const totalChars = text.length;
+
+    if (chineseChars / totalChars > 0.1) return 'zh';
+    if (japaneseChars / totalChars > 0.1) return 'ja';
+    return 'en';
+  }
+
+  private extractRawText(blocks: MinerUBlock[]): string {
+    return blocks
+      .map((block) => block.text || block.content || '')
+      .filter((text) => text.trim().length > 0)
+      .join(
+        '\
+'
+      );
+  }
+
+  private detectSections(_textBlocks: MinerUBlock[]): MinerUBlock[] {
+    // Placeholder implementation - should use more sophisticated analysis
+    // This would integrate with existing section detection logic
+    return [];
+  }
+
+  private isEquationInSection(_equation: EnhancedEquation, _section: MinerUBlock): boolean {
+    // Placeholder - implement proper position-based matching
+    return true;
+  }
+
+  private reportProgress(progress: ParsingProgress): void {
+    if (this.progressCallback) {
+      this.progressCallback(progress);
+    }
+  }
+
+  /**
+   * Test connection to MinerU service
+   */
+  async testConnection(): Promise<boolean> {
+    try {
+      const response = await fetch(`${this.config.serviceUrl}/health`, {
+        method: 'GET',
+        timeout: 5000,
+      });
+
+      return response.ok;
+    } catch {
+      return false;
+    }
+  }
+}

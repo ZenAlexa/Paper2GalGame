@@ -7,14 +7,14 @@
  */
 
 import type {
-  TTSProvider,
-  TTSOptions,
-  TTSEmotion,
-  ProviderStatus,
   CharacterVoiceSettings,
   MinimaxTTSRequest,
   MinimaxTTSResponse,
-  MinimaxVoiceId
+  MinimaxVoiceId,
+  ProviderStatus,
+  TTSEmotion,
+  TTSOptions,
+  TTSProvider,
 } from '../types';
 
 /**
@@ -25,9 +25,7 @@ import type {
 export class MinimaxTTSProvider implements TTSProvider {
   readonly name = 'minimax';
   readonly supportedLanguages = ['zh', 'ja', 'en'];
-  readonly supportedEmotions: TTSEmotion[] = [
-    'neutral', 'happy', 'serious', 'excited', 'calm', 'sad', 'angry'
-  ];
+  readonly supportedEmotions: TTSEmotion[] = ['neutral', 'happy', 'serious', 'excited', 'calm', 'sad', 'angry'];
 
   private apiKey: string;
   private baseURL: string;
@@ -56,8 +54,8 @@ export class MinimaxTTSProvider implements TTSProvider {
       const response = await fetch(this.baseURL, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
-          'Content-Type': 'application/json'
+          Authorization: `Bearer ${this.apiKey}`,
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           model: this.model,
@@ -66,9 +64,9 @@ export class MinimaxTTSProvider implements TTSProvider {
             voice_id: 'Japanese_GracefulMaiden',
             speed: 1.0,
             vol: 1,
-            pitch: 0
-          }
-        })
+            pitch: 0,
+          },
+        }),
       });
 
       return response.ok || response.status === 200;
@@ -88,7 +86,7 @@ export class MinimaxTTSProvider implements TTSProvider {
       available,
       lastChecked: new Date(),
       error: available ? undefined : 'API key not configured or service unavailable',
-      version: this.model
+      version: this.model,
     };
   }
 
@@ -96,11 +94,7 @@ export class MinimaxTTSProvider implements TTSProvider {
    * Generate audio from text
    * Note: HTTP API does not support emotion parameter
    */
-  async generateAudio(
-    text: string,
-    voiceSettings: CharacterVoiceSettings,
-    options?: TTSOptions
-  ): Promise<ArrayBuffer> {
+  async generateAudio(text: string, voiceSettings: CharacterVoiceSettings, options?: TTSOptions): Promise<ArrayBuffer> {
     if (!this.apiKey) {
       throw new Error('Minimax API key not configured');
     }
@@ -116,14 +110,14 @@ export class MinimaxTTSProvider implements TTSProvider {
         voice_id: minimaxSettings.voice,
         speed: options?.speed ?? 1.0,
         vol: options?.volume ?? 1,
-        pitch: options?.pitch ?? 0
+        pitch: options?.pitch ?? 0,
       },
       audio_setting: {
         sample_rate: options?.sampleRate ?? 32000,
         bitrate: 128000,
         format: options?.format ?? 'mp3',
-        channel: 1
-      }
+        channel: 1,
+      },
     };
 
     const response = await this.makeRequest(requestBody);
@@ -137,10 +131,10 @@ export class MinimaxTTSProvider implements TTSProvider {
     const response = await fetch(this.baseURL, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${this.apiKey}`,
-        'Content-Type': 'application/json'
+        Authorization: `Bearer ${this.apiKey}`,
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify(body)
+      body: JSON.stringify(body),
     });
 
     if (!response.ok) {
@@ -148,7 +142,7 @@ export class MinimaxTTSProvider implements TTSProvider {
       throw new Error(`Minimax API error (${response.status}): ${errorText}`);
     }
 
-    return await response.json() as MinimaxTTSResponse;
+    return (await response.json()) as MinimaxTTSResponse;
   }
 
   /**
@@ -195,23 +189,23 @@ export class MinimaxTTSProvider implements TTSProvider {
   static getAvailableVoices(): MinimaxVoiceId[] {
     return [
       // Female voices - suitable for narration
-      'Japanese_GracefulMaiden',     // Elegant, soft - ideal for host
-      'Japanese_KindLady',           // Warm, friendly
-      'Japanese_CalmLady',           // Composed, mature
-      'Japanese_DecisivePrincess',   // Confident, clear
-      'Japanese_ColdQueen',          // Cool, dignified
-      'Japanese_DependableWoman',    // Reliable, steady
+      'Japanese_GracefulMaiden', // Elegant, soft - ideal for host
+      'Japanese_KindLady', // Warm, friendly
+      'Japanese_CalmLady', // Composed, mature
+      'Japanese_DecisivePrincess', // Confident, clear
+      'Japanese_ColdQueen', // Cool, dignified
+      'Japanese_DependableWoman', // Reliable, steady
       // Male voices
       'Japanese_IntellectualSenior', // Wise, scholarly
-      'Japanese_GentleButler',       // Polite, refined
-      'Japanese_LoyalKnight',        // Loyal, strong
-      'Japanese_DominantMan',        // Authoritative
-      'Japanese_SeriousCommander',   // Commanding presence
+      'Japanese_GentleButler', // Polite, refined
+      'Japanese_LoyalKnight', // Loyal, strong
+      'Japanese_DominantMan', // Authoritative
+      'Japanese_SeriousCommander', // Commanding presence
       // Youth voices
-      'Japanese_OptimisticYouth',    // Energetic, lively
-      'Japanese_SportyStudent',      // Active, enthusiastic
-      'Japanese_InnocentBoy',        // Innocent, curious
-      'Japanese_GenerousIzakayaOwner' // Friendly, welcoming
+      'Japanese_OptimisticYouth', // Energetic, lively
+      'Japanese_SportyStudent', // Active, enthusiastic
+      'Japanese_InnocentBoy', // Innocent, curious
+      'Japanese_GenerousIzakayaOwner', // Friendly, welcoming
     ];
   }
 
@@ -220,10 +214,10 @@ export class MinimaxTTSProvider implements TTSProvider {
    */
   static getRecommendedVoices(): MinimaxVoiceId[] {
     return [
-      'Japanese_GracefulMaiden',     // Host - elegant narrator
-      'Japanese_OptimisticYouth',    // Energizer - lively discussion
-      'Japanese_DecisivePrincess',   // Analyst - clear analysis
-      'Japanese_CalmLady'            // Interpreter - composed explanation
+      'Japanese_GracefulMaiden', // Host - elegant narrator
+      'Japanese_OptimisticYouth', // Energizer - lively discussion
+      'Japanese_DecisivePrincess', // Analyst - clear analysis
+      'Japanese_CalmLady', // Interpreter - composed explanation
     ];
   }
 

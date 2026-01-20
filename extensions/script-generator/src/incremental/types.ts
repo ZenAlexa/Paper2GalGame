@@ -5,8 +5,8 @@
  * supporting 50% completion game start mechanism
  */
 
-import type { WebGALScript, WebGALScene, GenerationOptions } from '../types/script';
 import type { MultiLanguageContent } from '../types/character';
+import type { GenerationOptions, WebGALScene, WebGALScript } from '../types/script';
 
 // Re-export paper types locally to avoid cross-package dependency issues
 // These mirror the types from @paper2galgame/paper-parser
@@ -98,20 +98,20 @@ export interface PaperSegment {
  * Segment types matching paper structure
  */
 export type SegmentType =
-  | 'intro'      // Abstract + Introduction
-  | 'methods'    // Methodology/Approach
-  | 'results'    // Results/Experiments
+  | 'intro' // Abstract + Introduction
+  | 'methods' // Methodology/Approach
+  | 'results' // Results/Experiments
   | 'conclusion' // Discussion/Conclusion
-  | 'extra';     // Additional content
+  | 'extra'; // Additional content
 
 /**
  * Segment generation status
  */
 export type SegmentStatus =
-  | 'pending'      // Not yet started
-  | 'generating'   // Currently being generated
-  | 'completed'    // Successfully generated
-  | 'failed';      // Generation failed
+  | 'pending' // Not yet started
+  | 'generating' // Currently being generated
+  | 'completed' // Successfully generated
+  | 'failed'; // Generation failed
 
 /**
  * Segment generation progress

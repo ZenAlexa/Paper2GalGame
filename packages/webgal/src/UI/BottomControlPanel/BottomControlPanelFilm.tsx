@@ -1,13 +1,13 @@
-import styles from './bottomControlPanelFilm.module.scss';
-import { switchAuto } from '@/Core/controller/gamePlay/autoPlay';
-import { switchFast } from '@/Core/controller/gamePlay/fastSkip';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '@/store/store';
-import { setMenuPanelTag, setVisibility } from '@/store/GUIReducer';
-import { componentsVisibility, MenuPanelTag } from '@/store/guiInterface';
-import { backToTitle } from '@/Core/controller/gamePlay/backToTitle';
-import { useValue } from '@/hooks/useValue';
 import { HamburgerButton } from '@icon-park/react';
+import { useDispatch, useSelector } from 'react-redux';
+import { switchAuto } from '@/Core/controller/gamePlay/autoPlay';
+import { backToTitle } from '@/Core/controller/gamePlay/backToTitle';
+import { switchFast } from '@/Core/controller/gamePlay/fastSkip';
+import { useValue } from '@/hooks/useValue';
+import { setMenuPanelTag, setVisibility } from '@/store/GUIReducer';
+import { type componentsVisibility, MenuPanelTag } from '@/store/guiInterface';
+import type { RootState } from '@/store/store';
+import styles from './bottomControlPanelFilm.module.scss';
 
 export const BottomControlPanelFilm = () => {
   const showPanel = useValue(false);
@@ -47,7 +47,7 @@ export const BottomControlPanelFilm = () => {
                 className={styles.singleButton}
                 onClick={() => {
                   showPanel.set(!showPanel.value);
-                  let VocalControl: any = document.getElementById('currentVocal');
+                  const VocalControl: any = document.getElementById('currentVocal');
                   if (VocalControl !== null) {
                     VocalControl.currentTime = 0;
                     VocalControl.pause();

@@ -1,13 +1,13 @@
-import styles from '@/UI/Menu/Options/options.module.scss';
+import { useDispatch, useSelector } from 'react-redux';
+import { setStorage } from '@/Core/controller/storage/storageController';
+import useTrans from '@/hooks/useTrans';
+import type { RootState } from '@/store/store';
+import { voiceOption } from '@/store/userDataInterface';
+import { setOptionData } from '@/store/userDataReducer';
+import { NormalButton } from '@/UI/Menu/Options//NormalButton';
 import { NormalOption } from '@/UI/Menu/Options/NormalOption';
 import { OptionSlider } from '@/UI/Menu/Options/OptionSlider';
-import { NormalButton } from '@/UI/Menu/Options//NormalButton';
-import { setOptionData } from '@/store/userDataReducer';
-import { setStorage } from '@/Core/controller/storage/storageController';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '@/store/store';
-import useTrans from '@/hooks/useTrans';
-import { voiceOption } from '@/store/userDataInterface';
+import styles from '@/UI/Menu/Options/options.module.scss';
 
 export function Sound() {
   const userDataState = useSelector((state: RootState) => state.userData);

@@ -1,10 +1,9 @@
-import { sceneFetcher } from './sceneFetcher';
+import { nextSentence } from '@/Core/controller/gamePlay/nextSentence';
+import type { ISceneEntry } from '@/Core/Modules/scene';
+import { WebGAL } from '@/Core/WebGAL';
 import { sceneParser } from '../../parser/sceneParser';
 import { logger } from '../../util/logger';
-import { nextSentence } from '@/Core/controller/gamePlay/nextSentence';
-import { ISceneEntry } from '@/Core/Modules/scene';
-
-import { WebGAL } from '@/Core/WebGAL';
+import { sceneFetcher } from './sceneFetcher';
 
 /**
  * 恢复场景

@@ -1,15 +1,12 @@
-import { ISentence } from '@/Core/controller/scene/sceneInterface';
-import { IPerform } from '@/Core/Modules/perform/performInterface';
-import { getBooleanArgByKey, getStringArgByKey } from '@/Core/util/getSentenceArg';
-import { IAnimationObject } from '@/Core/controller/stage/pixi/PixiController';
-import { logger } from '@/Core/util/logger';
-import { webgalStore } from '@/store/store';
-import { generateTimelineObj } from '@/Core/controller/stage/pixi/animations/timeline';
-import cloneDeep from 'lodash/cloneDeep';
-import { baseTransform } from '@/store/stageInterface';
-import { IUserAnimation } from '../Modules/animations';
+import type { ISentence } from '@/Core/controller/scene/sceneInterface';
+import type { IAnimationObject } from '@/Core/controller/stage/pixi/PixiController';
 import { getAnimateDuration, getAnimationObject } from '@/Core/Modules/animationFunctions';
+import type { IPerform } from '@/Core/Modules/perform/performInterface';
+import { getBooleanArgByKey, getStringArgByKey } from '@/Core/util/getSentenceArg';
+import { logger } from '@/Core/util/logger';
 import { WebGAL } from '@/Core/WebGAL';
+import { webgalStore } from '@/store/store';
+import type { IUserAnimation } from '../Modules/animations';
 
 /**
  * 设置临时动画
@@ -22,7 +19,7 @@ export const setTempAnimation = (sentence: ISentence): IPerform => {
   let animationObj;
   try {
     animationObj = JSON.parse(animationString);
-  } catch (e) {
+  } catch (_e) {
     animationObj = [];
   }
   const newAnimation: IUserAnimation = { name: animationName, effects: animationObj };
@@ -44,7 +41,7 @@ export const setTempAnimation = (sentence: ISentence): IPerform => {
       animationName,
       target,
       animationDuration,
-      writeDefault,
+      writeDefault
     );
     if (animationObj) {
       logger.debug(`动画${animationName}作用在${target}`, animationDuration);
@@ -54,7 +51,7 @@ export const setTempAnimation = (sentence: ISentence): IPerform => {
   stopFunction = () => {
     setTimeout(() => {
       const endDialogKey = webgalStore.getState().stage.currentDialogKey;
-      const isHasNext = startDialogKey !== endDialogKey;
+      const _isHasNext = startDialogKey !== endDialogKey;
       WebGAL.gameplay.pixiStage?.removeAnimationWithSetEffects(key);
     }, 0);
   };

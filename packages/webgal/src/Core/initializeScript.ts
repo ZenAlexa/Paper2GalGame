@@ -1,20 +1,21 @@
 /**
  * @file 引擎初始化时会执行的脚本，包括获取游戏信息，初始化运行时变量，初始化用户数据存储
  */
-import { logger } from './util/logger';
-import { infoFetcher } from './util/coreInitialFunction/infoFetcher';
-import { assetSetter, fileType } from './util/gameAssetsAccess/assetSetter';
+
+import axios from 'axios';
+import uniqWith from 'lodash/uniqWith';
+import PixiStage from '@/Core/controller/stage/pixi/PixiController';
+import { bindExtraFunc } from '@/Core/util/coreInitialFunction/bindExtraFunc';
+import { loadTemplate } from '@/Core/util/coreInitialFunction/templateLoader';
+import { webSocketFunc } from '@/Core/util/syncWithEditor/webSocketFunc';
+import { WebGAL } from '@/Core/WebGAL';
+import { __INFO } from '@/config/info';
 import { sceneFetcher } from './controller/scene/sceneFetcher';
 import { sceneParser } from './parser/sceneParser';
-import { bindExtraFunc } from '@/Core/util/coreInitialFunction/bindExtraFunc';
-import { webSocketFunc } from '@/Core/util/syncWithEditor/webSocketFunc';
-import uniqWith from 'lodash/uniqWith';
+import { infoFetcher } from './util/coreInitialFunction/infoFetcher';
+import { assetSetter, fileType } from './util/gameAssetsAccess/assetSetter';
+import { logger } from './util/logger';
 import { scenePrefetcher } from './util/prefetcher/scenePrefetcher';
-import PixiStage from '@/Core/controller/stage/pixi/PixiController';
-import axios from 'axios';
-import { __INFO } from '@/config/info';
-import { WebGAL } from '@/Core/WebGAL';
-import { loadTemplate } from '@/Core/util/coreInitialFunction/templateLoader';
 
 const u = navigator.userAgent;
 export const isIOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); // 判断是否是 iOS终端
@@ -37,7 +38,7 @@ export const initializeScript = (): void => {
     alert(
       `iOS 用户请横屏使用以获得最佳体验
 | Please use landscape mode on iOS for the best experience
-| iOS ユーザーは横画面での使用をお勧めします`,
+| iOS ユーザーは横画面での使用をお勧めします`
     );
   }
 

@@ -1,19 +1,29 @@
-import { webgalStore } from '@/store/store';
-import { getStorageAsync, setStorageAsync } from '@/Core/controller/storage/storageController';
-import { ISaveData } from '@/store/userDataInterface';
+import cloneDeep from 'lodash/cloneDeep';
 import { loadGameFromStageData } from '@/Core/controller/storage/loadGame';
 import { generateCurrentStageData } from '@/Core/controller/storage/saveGame';
-import cloneDeep from 'lodash/cloneDeep';
+import {
+  dumpFastSaveToStorage,
+  dumpFastSaveToStorageSync,
+  getFastSaveFromStorage,
+} from '@/Core/controller/storage/savesController';
+import {
+  createPaperReadingEntry,
+  getStorageAsync,
+  setStorageAsync,
+  updatePaperReadingEntry,
+} from '@/Core/controller/storage/storageController';
+import { logger } from '@/Core/util/logger';
 import { WebGAL } from '@/Core/WebGAL';
 import { saveActions } from '@/store/savesReducer';
-import { dumpFastSaveToStorage, dumpFastSaveToStorageSync, getFastSaveFromStorage } from '@/Core/controller/storage/savesController';
+import { webgalStore } from '@/store/store';
+import type { ISaveData } from '@/store/userDataInterface';
 
 export let fastSaveGameKey = '';
 export let isFastSaveKey = '';
-let lock = true;
+let _lock = true;
 
 export function initKey() {
-  lock = false;
+  _lock = false;
   fastSaveGameKey = `FastSaveKey-${WebGAL.gameName}-${WebGAL.gameKey}`;
   isFastSaveKey = `FastSaveActive-${WebGAL.gameName}-${WebGAL.gameKey}`;
 }
@@ -26,6 +36,16 @@ export async function fastSaveGame() {
   const newSaveData = cloneDeep(saveData);
   webgalStore.dispatch(saveActions.setFastSave(newSaveData));
   await dumpFastSaveToStorage();
+
+  // Update Paper reading list if this is a Paper mode save
+  if (newSaveData.paperState) {
+    const readingEntry = createPaperReadingEntry(newSaveData);
+    if (readingEntry) {
+      await updatePaperReadingEntry(readingEntry).catch((error) => {
+        logger.error('Failed to update Paper reading list during fast save:', error);
+      });
+    }
+  }
 }
 
 /**

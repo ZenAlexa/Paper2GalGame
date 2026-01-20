@@ -1,18 +1,18 @@
+import throttle from 'lodash/throttle';
+import { useCallback, useEffect, useRef } from 'react';
+import { useDispatch } from 'react-redux';
 import { setFastButton, startFast, stopAll, stopFast } from '@/Core/controller/gamePlay/fastSkip';
 import { nextSentence } from '@/Core/controller/gamePlay/nextSentence';
-import { fastSaveGame, fastSaveGameSync } from '@/Core/controller/storage/fastSaveLoad';
+import { fastSaveGameSync } from '@/Core/controller/storage/fastSaveLoad';
 import { setStorage } from '@/Core/controller/storage/storageController';
 import { WebGAL } from '@/Core/WebGAL';
 import { useGenSyncRef } from '@/hooks/useGenSyncRef';
 import { useMounted, useUnMounted, useUpdated } from '@/hooks/useLifeCycle';
-import { componentsVisibility, MenuPanelTag } from '@/store/guiInterface';
 import { setVisibility } from '@/store/GUIReducer';
-import { RootState } from '@/store/store';
+import { type componentsVisibility, MenuPanelTag } from '@/store/guiInterface';
+import type { RootState } from '@/store/store';
 import { setOptionData } from '@/store/userDataReducer';
 import styles from '@/UI/Backlog/backlog.module.scss';
-import throttle from 'lodash/throttle';
-import { useCallback, useEffect, useRef } from 'react';
-import { useDispatch } from 'react-redux';
 import useFullScreen from './useFullScreen';
 
 // options备用
@@ -39,7 +39,7 @@ export const keyboard: Keyboard | undefined = 'keyboard' in navigator && (naviga
 // export const fastSaveGameKey = `FastSaveKey`;
 // export const isFastSaveKey = `FastSaveActive`;
 
-export function useHotkey(opt?: HotKeyType) {
+export function useHotkey(_opt?: HotKeyType) {
   useMouseRightClickHotKey();
   useMouseWheel();
   useSkip();
@@ -60,28 +60,39 @@ export function useMouseRightClickHotKey() {
   const isOpenedDialog = useIsOpenedDialog<typeof GUIStore>(GUIStore);
   const validMenuPanelTag = useValidMenuPanelTag<typeof GUIStore>(GUIStore);
   const isShowExtra = useIsOpenedExtra<typeof GUIStore>(GUIStore);
-  const handleContextMenu = useCallback((ev: MouseEvent) => {
-    if (isOpenedDialog()) {
-      setComponentVisibility('showGlobalDialog', false);
+  const handleContextMenu = useCallback(
+    (ev: MouseEvent) => {
+      if (isOpenedDialog()) {
+        setComponentVisibility('showGlobalDialog', false);
+        ev.preventDefault();
+        return false;
+      }
+      if (isShowExtra()) {
+        setComponentVisibility('showExtra', false);
+      }
+      if (isGameActive()) {
+        setComponentVisibility('showTextBox', !GUIStore.current.showTextBox);
+      }
+      if (isInBackLog()) {
+        setComponentVisibility('showBacklog', false);
+        setComponentVisibility('showTextBox', true);
+      }
+      if (validMenuPanelTag()) {
+        setComponentVisibility('showMenuPanel', false);
+      }
       ev.preventDefault();
       return false;
-    }
-    if (isShowExtra()) {
-      setComponentVisibility('showExtra', false);
-    }
-    if (isGameActive()) {
-      setComponentVisibility('showTextBox', !GUIStore.current.showTextBox);
-    }
-    if (isInBackLog()) {
-      setComponentVisibility('showBacklog', false);
-      setComponentVisibility('showTextBox', true);
-    }
-    if (validMenuPanelTag()) {
-      setComponentVisibility('showMenuPanel', false);
-    }
-    ev.preventDefault();
-    return false;
-  }, []);
+    },
+    [
+      GUIStore.current.showTextBox,
+      isGameActive,
+      isInBackLog,
+      isOpenedDialog,
+      isShowExtra,
+      setComponentVisibility,
+      validMenuPanelTag,
+    ]
+  );
   useMounted(() => {
     document.addEventListener('contextmenu', handleContextMenu);
   });
@@ -90,7 +101,7 @@ export function useMouseRightClickHotKey() {
   });
 }
 
-let wheelTimeout = setTimeout(() => {
+const wheelTimeout = setTimeout(() => {
   // 初始化，什么也不干
 }, 0);
 
@@ -109,48 +120,51 @@ export function useMouseWheel() {
     throttle(() => {
       nextSentence();
     }, 100),
-    [],
+    []
   );
   // 防止一直往下滚的时候顺着滚出历史记录
   // 问就是抄的999
   const prevDownWheelTimeRef = useRef(0);
-  const handleMouseWheel = useCallback((ev) => {
-    if (isPanicOverlayOpen()) return;
-    const direction =
-      (ev.wheelDelta && (ev.wheelDelta > 0 ? 'up' : 'down')) ||
-      (ev.detail && (ev.detail < 0 ? 'up' : 'down')) ||
-      'down';
-    const ctrlKey = ev.ctrlKey;
-    const dom = document.querySelector(`.${styles.backlog_content}`);
-    if (isGameActive() && direction === 'up' && !ctrlKey) {
-      setComponentVisibility('showBacklog', true);
-      setComponentVisibility('showTextBox', false);
-    } else if (isInBackLog() && direction === 'down' && !ctrlKey) {
-      if (dom) {
-        let flag = hasScrollToBottom(dom);
-        let curTime = new Date().getTime();
-        // 滚动到底部 & 非连续滚动
-        if (flag && curTime - prevDownWheelTimeRef.current > 100) {
-          setComponentVisibility('showBacklog', false);
-          setComponentVisibility('showTextBox', true);
+  const handleMouseWheel = useCallback(
+    (ev) => {
+      if (isPanicOverlayOpen()) return;
+      const direction =
+        (ev.wheelDelta && (ev.wheelDelta > 0 ? 'up' : 'down')) ||
+        (ev.detail && (ev.detail < 0 ? 'up' : 'down')) ||
+        'down';
+      const ctrlKey = ev.ctrlKey;
+      const dom = document.querySelector(`.${styles.backlog_content}`);
+      if (isGameActive() && direction === 'up' && !ctrlKey) {
+        setComponentVisibility('showBacklog', true);
+        setComponentVisibility('showTextBox', false);
+      } else if (isInBackLog() && direction === 'down' && !ctrlKey) {
+        if (dom) {
+          const flag = hasScrollToBottom(dom);
+          const curTime = Date.now();
+          // 滚动到底部 & 非连续滚动
+          if (flag && curTime - prevDownWheelTimeRef.current > 100) {
+            setComponentVisibility('showBacklog', false);
+            setComponentVisibility('showTextBox', true);
+          }
+          prevDownWheelTimeRef.current = curTime;
         }
-        prevDownWheelTimeRef.current = curTime;
+        // setComponentVisibility('showBacklog', false);
+      } else if (isGameActive() && direction === 'down' && !ctrlKey) {
+        clearTimeout(wheelTimeout);
+        // 已开启快进模式
+        if (WebGAL.gameplay.isFast) stopFast();
+        WebGAL.gameplay.isFast = true;
+        // 滚轮视作快进
+        setFastButton(true);
+        setTimeout(() => {
+          WebGAL.gameplay.isFast = false;
+          setFastButton(false);
+        }, 150);
+        next();
       }
-      // setComponentVisibility('showBacklog', false);
-    } else if (isGameActive() && direction === 'down' && !ctrlKey) {
-      clearTimeout(wheelTimeout);
-      // 已开启快进模式
-      if (WebGAL.gameplay.isFast) stopFast();
-      WebGAL.gameplay.isFast = true;
-      // 滚轮视作快进
-      setFastButton(true);
-      setTimeout(() => {
-        WebGAL.gameplay.isFast = false;
-        setFastButton(false);
-      }, 150);
-      next();
-    }
-  }, []);
+    },
+    [isGameActive, isInBackLog, isPanicOverlayOpen, next, setComponentVisibility]
+  );
   useMounted(() => {
     document.addEventListener('wheel', handleMouseWheel);
   });
@@ -170,17 +184,20 @@ export function usePanic() {
   const isTitleShown = useCallback(() => GUIStore.current.showTitle, [GUIStore]);
   const isPanicOverlayOpen = useIsPanicOverlayOpen(GUIStore);
   const setComponentVisibility = useSetComponentVisibility();
-  const handlePressPanicButton = useCallback((ev: KeyboardEvent) => {
-    if (!isPanicButton(ev) || isTitleShown()) return;
-    if (isPanicOverlayOpen()) {
-      setComponentVisibility('showPanicOverlay', false);
-      // todo: resume
-    } else {
-      setComponentVisibility('showPanicOverlay', true);
-      stopAll(); // despite the name, it only disables fast mode and auto mode
-      // todo: pause music & animation for better performance
-    }
-  }, []);
+  const handlePressPanicButton = useCallback(
+    (ev: KeyboardEvent) => {
+      if (!isPanicButton(ev) || isTitleShown()) return;
+      if (isPanicOverlayOpen()) {
+        setComponentVisibility('showPanicOverlay', false);
+        // todo: resume
+      } else {
+        setComponentVisibility('showPanicOverlay', true);
+        stopAll(); // despite the name, it only disables fast mode and auto mode
+        // todo: pause music & animation for better performance
+      }
+    },
+    [isPanicButton, isPanicOverlayOpen, isTitleShown, setComponentVisibility]
+  );
   useMounted(() => {
     document.addEventListener('keyup', handlePressPanicButton);
   });
@@ -200,17 +217,23 @@ export function useSkip() {
   const isGameActive = useGameActive(GUIStore);
   // 判断按键是否为ctrl
   const isCtrlKey = useCallback((e) => e.keyCode === 17, []);
-  const handleCtrlKeydown = useCallback((e) => {
-    if (isCtrlKey(e) && isGameActive()) {
-      startFast();
-    }
-  }, []);
-  const handleCtrlKeyup = useCallback((e) => {
-    if (isCtrlKey(e) && isGameActive()) {
-      stopFast();
-    }
-  }, []);
-  const handleWindowBlur = useCallback((e) => {
+  const handleCtrlKeydown = useCallback(
+    (e) => {
+      if (isCtrlKey(e) && isGameActive()) {
+        startFast();
+      }
+    },
+    [isCtrlKey, isGameActive]
+  );
+  const handleCtrlKeyup = useCallback(
+    (e) => {
+      if (isCtrlKey(e) && isGameActive()) {
+        stopFast();
+      }
+    },
+    [isCtrlKey, isGameActive]
+  );
+  const handleWindowBlur = useCallback((_e) => {
     // 停止快进
     stopFast();
   }, []);
@@ -240,12 +263,15 @@ export function useSkip() {
  */
 export function useFastSaveBeforeUnloadPage() {
   const validMenuGameStart = useValidMenuGameStart();
-  const handleWindowUnload = useCallback((e: BeforeUnloadEvent) => {
-    if (validMenuGameStart()) {
-      // Only save if game has started to prevent invalid data overwrites
-      fastSaveGameSync();
-    }
-  }, []);
+  const handleWindowUnload = useCallback(
+    (_e: BeforeUnloadEvent) => {
+      if (validMenuGameStart()) {
+        // Only save if game has started to prevent invalid data overwrites
+        fastSaveGameSync();
+      }
+    },
+    [validMenuGameStart]
+  );
   useMounted(() => {
     window.addEventListener('beforeunload', handleWindowUnload);
   });
@@ -305,7 +331,7 @@ function useValidMenuGameStart() {
     // return !(runtime_currentSceneData.currentSentenceId === 0 &&
     //   runtime_currentSceneData.currentScene.sceneName === 'start.txt');
     return !(WebGAL.sceneManager.sceneData.currentSentenceId === 0);
-  }, [WebGAL.sceneManager.sceneData]);
+  }, []);
 }
 
 function useSetComponentVisibility(): (component: keyof componentsVisibility, visibility: boolean) => void {
@@ -315,7 +341,7 @@ function useSetComponentVisibility(): (component: keyof componentsVisibility, vi
   };
 }
 
-function nextTick(callback: () => void) {
+function _nextTick(callback: () => void) {
   // 具体实现根据浏览器的兼容实现微任务
   if (typeof Promise !== 'undefined') {
     const p = Promise.resolve();
@@ -339,23 +365,29 @@ export function useSpaceAndEnter() {
   const isSpaceOrEnter = useCallback((e) => {
     return e.keyCode === 32 || e.keyCode === 13;
   }, []);
-  const handleKeydown = useCallback((e) => {
-    if (isSpaceOrEnter(e) && isGameActive() && !lockRef.current) {
-      if (!GUIStore.current.showTextBox) {
-        setComponentVisibility('showTextBox', true);
-        return;
+  const handleKeydown = useCallback(
+    (e) => {
+      if (isSpaceOrEnter(e) && isGameActive() && !lockRef.current) {
+        if (!GUIStore.current.showTextBox) {
+          setComponentVisibility('showTextBox', true);
+          return;
+        }
+        stopAll();
+        nextSentence();
+        lockRef.current = true;
       }
-      stopAll();
-      nextSentence();
-      lockRef.current = true;
-    }
-  }, []);
-  const handleKeyup = useCallback((e) => {
-    if (isSpaceOrEnter(e) && isGameActive()) {
-      lockRef.current = false;
-    }
-  }, []);
-  const handleWindowBlur = useCallback((e) => {
+    },
+    [GUIStore.current.showTextBox, isGameActive, isSpaceOrEnter, setComponentVisibility]
+  );
+  const handleKeyup = useCallback(
+    (e) => {
+      if (isSpaceOrEnter(e) && isGameActive()) {
+        lockRef.current = false;
+      }
+    },
+    [isGameActive, isSpaceOrEnter]
+  );
+  const handleWindowBlur = useCallback((_e) => {
     lockRef.current = false;
   }, []);
   // mounted时绑定事件
@@ -382,12 +414,12 @@ function hasScrollToBottom(dom: Element) {
 }
 
 /**
- * F11 进入全屏
+ * F11 enters fullscreen
  */
 function useToggleFullScreen() {
   const { isSupported, isFullScreen, toggle } = useFullScreen();
-  if (!isSupported) return;
   const dispatch = useDispatch();
+  if (!isSupported) return;
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => e.repeat || (e.key === 'F11' && toggle());
@@ -395,9 +427,9 @@ function useToggleFullScreen() {
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, []);
+  }, [toggle]);
   useEffect(() => {
     dispatch(setOptionData({ key: 'fullScreen', value: isFullScreen ? 0 : 1 }));
     if (WebGAL.gameKey) setStorage();
-  }, [isFullScreen]);
+  }, [isFullScreen, dispatch]);
 }

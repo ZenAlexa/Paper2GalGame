@@ -1,20 +1,20 @@
-import { webgalStore } from '@/store/store';
-import { setVisibility } from '@/store/GUIReducer';
-import { WebGAL } from '@/Core/WebGAL';
-import { resetStage } from '@/Core/controller/stage/resetStage';
-import { sceneFetcher } from '@/Core/controller/scene/sceneFetcher';
-import { IScene } from '@/Core/controller/scene/sceneInterface';
-import { jumpFromBacklog } from '@/Core/controller/storage/jumpFromBacklog';
-import { nextSentence } from '@/Core/controller/gamePlay/nextSentence';
-import { sceneParser } from '@/Core/parser/sceneParser';
-import { logger } from '@/Core/util/logger';
-import { assetSetter, fileType } from '@/Core/util/gameAssetsAccess/assetSetter';
 import cloneDeep from 'lodash/cloneDeep';
+import { nextSentence } from '@/Core/controller/gamePlay/nextSentence';
+import { sceneFetcher } from '@/Core/controller/scene/sceneFetcher';
+import type { IScene } from '@/Core/controller/scene/sceneInterface';
+import { resetStage } from '@/Core/controller/stage/resetStage';
+import { jumpFromBacklog } from '@/Core/controller/storage/jumpFromBacklog';
+import { sceneParser } from '@/Core/parser/sceneParser';
+import { assetSetter, fileType } from '@/Core/util/gameAssetsAccess/assetSetter';
+import { logger } from '@/Core/util/logger';
+import { WebGAL } from '@/Core/WebGAL';
+import { setVisibility } from '@/store/GUIReducer';
+import { webgalStore } from '@/store/store';
 
 let syncFastTimeout: ReturnType<typeof setTimeout> | undefined;
 
 export const syncWithOrigine = (sceneName: string, sentenceId: number, expermental = false) => {
-  logger.warn('正在跳转到' + sceneName + ':' + sentenceId);
+  logger.warn(`正在跳转到${sceneName}:${sentenceId}`);
   const dispatch = webgalStore.dispatch;
   dispatch(setVisibility({ component: 'showTitle', visibility: false }));
   dispatch(setVisibility({ component: 'showMenuPanel', visibility: false }));

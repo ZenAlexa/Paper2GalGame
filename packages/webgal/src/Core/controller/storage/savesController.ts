@@ -1,9 +1,9 @@
 import localforage from 'localforage';
-import { WebGAL } from '@/Core/WebGAL';
 import { logger } from '@/Core/util/logger';
-import { webgalStore } from '@/store/store';
+import { WebGAL } from '@/Core/WebGAL';
 import { saveActions } from '@/store/savesReducer';
-import { ISaveData } from '@/store/userDataInterface';
+import { webgalStore } from '@/store/store';
+import type { ISaveData } from '@/store/userDataInterface';
 
 export function dumpSavesToStorage(startIndex: number, endIndex: number) {
   for (let i = startIndex; i <= endIndex; i++) {

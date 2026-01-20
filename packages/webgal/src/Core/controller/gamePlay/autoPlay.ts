@@ -1,9 +1,9 @@
 // import {logger} from '../../util/logger';
-import styles from '@/UI/BottomControlPanel/bottomControlPanel.module.scss';
-import { webgalStore } from '@/store/store';
-import { nextSentence } from '@/Core/controller/gamePlay/nextSentence';
 
+import { nextSentence } from '@/Core/controller/gamePlay/nextSentence';
 import { WebGAL } from '@/Core/WebGAL';
+import { webgalStore } from '@/store/store';
+import styles from '@/UI/BottomControlPanel/bottomControlPanel.module.scss';
 
 /**
  * 设置 autoplay 按钮的激活与否

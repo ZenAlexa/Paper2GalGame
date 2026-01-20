@@ -8,8 +8,8 @@ import 'modern-css-reset/dist/reset.min.css';
 /** i18n */
 import i18n from 'i18next';
 import { initReactI18next, Trans } from 'react-i18next';
-import { defaultLanguage, i18nTranslationResources, language } from './config/language';
 import { Provider } from 'react-redux';
+import { defaultLanguage, i18nTranslationResources, language } from './config/language';
 import { webgalStore } from './store/store';
 
 i18n
@@ -37,5 +37,5 @@ ReactDOM.render(
       </Provider>
     </Trans>
   </StrictMode>,
-  document.querySelector('#root'),
+  document.querySelector('#root')
 );

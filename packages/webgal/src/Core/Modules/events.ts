@@ -18,14 +18,14 @@ const eventBus = mitt();
 function formEvent<T>(eventName: string): IWebgalEvent<T> {
   return {
     on: (callback, id?) => {
-      // @ts-ignore
+      // @ts-expect-error
       eventBus.on(`${eventName}-${id ?? ''}`, callback);
     },
     emit: (message?, id?) => {
       eventBus.emit(`${eventName}-${id ?? ''}`, message);
     },
     off: (callback, id?) => {
-      // @ts-ignore
+      // @ts-expect-error
       eventBus.off(`${eventName}-${id ?? ''}`, callback);
     },
   };

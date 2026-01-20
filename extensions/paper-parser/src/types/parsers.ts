@@ -78,12 +78,14 @@ export interface PDFParser extends BaseParser {
    * @param buffer - PDF content as ArrayBuffer
    * @returns Promise resolving to array of image data
    */
-  extractImages(buffer: ArrayBuffer): Promise<Array<{
-    pageNumber: number;
-    imageData: string; // base64
-    width: number;
-    height: number;
-  }>>;
+  extractImages(buffer: ArrayBuffer): Promise<
+    Array<{
+      pageNumber: number;
+      imageData: string; // base64
+      width: number;
+      height: number;
+    }>
+  >;
 }
 
 /**
@@ -109,21 +111,25 @@ export interface WordParser extends BaseParser {
    * @param buffer - Word document content as ArrayBuffer
    * @returns Promise resolving to array of image data
    */
-  extractImages(buffer: ArrayBuffer): Promise<Array<{
-    id: string;
-    imageData: string; // base64
-    contentType: string;
-  }>>;
+  extractImages(buffer: ArrayBuffer): Promise<
+    Array<{
+      id: string;
+      imageData: string; // base64
+      contentType: string;
+    }>
+  >;
 
   /**
    * Extract table data
    * @param buffer - Word document content as ArrayBuffer
    * @returns Promise resolving to table data
    */
-  extractTables(buffer: ArrayBuffer): Promise<Array<{
-    headers: string[];
-    rows: string[][];
-  }>>;
+  extractTables(buffer: ArrayBuffer): Promise<
+    Array<{
+      headers: string[];
+      rows: string[][];
+    }>
+  >;
 }
 
 /**
@@ -233,18 +239,16 @@ export interface ParserOptions {
 /**
  * Progress callback for long-running parsing operations
  */
-export interface ProgressCallback {
-  (progress: {
-    /** Current step description */
-    step: string;
-    /** Progress percentage (0-100) */
-    percentage: number;
-    /** Current page being processed */
-    currentPage?: number;
-    /** Total pages */
-    totalPages?: number;
-  }): void;
-}
+export type ProgressCallback = (progress: {
+  /** Current step description */
+  step: string;
+  /** Progress percentage (0-100) */
+  percentage: number;
+  /** Current page being processed */
+  currentPage?: number;
+  /** Total pages */
+  totalPages?: number;
+}) => void;
 
 /**
  * Extended parser options with progress callback

@@ -1,1 +1,690 @@
-/**\n * Engine Factory - Intelligent Engine Selection and Management\n *\n * Provides unified interface for selecting and managing different parsing engines\n * with intelligent fallback mechanisms and cost optimization.\n */\n\nimport type {\n  EnhancedParserConfig,\n  ParsingEngine,\n  EngineSelection,\n  EnhancedParseResult,\n  ProgressCallback\n} from '../types/enhanced-paper';\n\n// Import engines\nimport { MinerUEngine } from './modern/mineru-engine';\nimport { MultimodalEngine } from './modern/multimodal-engine';\n\n// Import legacy parsers\nimport { PdfParser } from '../parsers/pdf-parser';\nimport { WordParser } from '../parsers/word-parser';\nimport { TxtParser } from '../parsers/txt-parser';\n\n/**\n * Engine capability assessment\n */\ninterface EngineCapabilities {\n  /** Supports PDF processing */\n  supportsPDF: boolean;\n  \n  /** Supports Word documents */\n  supportsWord: boolean;\n  \n  /** Supports TXT files */\n  supportsTXT: boolean;\n  \n  /** Has formula recognition */\n  hasFormulaRecognition: boolean;\n  \n  /** Has AI enhancement */\n  hasAIEnhancement: boolean;\n  \n  /** Quality score (0-1) */\n  qualityScore: number;\n  \n  /** Relative cost (1=lowest, 10=highest) */\n  costLevel: number;\n  \n  /** Speed score (0-1, 1=fastest) */\n  speedScore: number;\n}\n\n/**\n * Engine health status\n */\ninterface EngineHealth {\n  /** Engine is available */\n  available: boolean;\n  \n  /** Last health check timestamp */\n  lastChecked: Date;\n  \n  /** Response time in milliseconds */\n  responseTime?: number;\n  \n  /** Error message if unavailable */\n  error?: string;\n}\n\n/**\n * Unified parsing interface for all engines\n */\nexport interface UnifiedEngine {\n  /** Engine name */\n  name: string;\n  \n  /** Parse file */\n  parseFile(filePath: string, config?: any): Promise<EnhancedParseResult>;\n  \n  /** Test engine availability */\n  testConnection(): Promise<boolean>;\n  \n  /** Get engine capabilities */\n  getCapabilities(): EngineCapabilities;\n  \n  /** Set progress callback */\n  setProgressCallback?(callback: ProgressCallback): void;\n}\n\n/**\n * Engine factory for intelligent engine selection\n */\nexport class EngineFactory {\n  private config: EnhancedParserConfig;\n  private engineHealth: Map<string, EngineHealth> = new Map();\n  private engines: Map<string, UnifiedEngine> = new Map();\n  private progressCallback?: ProgressCallback;\n\n  constructor(config: EnhancedParserConfig) {\n    this.config = config;\n    this.initializeEngines();\n  }\n\n  /**\n   * Initialize all available engines\n   */\n  private initializeEngines(): void {\n    // Initialize legacy engines\n    this.engines.set('legacy-pdf', this.createLegacyPDFEngine());\n    this.engines.set('legacy-word', this.createLegacyWordEngine());\n    this.engines.set('legacy-txt', this.createLegacyTxtEngine());\n    \n    // Initialize modern engines if configured\n    if (this.config.mineruConfig?.enabled) {\n      this.engines.set('mineru', this.createMinerUEngine());\n    }\n    \n    if (this.config.aiEnhancement?.enableFormulaAI) {\n      this.engines.set('multimodal', this.createMultimodalEngine());\n    }\n    \n    // Initialize hybrid engine\n    this.engines.set('hybrid', this.createHybridEngine());\n  }\n\n  /**\n   * Set progress callback for all engines\n   */\n  setProgressCallback(callback: ProgressCallback): void {\n    this.progressCallback = callback;\n    \n    // Set callback for all engines that support it\n    for (const engine of this.engines.values()) {\n      if (engine.setProgressCallback) {\n        engine.setProgressCallback(callback);\n      }\n    }\n  }\n\n  /**\n   * Select best engine for file\n   */\n  async selectEngine(\n    filePath: string,\n    preferredEngine?: ParsingEngine\n  ): Promise<EngineSelection> {\n    const fileType = this.detectFileType(filePath);\n    \n    // Check preferred engine first\n    if (preferredEngine && preferredEngine !== 'auto') {\n      const engine = await this.validateEngine(preferredEngine, fileType);\n      if (engine) {\n        return {\n          engine: preferredEngine,\n          reason: `User preference: ${preferredEngine}`,\n          confidence: 0.9,\n          fallbacks: await this.getFallbackEngines(preferredEngine, fileType)\n        };\n      }\n    }\n    \n    // Intelligent selection based on file type and capabilities\n    const candidates = await this.getAvailableEngines(fileType);\n    const bestEngine = this.rankEngines(candidates, fileType);\n    \n    if (!bestEngine) {\n      throw new Error(`No suitable engine found for file type: ${fileType}`);\n    }\n    \n    return {\n      engine: bestEngine.engine,\n      reason: bestEngine.reason,\n      confidence: bestEngine.confidence,\n      fallbacks: candidates.slice(1).map(c => c.engine)\n    };\n  }\n\n  /**\n   * Parse file using selected engine\n   */\n  async parseFile(\n    filePath: string,\n    selectedEngine?: ParsingEngine\n  ): Promise<EnhancedParseResult> {\n    const selection = await this.selectEngine(filePath, selectedEngine);\n    \n    // Try primary engine\n    try {\n      const engine = this.engines.get(this.mapEngineToImplementation(selection.engine));\n      if (!engine) {\n        throw new Error(`Engine implementation not found: ${selection.engine}`);\n      }\n      \n      this.reportProgress({\n        stage: 'init',\n        progress: 0,\n        description: `Starting parsing with ${selection.engine} engine`\n      });\n      \n      const result = await engine.parseFile(filePath, this.config);\n      \n      // Enhance result with selection metadata\n      return {\n        ...result,\n        aiSummary: {\n          method: this.mapEngineToMethod(selection.engine),\n          confidence: selection.confidence,\n          recommendations: [],\n          costs: {\n            apiCalls: 0, // Will be updated by specific engines\n            estimatedDollars: 0,\n            tokensUsed: 0\n          }\n        }\n      };\n      \n    } catch (error) {\n      console.warn(`Primary engine ${selection.engine} failed:`, error);\n      \n      // Try fallback engines\n      for (const fallbackEngine of selection.fallbacks) {\n        try {\n          console.log(`Trying fallback engine: ${fallbackEngine}`);\n          \n          const engine = this.engines.get(this.mapEngineToImplementation(fallbackEngine));\n          if (!engine) continue;\n          \n          this.reportProgress({\n            stage: 'init',\n            progress: 0,\n            description: `Fallback to ${fallbackEngine} engine`\n          });\n          \n          const result = await engine.parseFile(filePath, this.config);\n          \n          return {\n            ...result,\n            aiSummary: {\n              method: this.mapEngineToMethod(fallbackEngine),\n              confidence: 0.7, // Lower confidence for fallback\n              recommendations: [`Primary engine ${selection.engine} failed, used fallback`],\n              costs: {\n                apiCalls: 0,\n                estimatedDollars: 0,\n                tokensUsed: 0\n              }\n            }\n          };\n          \n        } catch (fallbackError) {\n          console.warn(`Fallback engine ${fallbackEngine} failed:`, fallbackError);\n          continue;\n        }\n      }\n      \n      // All engines failed\n      throw new Error(`All engines failed. Primary: ${error}`);\n    }\n  }\n\n  /**\n   * Check health of all engines\n   */\n  async checkEngineHealth(): Promise<Map<string, EngineHealth>> {\n    const healthChecks = Array.from(this.engines.entries()).map(async ([name, engine]) => {\n      const startTime = Date.now();\n      \n      try {\n        const available = await engine.testConnection();\n        const responseTime = Date.now() - startTime;\n        \n        return [name, {\n          available,\n          lastChecked: new Date(),\n          responseTime\n        }] as [string, EngineHealth];\n        \n      } catch (error) {\n        return [name, {\n          available: false,\n          lastChecked: new Date(),\n          error: error instanceof Error ? error.message : 'Unknown error'\n        }] as [string, EngineHealth];\n      }\n    });\n    \n    const results = await Promise.allSettled(healthChecks);\n    \n    results.forEach(result => {\n      if (result.status === 'fulfilled') {\n        this.engineHealth.set(result.value[0], result.value[1]);\n      }\n    });\n    \n    return this.engineHealth;\n  }\n\n  /**\n   * Get engine statistics\n   */\n  getEngineStats(): Record<string, any> {\n    const stats: Record<string, any> = {};\n    \n    for (const [name, engine] of this.engines) {\n      const health = this.engineHealth.get(name);\n      stats[name] = {\n        available: health?.available || false,\n        capabilities: engine.getCapabilities(),\n        lastCheck: health?.lastChecked,\n        responseTime: health?.responseTime\n      };\n    }\n    \n    return stats;\n  }\n\n  // Private methods\n  \n  private detectFileType(filePath: string): 'pdf' | 'word' | 'txt' {\n    const ext = filePath.toLowerCase().split('.').pop();\n    \n    switch (ext) {\n      case 'pdf': return 'pdf';\n      case 'doc':\n      case 'docx': return 'word';\n      case 'txt':\n      case 'md': return 'txt';\n      default: return 'txt'; // Default fallback\n    }\n  }\n  \n  private async validateEngine(\n    engine: ParsingEngine,\n    fileType: string\n  ): Promise<boolean> {\n    const implementationName = this.mapEngineToImplementation(engine);\n    const engineInstance = this.engines.get(implementationName);\n    \n    if (!engineInstance) return false;\n    \n    const capabilities = engineInstance.getCapabilities();\n    \n    // Check file type support\n    switch (fileType) {\n      case 'pdf': return capabilities.supportsPDF;\n      case 'word': return capabilities.supportsWord;\n      case 'txt': return capabilities.supportsTXT;\n      default: return false;\n    }\n  }\n  \n  private async getAvailableEngines(fileType: string) {\n    const candidates = [];\n    \n    for (const [name, engine] of this.engines) {\n      const capabilities = engine.getCapabilities();\n      const health = this.engineHealth.get(name);\n      \n      // Check file type support\n      let supported = false;\n      switch (fileType) {\n        case 'pdf': supported = capabilities.supportsPDF; break;\n        case 'word': supported = capabilities.supportsWord; break;\n        case 'txt': supported = capabilities.supportsTXT; break;\n      }\n      \n      if (supported && (health?.available !== false)) {\n        candidates.push({\n          engine: this.mapImplementationToEngine(name),\n          capabilities,\n          health: health || { available: true, lastChecked: new Date() }\n        });\n      }\n    }\n    \n    return candidates;\n  }\n  \n  private rankEngines(candidates: any[], fileType: string) {\n    if (candidates.length === 0) return null;\n    \n    // Score each candidate\n    const scored = candidates.map(candidate => {\n      let score = 0;\n      \n      // Quality weight\n      score += candidate.capabilities.qualityScore * 0.4;\n      \n      // Speed weight\n      score += candidate.capabilities.speedScore * 0.3;\n      \n      // Cost efficiency (inverse of cost level)\n      score += (11 - candidate.capabilities.costLevel) / 10 * 0.2;\n      \n      // AI capabilities bonus for complex files\n      if (fileType === 'pdf' && candidate.capabilities.hasFormulaRecognition) {\n        score += 0.1;\n      }\n      \n      return {\n        engine: candidate.engine,\n        score,\n        confidence: Math.min(score, 0.95),\n        reason: this.generateSelectionReason(candidate.capabilities)\n      };\n    });\n    \n    // Sort by score (highest first)\n    scored.sort((a, b) => b.score - a.score);\n    \n    return scored[0];\n  }\n  \n  private async getFallbackEngines(\n    primaryEngine: ParsingEngine,\n    fileType: string\n  ): Promise<ParsingEngine[]> {\n    const available = await this.getAvailableEngines(fileType);\n    \n    return available\n      .map(c => c.engine)\n      .filter(engine => engine !== primaryEngine)\n      .slice(0, 3); // Limit to 3 fallbacks\n  }\n  \n  private mapEngineToImplementation(engine: ParsingEngine): string {\n    switch (engine) {\n      case 'legacy': return 'legacy-pdf';\n      case 'mineru': return 'mineru';\n      case 'ai-enhanced': return 'multimodal';\n      case 'full-ai': return 'hybrid';\n      default: return 'legacy-pdf';\n    }\n  }\n  \n  private mapImplementationToEngine(implementation: string): ParsingEngine {\n    switch (implementation) {\n      case 'legacy-pdf':\n      case 'legacy-word':\n      case 'legacy-txt':\n        return 'legacy';\n      case 'mineru': return 'mineru';\n      case 'multimodal': return 'ai-enhanced';\n      case 'hybrid': return 'full-ai';\n      default: return 'auto';\n    }\n  }\n  \n  private mapEngineToMethod(engine: ParsingEngine): 'legacy' | 'ai-enhanced' | 'full-ai' {\n    switch (engine) {\n      case 'legacy': return 'legacy';\n      case 'ai-enhanced':\n      case 'mineru':\n        return 'ai-enhanced';\n      case 'full-ai': return 'full-ai';\n      default: return 'legacy';\n    }\n  }\n  \n  private generateSelectionReason(capabilities: EngineCapabilities): string {\n    const reasons = [];\n    \n    if (capabilities.hasAIEnhancement) {\n      reasons.push('AI enhancement');\n    }\n    \n    if (capabilities.hasFormulaRecognition) {\n      reasons.push('formula recognition');\n    }\n    \n    if (capabilities.qualityScore > 0.8) {\n      reasons.push('high quality');\n    }\n    \n    if (capabilities.speedScore > 0.8) {\n      reasons.push('fast processing');\n    }\n    \n    return reasons.length > 0 ? `Selected for: ${reasons.join(', ')}` : 'Best available option';\n  }\n  \n  private reportProgress(progress: Partial<ParsingProgress>): void {\n    if (this.progressCallback) {\n      this.progressCallback({\n        stage: 'init',\n        progress: 0,\n        description: '',\n        ...progress\n      });\n    }\n  }\n  \n  // Engine creation methods\n  \n  private createLegacyPDFEngine(): UnifiedEngine {\n    // Wrapper for legacy PDF parser\n    return {\n      name: 'Legacy PDF Parser',\n      parseFile: async (filePath: string) => {\n        const parser = new PdfParser();\n        const result = await parser.parse(filePath);\n        \n        return {\n          success: result.success,\n          data: result.data as any, // Type conversion needed\n          errors: result.errors,\n          partialData: result.partialData\n        };\n      },\n      testConnection: async () => true, // Always available\n      getCapabilities: () => ({\n        supportsPDF: true,\n        supportsWord: false,\n        supportsTXT: false,\n        hasFormulaRecognition: false,\n        hasAIEnhancement: false,\n        qualityScore: 0.6,\n        costLevel: 1,\n        speedScore: 0.9\n      })\n    };\n  }\n  \n  private createLegacyWordEngine(): UnifiedEngine {\n    return {\n      name: 'Legacy Word Parser',\n      parseFile: async (filePath: string) => {\n        const parser = new WordParser();\n        const result = await parser.parse(filePath);\n        \n        return {\n          success: result.success,\n          data: result.data as any,\n          errors: result.errors,\n          partialData: result.partialData\n        };\n      },\n      testConnection: async () => true,\n      getCapabilities: () => ({\n        supportsPDF: false,\n        supportsWord: true,\n        supportsTXT: false,\n        hasFormulaRecognition: false,\n        hasAIEnhancement: false,\n        qualityScore: 0.7,\n        costLevel: 1,\n        speedScore: 0.95\n      })\n    };\n  }\n  \n  private createLegacyTxtEngine(): UnifiedEngine {\n    return {\n      name: 'Legacy Text Parser',\n      parseFile: async (filePath: string) => {\n        const parser = new TxtParser();\n        const result = await parser.parse(filePath);\n        \n        return {\n          success: result.success,\n          data: result.data as any,\n          errors: result.errors,\n          partialData: result.partialData\n        };\n      },\n      testConnection: async () => true,\n      getCapabilities: () => ({\n        supportsPDF: false,\n        supportsWord: false,\n        supportsTXT: true,\n        hasFormulaRecognition: false,\n        hasAIEnhancement: false,\n        qualityScore: 0.5,\n        costLevel: 1,\n        speedScore: 1.0\n      })\n    };\n  }\n  \n  private createMinerUEngine(): UnifiedEngine {\n    const engine = new MinerUEngine(this.config.mineruConfig);\n    \n    return {\n      name: 'MinerU Engine',\n      parseFile: async (filePath: string) => {\n        const result = await engine.parsePDF(filePath);\n        \n        return {\n          success: true,\n          data: result as any,\n          errors: []\n        };\n      },\n      testConnection: () => engine.testConnection(),\n      setProgressCallback: (callback) => engine.setProgressCallback(callback),\n      getCapabilities: () => ({\n        supportsPDF: true,\n        supportsWord: false,\n        supportsTXT: false,\n        hasFormulaRecognition: true,\n        hasAIEnhancement: true,\n        qualityScore: 0.95,\n        costLevel: 3,\n        speedScore: 0.7\n      })\n    };\n  }\n  \n  private createMultimodalEngine(): UnifiedEngine {\n    const engine = new MultimodalEngine({\n      openRouter: this.config.openRouterConfig!,\n      visionModel: this.config.aiEnhancement?.preferredModels?.vision || 'google/gemini-3-flash-preview',\n      fallbackModels: ['openai/gpt-4o', 'anthropic/claude-3-5-sonnet'],\n      maxConcurrency: 3,\n      costControl: this.config.aiEnhancement?.costControl || {\n        maxCostPerPaper: 1.0,\n        maxFormulasPerPaper: 50,\n        enableCaching: true\n      },\n      qualityThresholds: {\n        minConfidence: 0.7,\n        retryLowConfidence: true\n      }\n    });\n    \n    return {\n      name: 'Multimodal AI Engine',\n      parseFile: async (filePath: string) => {\n        // This would need integration with MinerU or legacy parser first\n        throw new Error('Multimodal engine requires base parsing first');\n      },\n      testConnection: () => engine.testConnection(),\n      setProgressCallback: (callback) => engine.setProgressCallback(callback),\n      getCapabilities: () => ({\n        supportsPDF: true,\n        supportsWord: false,\n        supportsTXT: false,\n        hasFormulaRecognition: true,\n        hasAIEnhancement: true,\n        qualityScore: 0.98,\n        costLevel: 8,\n        speedScore: 0.4\n      })\n    };\n  }\n  \n  private createHybridEngine(): UnifiedEngine {\n    // Combines MinerU + Multimodal for best results\n    return {\n      name: 'Hybrid AI Engine',\n      parseFile: async (filePath: string) => {\n        // Would orchestrate multiple engines\n        throw new Error('Hybrid engine implementation pending');\n      },\n      testConnection: async () => {\n        const mineruOk = this.config.mineruConfig?.enabled ? \n          await this.engines.get('mineru')?.testConnection() : true;\n        const multimodalOk = this.config.aiEnhancement?.enableFormulaAI ?\n          await this.engines.get('multimodal')?.testConnection() : true;\n        \n        return mineruOk && multimodalOk;\n      },\n      getCapabilities: () => ({\n        supportsPDF: true,\n        supportsWord: false,\n        supportsTXT: false,\n        hasFormulaRecognition: true,\n        hasAIEnhancement: true,\n        qualityScore: 0.99,\n        costLevel: 10,\n        speedScore: 0.3\n      })\n    };\n  }\n}\n"
+/**
+ * Engine Factory - Intelligent Engine Selection and Management
+ *
+ * Provides unified interface for selecting and managing different parsing engines
+ * with intelligent fallback mechanisms and cost optimization.
+ */
+
+// Import legacy parsers
+import { PdfParser } from '../parsers/pdf-parser';
+import { TxtParser } from '../parsers/txt-parser';
+import { WordParser } from '../parsers/word-parser';
+import type {
+  EngineSelection,
+  EnhancedParseResult,
+  EnhancedParserConfig,
+  ParsingEngine,
+  ProgressCallback,
+} from '../types/enhanced-paper';
+// Import engines
+import { MinerUEngine } from './modern/mineru-engine';
+import { MultimodalEngine } from './modern/multimodal-engine';
+
+/**
+ * Engine capability assessment
+ */
+interface EngineCapabilities {
+  /** Supports PDF processing */
+  supportsPDF: boolean;
+
+  /** Supports Word documents */
+  supportsWord: boolean;
+
+  /** Supports TXT files */
+  supportsTXT: boolean;
+
+  /** Has formula recognition */
+  hasFormulaRecognition: boolean;
+
+  /** Has AI enhancement */
+  hasAIEnhancement: boolean;
+
+  /** Quality score (0-1) */
+  qualityScore: number;
+
+  /** Relative cost (1=lowest, 10=highest) */
+  costLevel: number;
+
+  /** Speed score (0-1, 1=fastest) */
+  speedScore: number;
+}
+
+/**
+ * Engine health status
+ */
+interface EngineHealth {
+  /** Engine is available */
+  available: boolean;
+
+  /** Last health check timestamp */
+  lastChecked: Date;
+
+  /** Response time in milliseconds */
+  responseTime?: number;
+
+  /** Error message if unavailable */
+  error?: string;
+}
+
+/**
+ * Unified parsing interface for all engines
+ */
+export interface UnifiedEngine {
+  /** Engine name */
+  name: string;
+
+  /** Parse file */
+  parseFile(filePath: string, config?: any): Promise<EnhancedParseResult>;
+
+  /** Test engine availability */
+  testConnection(): Promise<boolean>;
+
+  /** Get engine capabilities */
+  getCapabilities(): EngineCapabilities;
+
+  /** Set progress callback */
+  setProgressCallback?(callback: ProgressCallback): void;
+}
+
+/**
+ * Engine factory for intelligent engine selection
+ */
+export class EngineFactory {
+  private config: EnhancedParserConfig;
+  private engineHealth: Map<string, EngineHealth> = new Map();
+  private engines: Map<string, UnifiedEngine> = new Map();
+  private progressCallback?: ProgressCallback;
+
+  constructor(config: EnhancedParserConfig) {
+    this.config = config;
+    this.initializeEngines();
+  }
+
+  /**
+   * Initialize all available engines
+   */
+  private initializeEngines(): void {
+    // Initialize legacy engines
+    this.engines.set('legacy-pdf', this.createLegacyPDFEngine());
+    this.engines.set('legacy-word', this.createLegacyWordEngine());
+    this.engines.set('legacy-txt', this.createLegacyTxtEngine());
+
+    // Initialize modern engines if configured
+    if (this.config.mineruConfig?.enabled) {
+      this.engines.set('mineru', this.createMinerUEngine());
+    }
+
+    if (this.config.aiEnhancement?.enableFormulaAI) {
+      this.engines.set('multimodal', this.createMultimodalEngine());
+    }
+
+    // Initialize hybrid engine
+    this.engines.set('hybrid', this.createHybridEngine());
+  }
+
+  /**
+   * Set progress callback for all engines
+   */
+  setProgressCallback(callback: ProgressCallback): void {
+    this.progressCallback = callback;
+
+    // Set callback for all engines that support it
+    for (const engine of this.engines.values()) {
+      if (engine.setProgressCallback) {
+        engine.setProgressCallback(callback);
+      }
+    }
+  }
+
+  /**
+   * Select best engine for file
+   */
+  async selectEngine(filePath: string, preferredEngine?: ParsingEngine): Promise<EngineSelection> {
+    const fileType = this.detectFileType(filePath);
+
+    // Check preferred engine first
+    if (preferredEngine && preferredEngine !== 'auto') {
+      const engine = await this.validateEngine(preferredEngine, fileType);
+      if (engine) {
+        return {
+          engine: preferredEngine,
+          reason: `User preference: ${preferredEngine}`,
+          confidence: 0.9,
+          fallbacks: await this.getFallbackEngines(preferredEngine, fileType),
+        };
+      }
+    }
+
+    // Intelligent selection based on file type and capabilities
+    const candidates = await this.getAvailableEngines(fileType);
+    const bestEngine = this.rankEngines(candidates, fileType);
+
+    if (!bestEngine) {
+      throw new Error(`No suitable engine found for file type: ${fileType}`);
+    }
+
+    return {
+      engine: bestEngine.engine,
+      reason: bestEngine.reason,
+      confidence: bestEngine.confidence,
+      fallbacks: candidates.slice(1).map((c) => c.engine),
+    };
+  }
+
+  /**
+   * Parse file using selected engine
+   */
+  async parseFile(filePath: string, selectedEngine?: ParsingEngine): Promise<EnhancedParseResult> {
+    const selection = await this.selectEngine(filePath, selectedEngine);
+
+    // Try primary engine
+    try {
+      const engine = this.engines.get(this.mapEngineToImplementation(selection.engine));
+      if (!engine) {
+        throw new Error(`Engine implementation not found: ${selection.engine}`);
+      }
+
+      this.reportProgress({
+        stage: 'init',
+        progress: 0,
+        description: `Starting parsing with ${selection.engine} engine`,
+      });
+
+      const result = await engine.parseFile(filePath, this.config);
+
+      // Enhance result with selection metadata
+      return {
+        ...result,
+        aiSummary: {
+          method: this.mapEngineToMethod(selection.engine),
+          confidence: selection.confidence,
+          recommendations: [],
+          costs: {
+            apiCalls: 0, // Will be updated by specific engines
+            estimatedDollars: 0,
+            tokensUsed: 0,
+          },
+        },
+      };
+    } catch (error) {
+      console.warn(`Primary engine ${selection.engine} failed:`, error);
+
+      // Try fallback engines
+      for (const fallbackEngine of selection.fallbacks) {
+        try {
+          console.log(`Trying fallback engine: ${fallbackEngine}`);
+
+          const engine = this.engines.get(this.mapEngineToImplementation(fallbackEngine));
+          if (!engine) continue;
+
+          this.reportProgress({
+            stage: 'init',
+            progress: 0,
+            description: `Fallback to ${fallbackEngine} engine`,
+          });
+
+          const result = await engine.parseFile(filePath, this.config);
+
+          return {
+            ...result,
+            aiSummary: {
+              method: this.mapEngineToMethod(fallbackEngine),
+              confidence: 0.7, // Lower confidence for fallback
+              recommendations: [`Primary engine ${selection.engine} failed, used fallback`],
+              costs: {
+                apiCalls: 0,
+                estimatedDollars: 0,
+                tokensUsed: 0,
+              },
+            },
+          };
+        } catch (fallbackError) {
+          console.warn(`Fallback engine ${fallbackEngine} failed:`, fallbackError);
+        }
+      }
+
+      // All engines failed
+      throw new Error(`All engines failed. Primary: ${error}`);
+    }
+  }
+
+  /**
+   * Check health of all engines
+   */
+  async checkEngineHealth(): Promise<Map<string, EngineHealth>> {
+    const healthChecks = Array.from(this.engines.entries()).map(async ([name, engine]) => {
+      const startTime = Date.now();
+
+      try {
+        const available = await engine.testConnection();
+        const responseTime = Date.now() - startTime;
+
+        return [
+          name,
+          {
+            available,
+            lastChecked: new Date(),
+            responseTime,
+          },
+        ] as [string, EngineHealth];
+      } catch (error) {
+        return [
+          name,
+          {
+            available: false,
+            lastChecked: new Date(),
+            error: error instanceof Error ? error.message : 'Unknown error',
+          },
+        ] as [string, EngineHealth];
+      }
+    });
+
+    const results = await Promise.allSettled(healthChecks);
+
+    results.forEach((result) => {
+      if (result.status === 'fulfilled') {
+        this.engineHealth.set(result.value[0], result.value[1]);
+      }
+    });
+
+    return this.engineHealth;
+  }
+
+  /**
+   * Get engine statistics
+   */
+  getEngineStats(): Record<string, any> {
+    const stats: Record<string, any> = {};
+
+    for (const [name, engine] of this.engines) {
+      const health = this.engineHealth.get(name);
+      stats[name] = {
+        available: health?.available || false,
+        capabilities: engine.getCapabilities(),
+        lastCheck: health?.lastChecked,
+        responseTime: health?.responseTime,
+      };
+    }
+
+    return stats;
+  }
+
+  // Private methods
+
+  private detectFileType(filePath: string): 'pdf' | 'word' | 'txt' {
+    const ext = filePath.toLowerCase().split('.').pop();
+
+    switch (ext) {
+      case 'pdf':
+        return 'pdf';
+      case 'doc':
+      case 'docx':
+        return 'word';
+      case 'txt':
+      case 'md':
+        return 'txt';
+      default:
+        return 'txt'; // Default fallback
+    }
+  }
+
+  private async validateEngine(engine: ParsingEngine, fileType: string): Promise<boolean> {
+    const implementationName = this.mapEngineToImplementation(engine);
+    const engineInstance = this.engines.get(implementationName);
+
+    if (!engineInstance) return false;
+
+    const capabilities = engineInstance.getCapabilities();
+
+    // Check file type support
+    switch (fileType) {
+      case 'pdf':
+        return capabilities.supportsPDF;
+      case 'word':
+        return capabilities.supportsWord;
+      case 'txt':
+        return capabilities.supportsTXT;
+      default:
+        return false;
+    }
+  }
+
+  private async getAvailableEngines(fileType: string) {
+    const candidates = [];
+
+    for (const [name, engine] of this.engines) {
+      const capabilities = engine.getCapabilities();
+      const health = this.engineHealth.get(name);
+
+      // Check file type support
+      let supported = false;
+      switch (fileType) {
+        case 'pdf':
+          supported = capabilities.supportsPDF;
+          break;
+        case 'word':
+          supported = capabilities.supportsWord;
+          break;
+        case 'txt':
+          supported = capabilities.supportsTXT;
+          break;
+      }
+
+      if (supported && health?.available !== false) {
+        candidates.push({
+          engine: this.mapImplementationToEngine(name),
+          capabilities,
+          health: health || { available: true, lastChecked: new Date() },
+        });
+      }
+    }
+
+    return candidates;
+  }
+
+  private rankEngines(candidates: any[], fileType: string) {
+    if (candidates.length === 0) return null;
+
+    // Score each candidate
+    const scored = candidates.map((candidate) => {
+      let score = 0;
+
+      // Quality weight
+      score += candidate.capabilities.qualityScore * 0.4;
+
+      // Speed weight
+      score += candidate.capabilities.speedScore * 0.3;
+
+      // Cost efficiency (inverse of cost level)
+      score += ((11 - candidate.capabilities.costLevel) / 10) * 0.2;
+
+      // AI capabilities bonus for complex files
+      if (fileType === 'pdf' && candidate.capabilities.hasFormulaRecognition) {
+        score += 0.1;
+      }
+
+      return {
+        engine: candidate.engine,
+        score,
+        confidence: Math.min(score, 0.95),
+        reason: this.generateSelectionReason(candidate.capabilities),
+      };
+    });
+
+    // Sort by score (highest first)
+    scored.sort((a, b) => b.score - a.score);
+
+    return scored[0];
+  }
+
+  private async getFallbackEngines(primaryEngine: ParsingEngine, fileType: string): Promise<ParsingEngine[]> {
+    const available = await this.getAvailableEngines(fileType);
+
+    return available
+      .map((c) => c.engine)
+      .filter((engine) => engine !== primaryEngine)
+      .slice(0, 3); // Limit to 3 fallbacks
+  }
+
+  private mapEngineToImplementation(engine: ParsingEngine): string {
+    switch (engine) {
+      case 'legacy':
+        return 'legacy-pdf';
+      case 'mineru':
+        return 'mineru';
+      case 'ai-enhanced':
+        return 'multimodal';
+      case 'full-ai':
+        return 'hybrid';
+      default:
+        return 'legacy-pdf';
+    }
+  }
+
+  private mapImplementationToEngine(implementation: string): ParsingEngine {
+    switch (implementation) {
+      case 'legacy-pdf':
+      case 'legacy-word':
+      case 'legacy-txt':
+        return 'legacy';
+      case 'mineru':
+        return 'mineru';
+      case 'multimodal':
+        return 'ai-enhanced';
+      case 'hybrid':
+        return 'full-ai';
+      default:
+        return 'auto';
+    }
+  }
+
+  private mapEngineToMethod(engine: ParsingEngine): 'legacy' | 'ai-enhanced' | 'full-ai' {
+    switch (engine) {
+      case 'legacy':
+        return 'legacy';
+      case 'ai-enhanced':
+      case 'mineru':
+        return 'ai-enhanced';
+      case 'full-ai':
+        return 'full-ai';
+      default:
+        return 'legacy';
+    }
+  }
+
+  private generateSelectionReason(capabilities: EngineCapabilities): string {
+    const reasons = [];
+
+    if (capabilities.hasAIEnhancement) {
+      reasons.push('AI enhancement');
+    }
+
+    if (capabilities.hasFormulaRecognition) {
+      reasons.push('formula recognition');
+    }
+
+    if (capabilities.qualityScore > 0.8) {
+      reasons.push('high quality');
+    }
+
+    if (capabilities.speedScore > 0.8) {
+      reasons.push('fast processing');
+    }
+
+    return reasons.length > 0 ? `Selected for: ${reasons.join(', ')}` : 'Best available option';
+  }
+
+  private reportProgress(progress: Partial<ParsingProgress>): void {
+    if (this.progressCallback) {
+      this.progressCallback({
+        stage: 'init',
+        progress: 0,
+        description: '',
+        ...progress,
+      });
+    }
+  }
+
+  // Engine creation methods
+
+  private createLegacyPDFEngine(): UnifiedEngine {
+    // Wrapper for legacy PDF parser
+    return {
+      name: 'Legacy PDF Parser',
+      parseFile: async (filePath: string) => {
+        const parser = new PdfParser();
+        const result = await parser.parse(filePath);
+
+        return {
+          success: result.success,
+          data: result.data as any, // Type conversion needed
+          errors: result.errors,
+          partialData: result.partialData,
+        };
+      },
+      testConnection: async () => true, // Always available
+      getCapabilities: () => ({
+        supportsPDF: true,
+        supportsWord: false,
+        supportsTXT: false,
+        hasFormulaRecognition: false,
+        hasAIEnhancement: false,
+        qualityScore: 0.6,
+        costLevel: 1,
+        speedScore: 0.9,
+      }),
+    };
+  }
+
+  private createLegacyWordEngine(): UnifiedEngine {
+    return {
+      name: 'Legacy Word Parser',
+      parseFile: async (filePath: string) => {
+        const parser = new WordParser();
+        const result = await parser.parse(filePath);
+
+        return {
+          success: result.success,
+          data: result.data as any,
+          errors: result.errors,
+          partialData: result.partialData,
+        };
+      },
+      testConnection: async () => true,
+      getCapabilities: () => ({
+        supportsPDF: false,
+        supportsWord: true,
+        supportsTXT: false,
+        hasFormulaRecognition: false,
+        hasAIEnhancement: false,
+        qualityScore: 0.7,
+        costLevel: 1,
+        speedScore: 0.95,
+      }),
+    };
+  }
+
+  private createLegacyTxtEngine(): UnifiedEngine {
+    return {
+      name: 'Legacy Text Parser',
+      parseFile: async (filePath: string) => {
+        const parser = new TxtParser();
+        const result = await parser.parse(filePath);
+
+        return {
+          success: result.success,
+          data: result.data as any,
+          errors: result.errors,
+          partialData: result.partialData,
+        };
+      },
+      testConnection: async () => true,
+      getCapabilities: () => ({
+        supportsPDF: false,
+        supportsWord: false,
+        supportsTXT: true,
+        hasFormulaRecognition: false,
+        hasAIEnhancement: false,
+        qualityScore: 0.5,
+        costLevel: 1,
+        speedScore: 1.0,
+      }),
+    };
+  }
+
+  private createMinerUEngine(): UnifiedEngine {
+    const engine = new MinerUEngine(this.config.mineruConfig);
+
+    return {
+      name: 'MinerU Engine',
+      parseFile: async (filePath: string) => {
+        const result = await engine.parsePDF(filePath);
+
+        return {
+          success: true,
+          data: result as any,
+          errors: [],
+        };
+      },
+      testConnection: () => engine.testConnection(),
+      setProgressCallback: (callback) => engine.setProgressCallback(callback),
+      getCapabilities: () => ({
+        supportsPDF: true,
+        supportsWord: false,
+        supportsTXT: false,
+        hasFormulaRecognition: true,
+        hasAIEnhancement: true,
+        qualityScore: 0.95,
+        costLevel: 3,
+        speedScore: 0.7,
+      }),
+    };
+  }
+
+  private createMultimodalEngine(): UnifiedEngine {
+    const engine = new MultimodalEngine({
+      openRouter: this.config.openRouterConfig!,
+      visionModel: this.config.aiEnhancement?.preferredModels?.vision || 'google/gemini-3-flash-preview',
+      fallbackModels: ['openai/gpt-4o', 'anthropic/claude-3-5-sonnet'],
+      maxConcurrency: 3,
+      costControl: this.config.aiEnhancement?.costControl || {
+        maxCostPerPaper: 1.0,
+        maxFormulasPerPaper: 50,
+        enableCaching: true,
+      },
+      qualityThresholds: {
+        minConfidence: 0.7,
+        retryLowConfidence: true,
+      },
+    });
+
+    return {
+      name: 'Multimodal AI Engine',
+      parseFile: async (_filePath: string) => {
+        // This would need integration with MinerU or legacy parser first
+        throw new Error('Multimodal engine requires base parsing first');
+      },
+      testConnection: () => engine.testConnection(),
+      setProgressCallback: (callback) => engine.setProgressCallback(callback),
+      getCapabilities: () => ({
+        supportsPDF: true,
+        supportsWord: false,
+        supportsTXT: false,
+        hasFormulaRecognition: true,
+        hasAIEnhancement: true,
+        qualityScore: 0.98,
+        costLevel: 8,
+        speedScore: 0.4,
+      }),
+    };
+  }
+
+  private createHybridEngine(): UnifiedEngine {
+    // Combines MinerU + Multimodal for best results
+    return {
+      name: 'Hybrid AI Engine',
+      parseFile: async (_filePath: string) => {
+        // Would orchestrate multiple engines
+        throw new Error('Hybrid engine implementation pending');
+      },
+      testConnection: async () => {
+        const mineruOk = this.config.mineruConfig?.enabled ? await this.engines.get('mineru')?.testConnection() : true;
+        const multimodalOk = this.config.aiEnhancement?.enableFormulaAI
+          ? await this.engines.get('multimodal')?.testConnection()
+          : true;
+
+        return mineruOk && multimodalOk;
+      },
+      getCapabilities: () => ({
+        supportsPDF: true,
+        supportsWord: false,
+        supportsTXT: false,
+        hasFormulaRecognition: true,
+        hasAIEnhancement: true,
+        qualityScore: 0.99,
+        costLevel: 10,
+        speedScore: 0.3,
+      }),
+    };
+  }
+}

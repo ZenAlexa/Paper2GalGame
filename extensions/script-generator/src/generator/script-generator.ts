@@ -5,16 +5,16 @@
  * with character configurations and prompt engineering
  */
 
+import { getCharacter, validateCharacterSelection } from '../characters';
 import { OpenRouterClient } from '../openrouter';
-import { CHARACTER_CONFIGS, getCharacter, validateCharacterSelection } from '../characters';
 import type {
-  ParsedPaper,
-  GenerationOptions,
-  WebGALScript,
-  WebGALScene,
-  WebGALLine,
   Character,
-  OpenRouterConfig
+  GenerationOptions,
+  OpenRouterConfig,
+  ParsedPaper,
+  WebGALLine,
+  WebGALScene,
+  WebGALScript,
 } from '../types';
 
 /**
@@ -70,24 +70,18 @@ export class ScriptGenerator {
   /**
    * Generate WebGAL script from parsed paper
    */
-  async generateScript(
-    paperData: ParsedPaper,
-    options: GenerationOptions
-  ): Promise<GenerationResult> {
+  async generateScript(paperData: ParsedPaper, options: GenerationOptions): Promise<GenerationResult> {
     const startTime = Date.now();
 
     try {
       // Validate inputs
       const validation = this.validateInputs(paperData, options);
       if (!validation.valid) {
-        return this.createErrorResult(
-          `Validation failed: ${validation.errors.join(', ')}`,
-          Date.now() - startTime
-        );
+        return this.createErrorResult(`Validation failed: ${validation.errors.join(', ')}`, Date.now() - startTime);
       }
 
       // Generate enhanced prompt
-      const prompt = this.buildEnhancedPrompt(paperData, options);
+      const _prompt = this.buildEnhancedPrompt(paperData, options);
 
       // Call OpenRouter API
       const response = await this.openRouterClient.generateScript({
@@ -96,17 +90,12 @@ export class ScriptGenerator {
         options: {
           educationalWeight: options.style.educationalWeight,
           style: 'formal' as const,
-          includeInteractions: options.style.interactive
-        }
+          includeInteractions: options.style.interactive,
+        },
       });
 
       // Parse and structure the generated script
-      const script = await this.parseGeneratedScript(
-        response.script,
-        paperData,
-        options,
-        response.metadata
-      );
+      const script = await this.parseGeneratedScript(response.script, paperData, options, response.metadata);
 
       // Calculate quality metrics
       const quality = this.calculateQualityMetrics(script, response.validation);
@@ -120,12 +109,11 @@ export class ScriptGenerator {
             inputTokens: response.metadata.usage.prompt_tokens,
             outputTokens: response.metadata.usage.completion_tokens,
             totalTokens: response.metadata.usage.total_tokens,
-            ...(response.metadata.usage.estimated_cost && { estimatedCost: response.metadata.usage.estimated_cost })
+            ...(response.metadata.usage.estimated_cost && { estimatedCost: response.metadata.usage.estimated_cost }),
           },
-          quality
-        }
+          quality,
+        },
       };
-
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       return this.createErrorResult(errorMessage, Date.now() - startTime);
@@ -135,7 +123,10 @@ export class ScriptGenerator {
   /**
    * Validate generation inputs
    */
-  private validateInputs(paperData: ParsedPaper, options: GenerationOptions): {
+  private validateInputs(
+    paperData: ParsedPaper,
+    options: GenerationOptions
+  ): {
     valid: boolean;
     errors: string[];
   } {
@@ -170,7 +161,7 @@ export class ScriptGenerator {
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -180,7 +171,7 @@ export class ScriptGenerator {
    */
   private buildEnhancedPrompt(paperData: ParsedPaper, options: GenerationOptions): string {
     const selectedCharacters = options.characters
-      .map(id => getCharacter(id))
+      .map((id) => getCharacter(id))
       .filter((char): char is Character => char !== null);
 
     // Map character IDs to actual sprite files
@@ -188,20 +179,22 @@ export class ScriptGenerator {
       host: 'stand.webp',
       energizer: 'stand2.webp',
       analyst: 'stand.webp',
-      interpreter: 'stand2.webp'
+      interpreter: 'stand2.webp',
     };
 
     const primaryLang = options.multiLanguage.primaryLanguage;
-    const characterDetails = selectedCharacters.map(char => {
-      const sprite = characterSpriteMap[char.id] || 'stand.webp';
-      return `
+    const characterDetails = selectedCharacters
+      .map((char) => {
+        const sprite = characterSpriteMap[char.id] || 'stand.webp';
+        return `
 ### ${char.name[primaryLang]} (${char.id})
 - **Sprite**: ${sprite}
 - **Personality**: ${char.personality.join(', ')}
 - **Speaking Style**: ${char.speakingStyle.join(', ')}
 - **Paper Role**: ${char.paperRole}
 - **Phrases**: ${char.phrases.slice(0, 3).join(', ')}`;
-    }).join('\n');
+      })
+      .join('\n');
 
     const paperSummary = this.createPaperSummary(paperData);
 
@@ -262,7 +255,10 @@ Generate complete WebGAL script with correct asset filenames. Use Japanese for d
 
     if (paperData.sections && paperData.sections.length > 0) {
       for (const section of paperData.sections) {
-        if (section.type && ['abstract', 'introduction', 'methodology', 'results', 'conclusion'].includes(section.type.toLowerCase())) {
+        if (
+          section.type &&
+          ['abstract', 'introduction', 'methodology', 'results', 'conclusion'].includes(section.type.toLowerCase())
+        ) {
           summary += `### ${section.title}\n${section.content.substring(0, 400)}...\n\n`;
         }
       }
@@ -282,18 +278,94 @@ Generate complete WebGAL script with correct asset filenames. Use Japanese for d
     rawScript: string,
     paperData: ParsedPaper,
     options: GenerationOptions,
-    apiMetadata: any
+    _apiMetadata: any
   ): Promise<WebGALScript> {
+    // DEBUG: Log raw script from AI
+    console.log('[ScriptGenerator] ========== RAW AI SCRIPT (first 1000 chars) ==========');
+    console.log(rawScript.substring(0, 1000));
+    console.log('[ScriptGenerator] ========== END RAW SCRIPT ==========');
+    console.log(`[ScriptGenerator] Total raw script length: ${rawScript.length} chars`);
+
     // Extract script content from markdown code blocks if present
+    // Use multiple patterns to handle various AI output formats
     let cleanScript = rawScript;
-    const codeBlockMatch = rawScript.match(/```(?:webgal)?\n([\s\S]*?)```/);
-    if (codeBlockMatch && codeBlockMatch[1]) {
-      cleanScript = codeBlockMatch[1];
+
+    // Multiple patterns to try, in order of specificity
+    const codeBlockPatterns = [
+      /```webgal\s*\n([\s\S]*?)```/i, // Standard: ```webgal\n (case insensitive)
+      /```\s*webgal\s*\n([\s\S]*?)```/i, // With spaces: ``` webgal \n
+      /```\n([\s\S]*?)```/, // No language tag: ```\n
+      /```([\s\S]*?)```/, // Minimal: ``` (no newline)
+    ];
+
+    let extracted = false;
+    for (const pattern of codeBlockPatterns) {
+      const match = rawScript.match(pattern);
+      if (match?.[1]?.trim()) {
+        cleanScript = match[1];
+        extracted = true;
+        console.log('[ScriptGenerator] Extracted code block with pattern:', pattern.toString().substring(0, 30));
+        break;
+      }
     }
 
-    const lines = cleanScript.split('\n')
-      .filter(line => line.trim() && !line.trim().startsWith('//')) // Filter comments
-      .map((line, index) => this.parseScriptLine(line, index));
+    // Fallback: Extract lines that look like WebGAL commands
+    if (!extracted) {
+      const validCommands = [
+        'changeBg',
+        'changeFigure',
+        'say',
+        'bgm',
+        'playBGM',
+        'playSE',
+        'wait',
+        'choose',
+        'label',
+        'end',
+        'jump',
+      ];
+      const webgalLines = rawScript.split('\n').filter((line) => {
+        const trimmed = line.trim();
+        if (!trimmed || trimmed.startsWith('//') || trimmed.startsWith('#')) return false;
+        return validCommands.some((cmd) => trimmed.toLowerCase().startsWith(`${cmd.toLowerCase()}:`));
+      });
+      if (webgalLines.length > 0) {
+        cleanScript = webgalLines.join('\n');
+        console.warn('[ScriptGenerator] Used fallback: extracted', webgalLines.length, 'WebGAL lines from prose');
+      } else {
+        console.error('[ScriptGenerator] CRITICAL: Could not extract WebGAL script from AI response');
+        console.error('[ScriptGenerator] Raw script first 500 chars:', rawScript.substring(0, 500));
+      }
+    }
+
+    // DEBUG: Log clean script stats
+    const cleanLines = cleanScript.split('\n').filter((line) => line.trim() && !line.trim().startsWith('//'));
+    console.log(`[ScriptGenerator] Clean script has ${cleanLines.length} non-empty lines`);
+
+    // Count command types
+    const commandCounts: Record<string, number> = {};
+    for (const line of cleanLines) {
+      const match = line.match(/^(\w+):/);
+      if (match?.[1]) {
+        const cmd = match[1].toLowerCase();
+        commandCounts[cmd] = (commandCounts[cmd] || 0) + 1;
+      }
+    }
+    console.log('[ScriptGenerator] Command type counts:', JSON.stringify(commandCounts));
+
+    // Check for critical commands
+    const hasChangeBg = cleanLines.some((l) => l.toLowerCase().startsWith('changebg:'));
+    const hasChangeFigure = cleanLines.some((l) => l.toLowerCase().startsWith('changefigure:'));
+    console.log(`[ScriptGenerator] Has changeBg: ${hasChangeBg}, Has changeFigure: ${hasChangeFigure}`);
+
+    if (!hasChangeBg) {
+      console.warn('[ScriptGenerator] WARNING: No changeBg command found in script!');
+    }
+    if (!hasChangeFigure) {
+      console.warn('[ScriptGenerator] WARNING: No changeFigure command found in script!');
+    }
+
+    const lines = cleanLines.map((line, index) => this.parseScriptLine(line, index));
 
     // Group lines into scenes based on content flow
     const scenes = this.groupLinesIntoScenes(lines, paperData);
@@ -303,29 +375,29 @@ Generate complete WebGAL script with correct asset filenames. Use Japanese for d
         title: {
           zh: `${paperData.metadata.title} - WebGAL脚本`,
           jp: `${paperData.metadata.title} - WebGALスクリプト`,
-          en: `${paperData.metadata.title} - WebGAL Script`
+          en: `${paperData.metadata.title} - WebGAL Script`,
         },
         paperTitle: {
           zh: paperData.metadata.title || '未知论文',
           jp: paperData.metadata.title || '不明な論文',
-          en: paperData.metadata.title || 'Unknown Paper'
+          en: paperData.metadata.title || 'Unknown Paper',
         },
         timestamp: new Date(),
         version: this.version,
         multiLanguage: {
           supportedLanguages: ['zh', 'jp', 'en'],
           primaryLanguage: options.multiLanguage.primaryLanguage,
-          currentLanguage: options.multiLanguage.primaryLanguage
+          currentLanguage: options.multiLanguage.primaryLanguage,
         },
         characters: options.characters,
-        totalDuration: this.estimateScriptDuration(lines)
+        totalDuration: this.estimateScriptDuration(lines),
       },
       scenes,
       validation: {
         isValid: true,
         errors: [],
-        warnings: []
-      }
+        warnings: [],
+      },
     };
 
     return script;
@@ -334,7 +406,7 @@ Generate complete WebGAL script with correct asset filenames. Use Japanese for d
   /**
    * Parse individual script line with multi-language support
    */
-  private parseScriptLine(line: string, index: number): WebGALLine {
+  private parseScriptLine(line: string, _index: number): WebGALLine {
     const trimmedLine = line.trim();
 
     if (trimmedLine.includes(':')) {
@@ -352,8 +424,8 @@ Generate complete WebGAL script with correct asset filenames. Use Japanese for d
             metadata: {
               confidence: 1.0,
               relevance: 1.0,
-              isMultiLanguage: true
-            }
+              isMultiLanguage: true,
+            },
           };
         }
 
@@ -367,22 +439,23 @@ Generate complete WebGAL script with correct asset filenames. Use Japanese for d
           raw: trimmedLine,
           metadata: {
             confidence: 1.0,
-            relevance: 1.0
-          }
+            relevance: 1.0,
+          },
         };
       }
 
-      // For non-say commands, keep original behavior
-      const params = rest ? [rest] : [];
+      // For non-say commands, extract content WITHOUT options
+      // E.g., "stand.webp -center" → content="stand.webp", options={center: true}
+      const contentOnly = rest ? this.extractTextContent(rest) : '';
       return {
         command: command as any,
-        params,
+        params: [contentOnly],
         options: this.parseLineOptions(trimmedLine),
         raw: trimmedLine,
         metadata: {
           confidence: 1.0,
-          relevance: 1.0
-        }
+          relevance: 1.0,
+        },
       };
     }
 
@@ -394,16 +467,19 @@ Generate complete WebGAL script with correct asset filenames. Use Japanese for d
       raw: trimmedLine,
       metadata: {
         confidence: 0.8,
-        relevance: 0.9
-      }
+        relevance: 0.9,
+      },
     };
   }
 
   /**
    * Extract clean text content from say command, removing options
    * Handles: "text content -speaker=xxx;" -> "text content"
+   * Robust extraction with multiple fallback strategies
    */
   private extractTextContent(content: string): string {
+    if (!content) return '';
+
     // Remove trailing semicolon first
     let text = content.replace(/;$/, '').trim();
 
@@ -411,24 +487,46 @@ Generate complete WebGAL script with correct asset filenames. Use Japanese for d
     // Options start with space + dash, followed by name=value
     text = text.replace(/\s+-\w+=[^\s;]+/g, '').trim();
 
+    // If empty after extraction, try alternative strategies
+    if (!text && content.trim()) {
+      // Strategy 1: Everything before first " -" (space-dash)
+      const optionStart = content.indexOf(' -');
+      if (optionStart > 0) {
+        text = content.substring(0, optionStart).replace(/;$/, '').trim();
+      }
+
+      // Strategy 2: If still empty, try splitting by -speaker/-vocal
+      if (!text) {
+        const speakerMatch = content.match(/^(.+?)\s+-(?:speaker|vocal)=/);
+        if (speakerMatch?.[1]) {
+          text = speakerMatch[1].replace(/;$/, '').trim();
+        }
+      }
+
+      // Log warning if extraction produced empty from non-empty input
+      if (!text) {
+        console.warn(`[extractTextContent] Could not extract text from: "${content.substring(0, 100)}"`);
+      }
+    }
+
     return text;
   }
 
   /**
    * Parse multi-language content from say command
-   * Format: "中文内容||日文内容||英文内容"
+   * Format: "Chinese||Japanese||English"
    */
-  private parseMultiLanguageContent(content: string): { zh: string; jp: string; en: string; } | null {
+  private parseMultiLanguageContent(content: string): { zh: string; jp: string; en: string } | null {
     // Find the main content before -speaker option
     const speakerMatch = content.match(/(.*?)\s+-speaker=/);
-    const mainContent = speakerMatch && speakerMatch[1] ? speakerMatch[1].trim() : content.trim();
+    const mainContent = speakerMatch?.[1] ? speakerMatch[1].trim() : content.trim();
 
     const parts = mainContent.split('||');
     if (parts.length === 3 && parts[0] && parts[1] && parts[2]) {
       return {
         zh: parts[0].trim(),
         jp: parts[1].trim(),
-        en: parts[2].trim()
+        en: parts[2].trim(),
       };
     }
     return null;
@@ -436,21 +534,21 @@ Generate complete WebGAL script with correct asset filenames. Use Japanese for d
 
   /**
    * Parse multi-language options from command line
-   * Format: -speaker=中文名||日文名||英文名
+   * Format: -speaker=ChineseName||JapaneseName||EnglishName
    */
   private parseMultiLanguageOptions(line: string): Record<string, any> {
     const options: Record<string, any> = {};
 
     // Parse speaker names
     const speakerMatch = line.match(/-speaker=([^\\s]+)/);
-    if (speakerMatch && speakerMatch[1]) {
+    if (speakerMatch?.[1]) {
       const speakerContent = speakerMatch[1];
       const speakerParts = speakerContent.split('||');
       if (speakerParts.length === 3 && speakerParts[0] && speakerParts[1] && speakerParts[2]) {
         options.speaker = {
           zh: speakerParts[0].trim(),
           jp: speakerParts[1].trim(),
-          en: speakerParts[2].trim()
+          en: speakerParts[2].trim(),
         };
       } else {
         options.speaker = speakerContent;
@@ -467,16 +565,29 @@ Generate complete WebGAL script with correct asset filenames. Use Japanese for d
   }
 
   /**
-   * Parse line options (e.g., -speaker=name -vocal=file.wav)
+   * Parse line options (e.g., -speaker=name -vocal=file.wav -center)
+   * Handles both -key=value and -flag (boolean) formats
    */
   private parseLineOptions(line: string): Record<string, string | number | boolean> {
     const options: Record<string, string | number | boolean> = {};
-    const optionMatches = line.match(/-([\\w]+)=([^\\s]+)/g) || [];
 
-    for (const match of optionMatches) {
-      const [, key, value] = match.match(/-([\\w]+)=([^\\s]+)/) || [];
-      if (key && value) {
-        options[key] = value;
+    // Parse -key=value options
+    const valueMatches = line.match(/-(\w+)=([^\s;]+)/g) || [];
+    for (const match of valueMatches) {
+      const parsed = match.match(/-(\w+)=([^\s;]+)/);
+      if (parsed?.[1] && parsed[2]) {
+        // Clean value: remove trailing semicolon if present
+        options[parsed[1]] = parsed[2].replace(/;$/, '');
+      }
+    }
+
+    // Parse -flag (boolean) options like -center, -left, -right, -next
+    const flagMatches = line.match(/\s-(\w+)(?=\s|;|$)/g) || [];
+    for (const match of flagMatches) {
+      const key = match.trim().replace(/^-/, '');
+      // Don't overwrite if already set as key=value
+      if (key && !options[key]) {
+        options[key] = true;
       }
     }
 
@@ -486,7 +597,7 @@ Generate complete WebGAL script with correct asset filenames. Use Japanese for d
   /**
    * Group script lines into logical scenes
    */
-  private groupLinesIntoScenes(lines: WebGALLine[], paperData: ParsedPaper): WebGALScene[] {
+  private groupLinesIntoScenes(lines: WebGALLine[], _paperData: ParsedPaper): WebGALScene[] {
     const scenes: WebGALScene[] = [];
     let currentSceneLines: WebGALLine[] = [];
     let sceneIndex = 0;
@@ -512,8 +623,8 @@ Generate complete WebGAL script with correct asset filenames. Use Japanese for d
           metadata: {
             type: sceneType,
             objectives: this.generateSceneObjectives(sceneType),
-            duration: this.estimateSceneDuration(currentSceneLines)
-          }
+            duration: this.estimateSceneDuration(currentSceneLines),
+          },
         });
 
         currentSceneLines = [];
@@ -541,7 +652,7 @@ Generate complete WebGAL script with correct asset filenames. Use Japanese for d
       introduction: 'Opening Introduction',
       content: `Content Explanation ${Math.floor(index / 2) + 1}`,
       discussion: `In-depth Discussion ${Math.floor(index / 2)}`,
-      summary: 'Summary Review'
+      summary: 'Summary Review',
     };
     return titles[type as keyof typeof titles] || `Scene ${index + 1}`;
   }
@@ -554,7 +665,7 @@ Generate complete WebGAL script with correct asset filenames. Use Japanese for d
       introduction: ['Set learning atmosphere', 'Introduce paper topic', 'Character entrance'],
       content: ['Convey core paper content', 'Ensure concept understanding', 'Maintain learning interest'],
       discussion: ['Deepen understanding', 'Multi-angle analysis', 'Inspire thinking'],
-      summary: ['Consolidate knowledge', 'Summarize key points', 'Outlook applications']
+      summary: ['Consolidate knowledge', 'Summarize key points', 'Outlook applications'],
     };
     return objectives[type as keyof typeof objectives] || ['Advance story development'];
   }
@@ -569,7 +680,7 @@ Generate complete WebGAL script with correct asset filenames. Use Japanese for d
         return total + (content.length * 0.1 + 2); // ~0.1s per character + 2s pause
       }
       if (line.command === 'wait') {
-        const waitTime = parseInt(line.params[0] || '0');
+        const waitTime = parseInt(line.params[0] || '0', 10);
         return total + waitTime / 1000;
       }
       return total + 1; // Default 1s for other commands
@@ -586,7 +697,10 @@ Generate complete WebGAL script with correct asset filenames. Use Japanese for d
   /**
    * Calculate quality metrics
    */
-  private calculateQualityMetrics(script: WebGALScript, validation?: any): {
+  private calculateQualityMetrics(
+    script: WebGALScript,
+    validation?: any
+  ): {
     syntaxScore: number;
     characterScore: number;
     educationalScore: number;
@@ -606,7 +720,7 @@ Generate complete WebGAL script with correct asset filenames. Use Japanese for d
       syntaxScore,
       characterScore,
       educationalScore,
-      overallScore
+      overallScore,
     };
   }
 
@@ -651,9 +765,9 @@ Generate complete WebGAL script with correct asset filenames. Use Japanese for d
           syntaxScore: 0,
           characterScore: 0,
           educationalScore: 0,
-          overallScore: 0
-        }
-      }
+          overallScore: 0,
+        },
+      },
     };
   }
 

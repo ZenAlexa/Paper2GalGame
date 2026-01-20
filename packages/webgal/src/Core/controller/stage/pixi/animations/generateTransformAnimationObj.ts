@@ -1,6 +1,6 @@
-import { AnimationFrame } from '@/Core/Modules/animations';
-import { webgalStore } from '@/store/store';
 import isNull from 'lodash/isNull';
+import type { AnimationFrame } from '@/Core/Modules/animations';
+import { webgalStore } from '@/store/store';
 
 type AnimationObj = Array<AnimationFrame>;
 
@@ -9,7 +9,7 @@ export function generateTransformAnimationObj(
   target: string,
   applyFrame: AnimationFrame,
   duration: number | string | boolean | null,
-  ease: string,
+  ease: string
 ): AnimationObj {
   let animationObj;
   // 获取那个 target 的当前变换
@@ -23,9 +23,9 @@ export function generateTransformAnimationObj(
   applyFrame.ease = ease;
   animationObj = [applyFrame];
 
-  // 找到 effect
-  if (targetEffect) {
-    const effectWithDuration = { ...targetEffect!.transform!, duration: 0, ease };
+  // Find effect
+  if (targetEffect?.transform) {
+    const effectWithDuration = { ...targetEffect.transform, duration: 0, ease };
     animationObj.unshift(effectWithDuration);
   } else {
     // 应用默认effect，也就是最终的 effect 的 alpha = 0 版本

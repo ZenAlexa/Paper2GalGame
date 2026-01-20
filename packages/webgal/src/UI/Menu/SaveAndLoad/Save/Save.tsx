@@ -1,16 +1,16 @@
-import { FC, useEffect } from 'react';
-import styles from '../SaveAndLoad.module.scss';
-import { saveGame } from '@/Core/controller/storage/saveGame';
-import { setStorage } from '@/Core/controller/storage/storageController';
+import { type FC, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '@/store/store';
-import { setSlPage } from '@/store/userDataReducer';
-import { showGlogalDialog } from '@/UI/GlobalDialog/GlobalDialog';
-import useTrans from '@/hooks/useTrans';
-import useSoundEffect from '@/hooks/useSoundEffect';
+import { saveGame } from '@/Core/controller/storage/saveGame';
 import { getSavesFromStorage } from '@/Core/controller/storage/savesController';
+import { setStorage } from '@/Core/controller/storage/storageController';
+import useSoundEffect from '@/hooks/useSoundEffect';
+import useTrans from '@/hooks/useTrans';
 import { compileSentence } from '@/Stage/TextBox/TextBox';
+import type { RootState } from '@/store/store';
+import { setSlPage } from '@/store/userDataReducer';
 import { mergeStringsAndKeepObjects } from '@/UI/Backlog/Backlog';
+import { showGlogalDialog } from '@/UI/GlobalDialog/GlobalDialog';
+import styles from '../SaveAndLoad.module.scss';
 
 export const Save: FC = () => {
   const { playSePageChange, playSeEnter, playSeDialogOpen } = useSoundEffect();
@@ -21,7 +21,7 @@ export const Save: FC = () => {
   for (let i = 1; i <= 20; i++) {
     let classNameOfElement = styles.Save_Load_top_button;
     if (i === userDataState.optionData.slPage) {
-      classNameOfElement = classNameOfElement + ' ' + styles.Save_Load_top_button_on;
+      classNameOfElement = `${classNameOfElement} ${styles.Save_Load_top_button_on}`;
     }
     const element = (
       <div
@@ -31,7 +31,7 @@ export const Save: FC = () => {
           playSePageChange();
         }}
         onMouseEnter={playSeEnter}
-        key={'Save_element_page' + i}
+        key={`Save_element_page${i}`}
         className={classNameOfElement}
       >
         <div className={styles.Save_Load_top_button_text}>{i}</div>
@@ -99,7 +99,7 @@ export const Save: FC = () => {
           }
         }}
         onMouseEnter={playSeEnter}
-        key={'saveElement_' + i}
+        key={`saveElement_${i}`}
         className={styles.Save_Load_content_element}
         style={{ animationDelay: `${animationIndex * 30}ms` }}
       >
@@ -119,7 +119,7 @@ export const Save: FC = () => {
         </div>
         <div className={styles.Save_Load_top_buttonList}>{page}</div>
       </div>
-      <div className={styles.Save_Load_content} id={'Save_content_page_' + userDataState.optionData.slPage}>
+      <div className={styles.Save_Load_content} id={`Save_content_page_${userDataState.optionData.slPage}`}>
         {showSaves}
       </div>
     </div>

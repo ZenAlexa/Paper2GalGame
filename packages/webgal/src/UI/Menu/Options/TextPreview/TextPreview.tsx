@@ -1,15 +1,15 @@
-import styles from './textPreview.module.scss';
+import { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { RootState } from '@/store/store';
 import { useFontFamily } from '@/hooks/useFontFamily';
 import { useTextAnimationDuration, useTextDelay } from '@/hooks/useTextOptions';
 import useTrans from '@/hooks/useTrans';
-import { getTextSize } from '@/UI/getTextSize';
 import IMSSTextbox from '@/Stage/TextBox/IMSSTextbox';
 import { compileSentence } from '@/Stage/TextBox/TextBox';
-import { useState } from 'react';
+import type { RootState } from '@/store/store';
+import { getTextSize } from '@/UI/getTextSize';
+import styles from './textPreview.module.scss';
 
-export const TextPreview = (props: any) => {
+export const TextPreview = (_props: any) => {
   const t = useTrans('menu.options.pages.display.options.');
   const userDataState = useSelector((state: RootState) => state.userData);
   const stageState = useSelector((state: RootState) => state.stage);
@@ -17,7 +17,7 @@ export const TextPreview = (props: any) => {
   const textDelay = useTextDelay(userDataState.optionData.textSpeed);
   const textDuration = useTextAnimationDuration(userDataState.optionData.textSpeed);
   const textboxOpacity = userDataState.optionData.textboxOpacity;
-  const size = getTextSize(userDataState.optionData.textSize) + '%';
+  const size = `${getTextSize(userDataState.optionData.textSize)}%`;
   const font = useFontFamily();
   const userAgent = navigator.userAgent;
   const isFirefox = /firefox/i.test(userAgent);

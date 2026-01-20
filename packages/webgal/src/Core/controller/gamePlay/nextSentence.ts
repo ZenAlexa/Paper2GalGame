@@ -1,13 +1,10 @@
-import { scriptExecutor } from './scriptExecutor';
-import { logger } from '../../util/logger';
-import { webgalStore } from '@/store/store';
-import { resetStageState } from '@/store/stageReducer';
 import cloneDeep from 'lodash/cloneDeep';
-import { IBacklogItem } from '@/Core/Modules/backlog';
-
-import { SYSTEM_CONFIG } from '@/config';
 import { WebGAL } from '@/Core/WebGAL';
-import { IRunPerform } from '@/store/stageInterface';
+import type { IRunPerform } from '@/store/stageInterface';
+import { resetStageState } from '@/store/stageReducer';
+import { webgalStore } from '@/store/store';
+import { logger } from '../../util/logger';
+import { scriptExecutor } from './scriptExecutor';
 
 /**
  * 进行下一句

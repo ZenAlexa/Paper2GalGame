@@ -1,13 +1,13 @@
-import { OldFilmFilter } from '@pixi/filter-old-film';
+import type { BlurFilter } from '@pixi/filter-blur';
 import { DotFilter } from '@pixi/filter-dot';
-import { ReflectionFilter } from '@pixi/filter-reflection';
 import { GlitchFilter } from '@pixi/filter-glitch';
-import { RGBSplitFilter } from '@pixi/filter-rgb-split';
 import { GodrayFilter } from '@pixi/filter-godray';
+import { OldFilmFilter } from '@pixi/filter-old-film';
+import { ReflectionFilter } from '@pixi/filter-reflection';
+import { RGBSplitFilter } from '@pixi/filter-rgb-split';
+import * as PIXI from 'pixi.js';
 import { AdjustmentFilter, AdvancedBloomFilter, ShockwaveFilter } from 'pixi-filters';
 import { BevelFilter } from '@/Core/controller/stage/pixi/shaders/BevelFilter';
-import * as PIXI from 'pixi.js';
-import { BlurFilter } from '@pixi/filter-blur';
 import { INIT_RAD, RadiusAlphaFilter } from '@/Core/controller/stage/pixi/shaders/RadiusAlphaFilter';
 
 /**
@@ -32,7 +32,7 @@ interface PropertyConfig {
 }
 
 // 滤镜顺序，靠上滤镜的排滤镜数组后面(在上层)
-const enum FilterPriority {
+enum FilterPriority {
   ReflectionFilm,
   RadiusAlpha,
   ShockWave,
@@ -334,10 +334,6 @@ export class WebGALPixiContainer extends PIXI.Container {
   private baseX = 0;
   private baseY = 0;
 
-  public constructor() {
-    super();
-  }
-
   public removeFilterByName(filterName: string) {
     const filter = this.containerFilters.get(filterName);
     if (!filter || !this.filters) return;
@@ -607,7 +603,7 @@ export class WebGALPixiContainer extends PIXI.Container {
       (filterInstance as any)[propConfig.filterProperty] = value;
     } else {
       console.warn(
-        `WebGALPixiContainer: Property '${propertyName}' has neither overrideSet nor filterProperty defined for value setting.`,
+        `WebGALPixiContainer: Property '${propertyName}' has neither overrideSet nor filterProperty defined for value setting.`
       );
     }
     this.removeIfDefault(propConfig.filterName);

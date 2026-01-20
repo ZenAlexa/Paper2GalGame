@@ -1,5 +1,5 @@
-import { logger } from '../../util/logger';
 import { webgalStore } from '@/store/store';
+import { logger } from '../../util/logger';
 
 /**
  * 设置音量

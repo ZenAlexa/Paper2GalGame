@@ -1,17 +1,17 @@
-import { webgalStore } from '@/store/store';
-import { IEffect, IFigureAssociatedAnimation, IFigureMetadata, ITransform } from '@/store/stageInterface';
-import { setStage, stageActions } from '@/store/stageReducer';
-import { Live2D, WebGAL } from '@/Core/WebGAL';
-import { baseBlinkParam, baseFocusParam, BlinkParam, FocusParam } from '@/Core/live2DCore';
-import { isIOS } from '@/Core/initializeScript';
-import { WebGALPixiContainer } from '@/Core/controller/stage/pixi/WebGALPixiContainer';
-import { addSpineBgImpl, addSpineFigureImpl } from '@/Core/controller/stage/pixi/spine';
-import { SCREEN_CONSTANTS } from '@/Core/util/constants';
-import { logger } from '@/Core/util/logger';
-import { v4 as uuid } from 'uuid';
 import { cloneDeep, isEqual } from 'lodash';
 import * as PIXI from 'pixi.js';
 import { INSTALLED } from 'pixi.js';
+import { v4 as uuid } from 'uuid';
+import { addSpineBgImpl, addSpineFigureImpl } from '@/Core/controller/stage/pixi/spine';
+import { WebGALPixiContainer } from '@/Core/controller/stage/pixi/WebGALPixiContainer';
+import { isIOS } from '@/Core/initializeScript';
+import { type BlinkParam, baseBlinkParam, baseFocusParam, type FocusParam } from '@/Core/live2DCore';
+import { SCREEN_CONSTANTS } from '@/Core/util/constants';
+import { logger } from '@/Core/util/logger';
+import { Live2D, WebGAL } from '@/Core/WebGAL';
+import type { IEffect, IFigureAssociatedAnimation, IFigureMetadata, ITransform } from '@/store/stageInterface';
+import { setStage, stageActions } from '@/store/stageReducer';
+import { webgalStore } from '@/store/store';
 import { GifResource } from './GifResource';
 
 export interface IAnimationObject {
@@ -61,7 +61,7 @@ export interface ILive2DRecord {
 //   duration: number;
 // }
 
-// @ts-ignore
+// @ts-expect-error
 window.PIXI = PIXI;
 
 INSTALLED.push(GifResource);
@@ -122,7 +122,7 @@ export default class PixiStage {
       backgroundAlpha: 0,
       preserveDrawingBuffer: true,
     });
-    // @ts-ignore
+    // @ts-expect-error
 
     window.PIXIapp = this; // @ts-ignore
     window.__PIXI_APP__ = app;
@@ -137,7 +137,7 @@ export default class PixiStage {
     app.renderer.view.style.position = 'absolute';
     app.renderer.view.style.display = 'block';
     app.renderer.view.id = 'pixiCanvas';
-    // @ts-ignore
+    // @ts-expect-error
     app.renderer.autoResize = true;
     const appRoot = document.getElementById('root');
     if (appRoot) {
@@ -179,7 +179,7 @@ export default class PixiStage {
       this.foregroundEffectsContainer,
       this.figureContainer,
       this.backgroundEffectsContainer,
-      this.backgroundContainer,
+      this.backgroundContainer
     );
     this.currentApp = app;
     // 每 5s 获取帧率，并且防 loader 死
@@ -232,7 +232,7 @@ export default class PixiStage {
     animationObject: IAnimationObject | null,
     key: string,
     target = 'default',
-    currentEffects: IEffect[],
+    currentEffects: IEffect[]
   ) {
     if (!animationObject) return;
     const effect = currentEffects.find((effect) => effect.target === target);
@@ -307,7 +307,7 @@ export default class PixiStage {
       if (thisTickerFunc.targetKey) {
         const target = this.getStageObjByKey(thisTickerFunc.targetKey);
         if (target) {
-          let effect: IEffect = {
+          const effect: IEffect = {
             target: thisTickerFunc.targetKey,
             transform: endStateEffect,
           };
@@ -324,7 +324,7 @@ export default class PixiStage {
     key: string,
     targetAnimation: IFigureAssociatedAnimation,
     mouthState: string,
-    presetPosition: string,
+    _presetPosition: string
   ) {
     const currentFigure = this.getStageObjByKey(key)?.pixiContainer as WebGALPixiContainer;
 
@@ -354,7 +354,7 @@ export default class PixiStage {
     key: string,
     targetAnimation: IFigureAssociatedAnimation,
     blinkState: string,
-    presetPosition: string,
+    _presetPosition: string
   ) {
     const currentFigure = this.getStageObjByKey(key)?.pixiContainer as WebGALPixiContainer;
 
@@ -489,7 +489,7 @@ export default class PixiStage {
       // TODO：找一个更好的解法，现在的解法是无论是否复用原来的资源，都设置一个延时以让动画工作正常！
 
       setTimeout(() => {
-        console.debug('start loaded video: ' + url);
+        console.debug(`start loaded video: ${url}`);
         const video = document.createElement('video');
         const videoResource = new PIXI.VideoResource(video);
         videoResource.src = url;
@@ -498,7 +498,7 @@ export default class PixiStage {
         videoResource.source.loop = true;
         videoResource.source.autoplay = true;
         videoResource.source.src = url;
-        // @ts-ignore
+        // @ts-expect-error
         const texture = PIXI.Texture.from(videoResource);
         if (texture && this.getStageObjByUuid(bgUuid)) {
           /**
@@ -634,8 +634,8 @@ export default class PixiStage {
   public addLive2dFigure(key: string, jsonPath: string, pos: string) {
     if (Live2D.isAvailable !== true) return;
     try {
-      let stageWidth = this.stageWidth;
-      let stageHeight = this.stageHeight;
+      const stageWidth = this.stageWidth;
+      const stageHeight = this.stageHeight;
 
       this.figureCash.push(jsonPath);
 
@@ -669,12 +669,10 @@ export default class PixiStage {
         sourceType: 'live2d',
         sourceExt: 'json',
       });
-      // eslint-disable-next-line @typescript-eslint/no-this-alias
-      const instance = this;
 
       const setup = () => {
         if (thisFigureContainer && this.getStageObjByUuid(figureUuid)) {
-          (async function () {
+          (async () => {
             let overrideBounds: [number, number, number, number] = [0, 0, 0, 0];
             const mot = webgalStore.getState().stage.live2dMotion.find((e) => e.target === key);
             if (mot?.overrideBounds) {
@@ -722,8 +720,8 @@ export default class PixiStage {
 
               thisFigureContainer.pivot.set(0, stageHeight / 2);
 
-              let animation_index = 0;
-              let priority_number = 3;
+              const animation_index = 0;
+              const priority_number = 3;
 
               // motion
               let motionToSet = '';
@@ -731,7 +729,7 @@ export default class PixiStage {
               if (motionFromState) {
                 motionToSet = motionFromState.motion;
               }
-              instance.updateL2dMotionByKey(key, motionToSet);
+              this.updateL2dMotionByKey(key, motionToSet);
               model.motion(motionToSet, animation_index, priority_number);
 
               // expression
@@ -740,7 +738,7 @@ export default class PixiStage {
               if (expressionFromState) {
                 expressionToSet = expressionFromState.expression;
               }
-              instance.updateL2dExpressionByKey(key, expressionToSet);
+              this.updateL2dExpressionByKey(key, expressionToSet);
               model.expression(expressionToSet);
 
               // blink
@@ -749,7 +747,7 @@ export default class PixiStage {
               if (blinkFromState) {
                 blinkToSet = { ...blinkToSet, ...blinkFromState.blink };
               }
-              instance.updateL2dBlinkByKey(key, blinkToSet);
+              this.updateL2dBlinkByKey(key, blinkToSet);
               model.internalModel?.setBlinkParam(blinkToSet);
 
               // focus
@@ -758,7 +756,7 @@ export default class PixiStage {
               if (focusFromState) {
                 focusToSet = { ...focusToSet, ...focusFromState.focus };
               }
-              instance.updateL2dFocusByKey(key, focusToSet);
+              this.updateL2dFocusByKey(key, focusToSet);
               model.internalModel?.focusController?.focus(focusToSet.x, focusToSet.y, focusToSet.instant);
 
               // lip-sync is still a problem and you can not.
@@ -782,7 +780,7 @@ export default class PixiStage {
         setup();
       }
     } catch (error) {
-      console.error('Live2d Module err: ' + error);
+      console.error(`Live2d Module err: ${error}`);
       Live2D.isAvailable = false;
     }
   }
@@ -797,12 +795,12 @@ export default class PixiStage {
         if (!container) return;
         const children = container.children;
         for (const model of children) {
-          let category_name = motion;
-          let animation_index = 0;
-          let priority_number = 3; // @ts-ignore
+          const category_name = motion;
+          const animation_index = 0;
+          const priority_number = 3; // @ts-ignore
           const internalModel = model?.internalModel ?? undefined; // 安全访问
           internalModel?.motionManager?.stopAllMotions?.();
-          // @ts-ignore
+          // @ts-expect-error
           model.motion(category_name, animation_index, priority_number);
         }
         this.updateL2dMotionByKey(key, motion);
@@ -823,15 +821,15 @@ export default class PixiStage {
     const sprite = container.children[0] as PIXI.Container;
     if (sprite?.children?.[0]) {
       const spineObject = sprite.children[0];
-      // @ts-ignore
+      // @ts-expect-error
       if (spineObject.state && spineObject.spineData) {
-        // @ts-ignore
+        // @ts-expect-error
         const animationExists = spineObject.spineData.animations.find((anim: any) => anim.name === animation);
-        let targetCurrentAnimation = target?.spineAnimation ?? '';
+        const targetCurrentAnimation = target?.spineAnimation ?? '';
         if (animationExists && targetCurrentAnimation !== animation) {
           console.log(`setting animation ${animation}`);
           target!.spineAnimation = animation;
-          // @ts-ignore
+          // @ts-expect-error
           spineObject.state.setAnimation(0, animation, false);
         }
       }
@@ -848,7 +846,7 @@ export default class PixiStage {
       if (!container) return;
       const children = container.children;
       for (const model of children) {
-        // @ts-ignore
+        // @ts-expect-error
         model.expression(expression);
       }
       this.updateL2dExpressionByKey(key, expression);
@@ -869,7 +867,7 @@ export default class PixiStage {
         newBlinkParam = { ...cloneDeep(figureRecordTarget.blink), ...blinkParam };
       }
       for (const model of children) {
-        // @ts-ignore
+        // @ts-expect-error
         model?.internalModel?.setBlinkParam?.(newBlinkParam);
       }
       this.updateL2dBlinkByKey(key, newBlinkParam);
@@ -890,7 +888,7 @@ export default class PixiStage {
         newFocusParam = { ...cloneDeep(figureRecordTarget.focus), ...focusParam };
       }
       for (const model of children) {
-        // @ts-ignore
+        // @ts-expect-error
         model?.internalModel?.focusController.focus(newFocusParam.x, newFocusParam.y, newFocusParam.instant);
       }
       this.updateL2dFocusByKey(key, newFocusParam);
@@ -909,15 +907,15 @@ export default class PixiStage {
       if (!container) return;
       const children = container.children;
       for (const model of children) {
-        // @ts-ignore
+        // @ts-expect-error
         if (model?.internalModel) {
-          // @ts-ignore
+          // @ts-expect-error
           if (model?.internalModel?.coreModel?.setParamFloat)
-            // @ts-ignore
+            // @ts-expect-error
             model?.internalModel?.coreModel?.setParamFloat?.('PARAM_MOUTH_OPEN_Y', paramY);
-          // @ts-ignore
+          // @ts-expect-error
           if (model?.internalModel?.coreModel?.setParameterValueById)
-            // @ts-ignore
+            // @ts-expect-error
             model?.internalModel?.coreModel?.setParameterValueById('ParamMouthOpenY', paramY);
         }
       }
@@ -1087,7 +1085,7 @@ export default class PixiStage {
   }
 
   private unlockStageObject(targetName: string) {
-    const index = this.lockTransformTarget.findIndex((name) => name === targetName);
+    const index = this.lockTransformTarget.indexOf(targetName);
     if (index >= 0) this.lockTransformTarget.splice(index, 1);
   }
 
@@ -1102,7 +1100,7 @@ export default class PixiStage {
   }
 }
 
-function updateCurrentBacklogEffects(newEffects: IEffect[]) {
+function _updateCurrentBacklogEffects(newEffects: IEffect[]) {
   /**
    * 更新当前 backlog 条目的 effects 记录
    */
@@ -1121,9 +1119,9 @@ const getScreenFps = (() => {
   // 先做一下兼容性处理
   const nextFrame = [
     window.requestAnimationFrame,
-    // @ts-ignore
+    // @ts-expect-error
     window.webkitRequestAnimationFrame,
-    // @ts-ignore
+    // @ts-expect-error
     window.mozRequestAnimationFrame,
   ].find((fn) => fn);
   if (!nextFrame) {

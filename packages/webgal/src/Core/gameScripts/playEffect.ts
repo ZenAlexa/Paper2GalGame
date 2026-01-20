@@ -1,12 +1,10 @@
-import { ISentence } from '@/Core/controller/scene/sceneInterface';
-import { logger } from '@/Core/util/logger';
-import { RootState, webgalStore } from '@/store/store';
-import { getNumberArgByKey, getStringArgByKey } from '@/Core/util/getSentenceArg';
-import { IPerform } from '@/Core/Modules/perform/performInterface';
-import { useSelector } from 'react-redux';
-import { WebGAL } from '@/Core/WebGAL';
 import { WEBGAL_NONE } from '@/Core/constants';
-import { end } from './end';
+import type { ISentence } from '@/Core/controller/scene/sceneInterface';
+import type { IPerform } from '@/Core/Modules/perform/performInterface';
+import { getNumberArgByKey, getStringArgByKey } from '@/Core/util/getSentenceArg';
+import { logger } from '@/Core/util/logger';
+import { WebGAL } from '@/Core/WebGAL';
+import { webgalStore } from '@/store/store';
 
 /**
  * 播放一段效果音
@@ -19,7 +17,7 @@ export const playEffect = (sentence: ISentence): IPerform => {
   let performInitName = 'effect-sound';
   // 清除先前的效果音
   WebGAL.gameplay.performController.unmountPerform(performInitName, true);
-  let url = sentence.content;
+  const url = sentence.content;
   let isLoop = false;
   // 清除带 id 的效果音
   const id = getStringArgByKey(sentence, 'id') ?? '';
@@ -62,7 +60,7 @@ export const playEffect = (sentence: ISentence): IPerform => {
       setTimeout(() => {
         let volume = getNumberArgByKey(sentence, 'volume') ?? 100; // 获取音量比
         volume = Math.max(0, Math.min(volume, 100)); // 限制音量在 0-100 之间
-        let seElement = document.createElement('audio');
+        const seElement = document.createElement('audio');
         seElement.src = url;
         if (isLoop) {
           seElement.loop = true;
@@ -102,7 +100,7 @@ export const playEffect = (sentence: ISentence): IPerform => {
           }
         };
         seElement.onended = endFunc;
-        seElement.addEventListener('error', (e) => {
+        seElement.addEventListener('error', (_e) => {
           logger.error(`播放效果音失败: ${url}`);
           // 播放失败提前结束
           endFunc();

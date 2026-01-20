@@ -6,13 +6,13 @@
  */
 
 import type {
-  TTSProvider,
-  TTSOptions,
-  TTSEmotion,
-  ProviderStatus,
   CharacterVoiceSettings,
+  ProviderStatus,
+  TTSEmotion,
+  TTSOptions,
+  TTSProvider,
   VoicevoxAudioQuery,
-  VoicevoxSpeaker
+  VoicevoxSpeaker,
 } from '../types';
 
 /**
@@ -34,7 +34,7 @@ export const VOICEVOX_SPEAKERS = {
   ZUNDAMON_HISOISO: 38,
 
   // Kasukabe Tsumugi
-  KASUKABE_TSUMUGI: 8
+  KASUKABE_TSUMUGI: 8,
 } as const;
 
 /**
@@ -43,9 +43,7 @@ export const VOICEVOX_SPEAKERS = {
 export class VoicevoxTTSProvider implements TTSProvider {
   readonly name = 'voicevox';
   readonly supportedLanguages = ['jp'];
-  readonly supportedEmotions: TTSEmotion[] = [
-    'neutral', 'happy', 'serious', 'calm'
-  ];
+  readonly supportedEmotions: TTSEmotion[] = ['neutral', 'happy', 'serious', 'calm'];
 
   private baseURL: string;
   private timeout: number;
@@ -69,12 +67,12 @@ export class VoicevoxTTSProvider implements TTSProvider {
       const timeoutId = setTimeout(() => controller.abort(), 5000);
 
       const response = await fetch(`${this.baseURL}/version`, {
-        signal: controller.signal
+        signal: controller.signal,
       });
 
       clearTimeout(timeoutId);
       return response.ok;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -88,7 +86,7 @@ export class VoicevoxTTSProvider implements TTSProvider {
       const timeoutId = setTimeout(() => controller.abort(), 5000);
 
       const response = await fetch(`${this.baseURL}/version`, {
-        signal: controller.signal
+        signal: controller.signal,
       });
 
       clearTimeout(timeoutId);
@@ -99,7 +97,7 @@ export class VoicevoxTTSProvider implements TTSProvider {
           name: this.name,
           available: true,
           lastChecked: new Date(),
-          version: version.replace(/"/g, '')
+          version: version.replace(/"/g, ''),
         };
       }
 
@@ -107,14 +105,14 @@ export class VoicevoxTTSProvider implements TTSProvider {
         name: this.name,
         available: false,
         lastChecked: new Date(),
-        error: `HTTP ${response.status}`
+        error: `HTTP ${response.status}`,
       };
     } catch (error) {
       return {
         name: this.name,
         available: false,
         lastChecked: new Date(),
-        error: error instanceof Error ? error.message : 'Connection failed'
+        error: error instanceof Error ? error.message : 'Connection failed',
       };
     }
   }
@@ -122,11 +120,7 @@ export class VoicevoxTTSProvider implements TTSProvider {
   /**
    * Generate audio from text using VOICEVOX
    */
-  async generateAudio(
-    text: string,
-    voiceSettings: CharacterVoiceSettings,
-    options?: TTSOptions
-  ): Promise<ArrayBuffer> {
+  async generateAudio(text: string, voiceSettings: CharacterVoiceSettings, options?: TTSOptions): Promise<ArrayBuffer> {
     const vvSettings = voiceSettings.voicevox;
     const speakerId = vvSettings.speaker;
 
@@ -143,10 +137,7 @@ export class VoicevoxTTSProvider implements TTSProvider {
   /**
    * Create audio query for text
    */
-  private async createAudioQuery(
-    text: string,
-    speakerId: number
-  ): Promise<VoicevoxAudioQuery> {
+  private async createAudioQuery(text: string, speakerId: number): Promise<VoicevoxAudioQuery> {
     const url = `${this.baseURL}/audio_query?text=${encodeURIComponent(text)}&speaker=${speakerId}`;
 
     const controller = new AbortController();
@@ -155,7 +146,7 @@ export class VoicevoxTTSProvider implements TTSProvider {
     try {
       const response = await fetch(url, {
         method: 'POST',
-        signal: controller.signal
+        signal: controller.signal,
       });
 
       clearTimeout(timeoutId);
@@ -165,7 +156,7 @@ export class VoicevoxTTSProvider implements TTSProvider {
         throw new Error(`VOICEVOX audio_query failed (${response.status}): ${errorText}`);
       }
 
-      return await response.json() as VoicevoxAudioQuery;
+      return (await response.json()) as VoicevoxAudioQuery;
     } catch (error) {
       clearTimeout(timeoutId);
       if (error instanceof Error && error.name === 'AbortError') {
@@ -197,10 +188,7 @@ export class VoicevoxTTSProvider implements TTSProvider {
   /**
    * Synthesize audio from query
    */
-  private async synthesizeAudio(
-    audioQuery: VoicevoxAudioQuery,
-    speakerId: number
-  ): Promise<ArrayBuffer> {
+  private async synthesizeAudio(audioQuery: VoicevoxAudioQuery, speakerId: number): Promise<ArrayBuffer> {
     const url = `${this.baseURL}/synthesis?speaker=${speakerId}`;
 
     const controller = new AbortController();
@@ -210,10 +198,10 @@ export class VoicevoxTTSProvider implements TTSProvider {
       const response = await fetch(url, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(audioQuery),
-        signal: controller.signal
+        signal: controller.signal,
       });
 
       clearTimeout(timeoutId);
@@ -242,7 +230,7 @@ export class VoicevoxTTSProvider implements TTSProvider {
       if (!response.ok) {
         throw new Error(`Failed to get speakers: ${response.status}`);
       }
-      return await response.json() as VoicevoxSpeaker[];
+      return (await response.json()) as VoicevoxSpeaker[];
     } catch (error) {
       console.error('Failed to get VOICEVOX speakers:', error);
       return [];
@@ -254,10 +242,7 @@ export class VoicevoxTTSProvider implements TTSProvider {
    */
   async initializeSpeaker(speakerId: number): Promise<boolean> {
     try {
-      const response = await fetch(
-        `${this.baseURL}/initialize_speaker?speaker=${speakerId}`,
-        { method: 'POST' }
-      );
+      const response = await fetch(`${this.baseURL}/initialize_speaker?speaker=${speakerId}`, { method: 'POST' });
       return response.ok;
     } catch (error) {
       console.warn(`Failed to initialize speaker ${speakerId}:`, error);
@@ -268,10 +253,7 @@ export class VoicevoxTTSProvider implements TTSProvider {
   /**
    * Map emotion to speaker style
    */
-  static mapEmotionToStyle(
-    baseSpeakerId: number,
-    emotion: TTSEmotion
-  ): number {
+  static mapEmotionToStyle(baseSpeakerId: number, emotion: TTSEmotion): number {
     // Map emotions to VOICEVOX styles for Zundamon
     if (baseSpeakerId === 3) {
       switch (emotion) {

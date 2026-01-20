@@ -1,16 +1,16 @@
-import useLanguage from '@/hooks/useLanguage';
 import { useEffect, useState } from 'react';
-import s from './translation.module.scss';
-import languages, { language } from '@/config/language';
 import { useSelector } from 'react-redux';
-import { RootState } from '@/store/store';
+import languages, { language } from '@/config/language';
+import useLanguage from '@/hooks/useLanguage';
+import type { RootState } from '@/store/store';
+import s from './translation.module.scss';
 
 export default function Translation() {
   const setLanguage = useLanguage();
 
   const [isShowSelectLanguage, setIsShowSelectLanguage] = useState(false);
   const globalVar = useSelector((state: RootState) => state.userData.globalGameVar);
-  const defaultLang = globalVar['Default_Language'] ?? '';
+  const defaultLang = globalVar.Default_Language ?? '';
 
   const setLang = (langId: language) => {
     setIsShowSelectLanguage(false);
@@ -40,7 +40,7 @@ export default function Translation() {
     } else {
       setLanguage(Number(window?.localStorage.getItem('lang')), false);
     }
-  }, [defaultLang]);
+  }, [defaultLang, setLang, setLanguage]);
 
   return (
     <>

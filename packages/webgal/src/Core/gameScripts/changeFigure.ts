@@ -1,17 +1,17 @@
-import { ISentence } from '@/Core/controller/scene/sceneInterface';
-import { IPerform } from '@/Core/Modules/perform/performInterface';
-import { webgalStore } from '@/store/store';
-import { setStage, stageActions } from '@/store/stageReducer';
 import cloneDeep from 'lodash/cloneDeep';
-import { getBooleanArgByKey, getNumberArgByKey, getStringArgByKey } from '@/Core/util/getSentenceArg';
-import { IFreeFigure, IStageState, ITransform } from '@/store/stageInterface';
-import { AnimationFrame, IUserAnimation } from '@/Core/Modules/animations';
+import type { ISentence } from '@/Core/controller/scene/sceneInterface';
 import { generateTransformAnimationObj } from '@/Core/controller/stage/pixi/animations/generateTransformAnimationObj';
-import { assetSetter, fileType } from '@/Core/util/gameAssetsAccess/assetSetter';
-import { logger } from '@/Core/util/logger';
+import { type BlinkParam, baseBlinkParam, baseFocusParam, type FocusParam } from '@/Core/live2DCore';
 import { getAnimateDuration } from '@/Core/Modules/animationFunctions';
+import type { AnimationFrame, IUserAnimation } from '@/Core/Modules/animations';
+import type { IPerform } from '@/Core/Modules/perform/performInterface';
+import { assetSetter, fileType } from '@/Core/util/gameAssetsAccess/assetSetter';
+import { getBooleanArgByKey, getNumberArgByKey, getStringArgByKey } from '@/Core/util/getSentenceArg';
+import { logger } from '@/Core/util/logger';
 import { WebGAL } from '@/Core/WebGAL';
-import { baseBlinkParam, baseFocusParam, BlinkParam, FocusParam } from '@/Core/live2DCore';
+import type { IFreeFigure, IStageState } from '@/store/stageInterface';
+import { setStage, stageActions } from '@/store/stageReducer';
+import { webgalStore } from '@/store/store';
 import { DEFAULT_FIG_IN_DURATION, DEFAULT_FIG_OUT_DURATION, WEBGAL_NONE } from '../constants';
 /**
  * 更改立绘
@@ -30,29 +30,29 @@ export function changeFigure(sentence: ISentence): IPerform {
 
   // 根据参数设置指定位置
   let pos: 'center' | 'left' | 'right' = 'center';
-  let mouthAnimationKey = 'mouthAnimation';
-  let eyesAnimationKey = 'blinkAnimation';
+  let _mouthAnimationKey = 'mouthAnimation';
+  let _eyesAnimationKey = 'blinkAnimation';
   const leftFromArgs = getBooleanArgByKey(sentence, 'left') ?? false;
   const rightFromArgs = getBooleanArgByKey(sentence, 'right') ?? false;
   if (leftFromArgs) {
     pos = 'left';
-    mouthAnimationKey = 'mouthAnimationLeft';
-    eyesAnimationKey = 'blinkAnimationLeft';
+    _mouthAnimationKey = 'mouthAnimationLeft';
+    _eyesAnimationKey = 'blinkAnimationLeft';
   }
   if (rightFromArgs) {
     pos = 'right';
-    mouthAnimationKey = 'mouthAnimationRight';
-    eyesAnimationKey = 'blinkAnimationRight';
+    _mouthAnimationKey = 'mouthAnimationRight';
+    _eyesAnimationKey = 'blinkAnimationRight';
   }
 
   // id 与 自由立绘
   let key = getStringArgByKey(sentence, 'id') ?? '';
-  const isFreeFigure = key ? true : false;
+  const isFreeFigure = !!key;
   const id = key ? key : `fig-${pos}`;
 
   // live2d 或 spine 相关
-  let motion = getStringArgByKey(sentence, 'motion') ?? '';
-  let expression = getStringArgByKey(sentence, 'expression') ?? '';
+  const motion = getStringArgByKey(sentence, 'motion') ?? '';
+  const expression = getStringArgByKey(sentence, 'expression') ?? '';
   const boundsFromArgs = getStringArgByKey(sentence, 'bounds') ?? '';
   let bounds = getOverrideBoundsArr(boundsFromArgs);
 
@@ -154,7 +154,7 @@ export function changeFigure(sentence: ISentence): IPerform {
       oldStageObject.isExiting = true;
     }
   }
-  const setAnimationNames = (key: string, sentence: ISentence) => {
+  const setAnimationNames = (key: string, _sentence: ISentence) => {
     // 处理 transform 和 默认 transform
     let animationObj: AnimationFrame[];
     if (transformString) {
@@ -169,9 +169,9 @@ export function changeFigure(sentence: ISentence): IPerform {
         WebGAL.animationManager.addAnimation(newAnimation);
         duration = getAnimateDuration(animationName);
         webgalStore.dispatch(
-          stageActions.updateAnimationSettings({ target: key, key: 'enterAnimationName', value: animationName }),
+          stageActions.updateAnimationSettings({ target: key, key: 'enterAnimationName', value: animationName })
         );
-      } catch (e) {
+      } catch (_e) {
         // 解析都错误了，歇逼吧
         applyDefaultTransform();
       }
@@ -190,30 +190,30 @@ export function changeFigure(sentence: ISentence): IPerform {
       WebGAL.animationManager.addAnimation(newAnimation);
       duration = getAnimateDuration(animationName);
       webgalStore.dispatch(
-        stageActions.updateAnimationSettings({ target: key, key: 'enterAnimationName', value: animationName }),
+        stageActions.updateAnimationSettings({ target: key, key: 'enterAnimationName', value: animationName })
       );
     }
 
     if (enterAnimation) {
       webgalStore.dispatch(
-        stageActions.updateAnimationSettings({ target: key, key: 'enterAnimationName', value: enterAnimation }),
+        stageActions.updateAnimationSettings({ target: key, key: 'enterAnimationName', value: enterAnimation })
       );
       duration = getAnimateDuration(enterAnimation);
     }
     if (exitAnimation) {
       webgalStore.dispatch(
-        stageActions.updateAnimationSettings({ target: key, key: 'exitAnimationName', value: exitAnimation }),
+        stageActions.updateAnimationSettings({ target: key, key: 'exitAnimationName', value: exitAnimation })
       );
       duration = getAnimateDuration(exitAnimation);
     }
     if (enterDuration >= 0) {
       webgalStore.dispatch(
-        stageActions.updateAnimationSettings({ target: key, key: 'enterDuration', value: enterDuration }),
+        stageActions.updateAnimationSettings({ target: key, key: 'enterDuration', value: enterDuration })
       );
     }
     if (exitDuration >= 0) {
       webgalStore.dispatch(
-        stageActions.updateAnimationSettings({ target: key, key: 'exitDuration', value: exitDuration }),
+        stageActions.updateAnimationSettings({ target: key, key: 'exitDuration', value: exitDuration })
       );
     }
   };
@@ -300,7 +300,7 @@ function getOverrideBoundsArr(raw: string): undefined | [number, number, number,
   const parseOverrideBoundsResult = raw.split(',').map((e) => Number(e));
   let isPass = true;
   parseOverrideBoundsResult.forEach((e) => {
-    if (isNaN(e)) {
+    if (Number.isNaN(e)) {
       isPass = false;
     }
   });

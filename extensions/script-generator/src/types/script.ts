@@ -10,17 +10,17 @@ import type { DialogueLine, MultiLanguageContent } from './character';
  * WebGAL script command types
  */
 export type WebGALCommand =
-  | 'say'          // Dialogue
-  | 'changeBg'     // Change background
+  | 'say' // Dialogue
+  | 'changeBg' // Change background
   | 'changeFigure' // Change character sprite
-  | 'playBGM'      // Play background music
-  | 'playSE'       // Play sound effect
-  | 'wait'         // Wait/pause
-  | 'choose'       // Choice menu
-  | 'jump'         // Jump to label
-  | 'label'        // Label marker
-  | 'setVar'       // Set variable
-  | 'callScene';   // Call scene
+  | 'playBGM' // Play background music
+  | 'playSE' // Play sound effect
+  | 'wait' // Wait/pause
+  | 'choose' // Choice menu
+  | 'jump' // Jump to label
+  | 'label' // Label marker
+  | 'setVar' // Set variable
+  | 'callScene'; // Call scene
 
 /**
  * WebGAL script line

@@ -5,21 +5,21 @@
  * with seamless background generation for remaining content
  */
 
-import type { WebGALScript, WebGALScene, GenerationOptions } from '../types/script';
-import type { MultiLanguageContent, Character } from '../types/character';
+import type { MultiLanguageContent } from '../types/character';
+import type { GenerationOptions, WebGALScene, WebGALScript } from '../types/script';
+import { createSegmentationStrategy, type PaperSegmentationStrategy } from './segmentation-strategy';
 import type {
-  ParsedPaper,
-  PaperSegment,
-  IncrementalGenerationResult,
   BackgroundTask,
   GenerationProgress,
-  SegmentProgress,
+  IncrementalConfig,
+  IncrementalGenerationResult,
+  PaperSegment,
+  ParsedPaper,
   SegmentEvent,
   SegmentEventListener,
-  IncrementalConfig,
-  WaitingDialogue
+  SegmentProgress,
+  WaitingDialogue,
 } from './types';
-import { PaperSegmentationStrategy, createSegmentationStrategy } from './segmentation-strategy';
 
 /**
  * Default waiting dialogues (tri-language)
@@ -30,37 +30,37 @@ const DEFAULT_WAITING_DIALOGUES: WaitingDialogue[] = [
     content: {
       zh: '让我想想这个部分该怎么解释...',
       jp: 'この部分をどう説明すればいいか考えてみますね...',
-      en: 'Let me think about how to explain this part...'
+      en: 'Let me think about how to explain this part...',
     },
-    context: 'generating'
+    context: 'generating',
   },
   {
     characterId: 'murasame',
     content: {
       zh: '诶诶！这里有些复杂的概念呢，稍等一下！',
       jp: 'えぇ！ここは少し複雑な概念がありますね、ちょっと待ってください！',
-      en: 'Wow! There are some complex concepts here, just a moment!'
+      en: 'Wow! There are some complex concepts here, just a moment!',
     },
-    context: 'generating'
+    context: 'generating',
   },
   {
     characterId: 'nanami',
     content: {
       zh: '这部分内容需要仔细分析，请稍候...',
       jp: 'この部分は慎重に分析する必要があります、少々お待ちください...',
-      en: 'This part requires careful analysis, please wait...'
+      en: 'This part requires careful analysis, please wait...',
     },
-    context: 'generating'
+    context: 'generating',
   },
   {
     characterId: 'meguru',
     content: {
       zh: '让我整理一下接下来要讲解的内容。',
       jp: '次に説明する内容を整理させてください。',
-      en: 'Let me organize the content for the next section.'
+      en: 'Let me organize the content for the next section.',
     },
-    context: 'transition'
-  }
+    context: 'transition',
+  },
 ];
 
 /**
@@ -75,10 +75,7 @@ export class IncrementalScriptGenerator {
   private generatedScripts: Map<string, WebGALScene[]>;
   private waitingDialogues: WaitingDialogue[];
 
-  constructor(
-    scriptGenerator: ScriptGeneratorInterface,
-    config: Partial<IncrementalConfig> = {}
-  ) {
+  constructor(scriptGenerator: ScriptGeneratorInterface, config: Partial<IncrementalConfig> = {}) {
     this.scriptGenerator = scriptGenerator;
     this.config = {
       minStartPercentage: 50,
@@ -88,7 +85,7 @@ export class IncrementalScriptGenerator {
       enableWaitingDialogues: true,
       retryFailedSegments: true,
       maxRetryAttempts: 3,
-      ...config
+      ...config,
     };
 
     this.segmentationStrategy = createSegmentationStrategy(this.config);
@@ -117,7 +114,7 @@ export class IncrementalScriptGenerator {
         type: 'segment_started',
         segmentId: segment.id,
         data: {},
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       try {
@@ -130,28 +127,28 @@ export class IncrementalScriptGenerator {
           segmentId: segment.id,
           data: {
             dialogueCount: scenes.reduce((sum, s) => sum + s.lines.length, 0),
-            scenes
+            scenes,
           },
-          timestamp: new Date()
+          timestamp: new Date(),
         });
       } catch (error) {
         this.emitEvent({
           type: 'segment_failed',
           segmentId: segment.id,
           data: { error: (error as Error).message },
-          timestamp: new Date()
+          timestamp: new Date(),
         });
         throw error;
       }
     }
 
     // Prepare background tasks
-    const backgroundTasks: BackgroundTask[] = backgroundSegments.map(segment => ({
+    const backgroundTasks: BackgroundTask[] = backgroundSegments.map((segment) => ({
       segmentId: segment.id,
       paperData,
       options,
       estimatedTime: this.segmentationStrategy.estimateGenerationTime(segment),
-      status: 'queued' as const
+      status: 'queued' as const,
     }));
 
     // Store background tasks
@@ -160,12 +157,7 @@ export class IncrementalScriptGenerator {
     }
 
     // Build immediate script
-    const immediateScript = this.buildScript(
-      immediateScenes,
-      paperData,
-      options,
-      prioritySegments
-    );
+    const immediateScript = this.buildScript(immediateScenes, paperData, options, prioritySegments);
 
     // Calculate initial progress
     const initialProgress = this.calculateProgress(segments);
@@ -176,7 +168,7 @@ export class IncrementalScriptGenerator {
         type: 'game_ready',
         segmentId: 'all',
         data: {},
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       // Start background generation
@@ -189,7 +181,7 @@ export class IncrementalScriptGenerator {
       immediateScript,
       backgroundTasks,
       gameReadyCallback,
-      initialProgress
+      initialProgress,
     };
   }
 
@@ -202,20 +194,13 @@ export class IncrementalScriptGenerator {
     options: GenerationOptions
   ): Promise<WebGALScene[]> {
     // Use the script generator to create scenes for this segment
-    return await this.scriptGenerator.generateSegmentScenes(
-      segment,
-      paperData,
-      options
-    );
+    return await this.scriptGenerator.generateSegmentScenes(segment, paperData, options);
   }
 
   /**
    * Start background generation for remaining segments
    */
-  private async startBackgroundGeneration(
-    tasks: BackgroundTask[],
-    allSegments: PaperSegment[]
-  ): Promise<void> {
+  private async startBackgroundGeneration(tasks: BackgroundTask[], allSegments: PaperSegment[]): Promise<void> {
     for (const task of tasks) {
       try {
         // Update task status
@@ -223,7 +208,7 @@ export class IncrementalScriptGenerator {
         this.backgroundTasks.set(task.segmentId, task);
 
         // Find segment
-        const segment = allSegments.find(s => s.id === task.segmentId);
+        const segment = allSegments.find((s) => s.id === task.segmentId);
         if (!segment) continue;
 
         // Emit start event
@@ -231,7 +216,7 @@ export class IncrementalScriptGenerator {
           type: 'segment_started',
           segmentId: task.segmentId,
           data: {},
-          timestamp: new Date()
+          timestamp: new Date(),
         });
 
         // Generate with retry
@@ -261,9 +246,9 @@ export class IncrementalScriptGenerator {
             segmentId: task.segmentId,
             data: {
               dialogueCount: scenes.reduce((sum, s) => sum + s.lines.length, 0),
-              scenes
+              scenes,
             },
-            timestamp: new Date()
+            timestamp: new Date(),
           });
         } else {
           // Failed after retries
@@ -273,13 +258,12 @@ export class IncrementalScriptGenerator {
             type: 'segment_failed',
             segmentId: task.segmentId,
             data: { error: lastError?.message || 'Unknown error' },
-            timestamp: new Date()
+            timestamp: new Date(),
           });
         }
 
         // Delay before next task
         await this.delay(this.config.backgroundTaskDelay);
-
       } catch (error) {
         task.status = 'failed';
         console.error(`Background generation failed for ${task.segmentId}:`, error);
@@ -301,32 +285,29 @@ export class IncrementalScriptGenerator {
         title: {
           zh: `${paperData.metadata.title} - 游戏脚本`,
           jp: `${paperData.metadata.title} - ゲームスクリプト`,
-          en: `${paperData.metadata.title} - Game Script`
+          en: `${paperData.metadata.title} - Game Script`,
         },
         paperTitle: {
           zh: paperData.metadata.title,
           jp: paperData.metadata.title, // May need translation
-          en: paperData.metadata.title
+          en: paperData.metadata.title,
         },
         timestamp: new Date(),
         version: '1.0.0',
         multiLanguage: {
           supportedLanguages: ['zh', 'jp', 'en'],
           primaryLanguage: options.multiLanguage.primaryLanguage,
-          currentLanguage: options.multiLanguage.primaryLanguage
+          currentLanguage: options.multiLanguage.primaryLanguage,
         },
         characters: options.characters,
-        totalDuration: segments.reduce(
-          (sum, s) => sum + this.segmentationStrategy.estimateGenerationTime(s),
-          0
-        )
+        totalDuration: segments.reduce((sum, s) => sum + this.segmentationStrategy.estimateGenerationTime(s), 0),
       },
       scenes,
       validation: {
         isValid: true,
         errors: [],
-        warnings: []
-      }
+        warnings: [],
+      },
     };
   }
 
@@ -334,7 +315,7 @@ export class IncrementalScriptGenerator {
    * Calculate current generation progress
    */
   private calculateProgress(segments: PaperSegment[]): GenerationProgress {
-    const segmentProgress: SegmentProgress[] = segments.map(segment => {
+    const segmentProgress: SegmentProgress[] = segments.map((segment) => {
       const generated = this.generatedScripts.has(segment.id);
       const task = this.backgroundTasks.get(segment.id);
 
@@ -352,9 +333,9 @@ export class IncrementalScriptGenerator {
       const result: SegmentProgress = {
         segmentId: segment.id,
         status,
-        progress: generated ? 100 : (status === 'generating' ? 50 : 0),
+        progress: generated ? 100 : status === 'generating' ? 50 : 0,
         message: this.getProgressMessage(status, segment),
-        timestamp: new Date()
+        timestamp: new Date(),
       };
 
       if (generated) {
@@ -367,15 +348,14 @@ export class IncrementalScriptGenerator {
       return result;
     });
 
-    const completedCount = segmentProgress.filter(s => s.status === 'completed').length;
+    const completedCount = segmentProgress.filter((s) => s.status === 'completed').length;
     const totalEstimatedDialogues = segments.reduce((sum, s) => sum + s.estimatedDialogues, 0);
     const completedDialogues = segments
-      .filter(s => this.generatedScripts.has(s.id))
+      .filter((s) => this.generatedScripts.has(s.id))
       .reduce((sum, s) => sum + s.estimatedDialogues, 0);
 
-    const overallProgress = totalEstimatedDialogues > 0
-      ? Math.round((completedDialogues / totalEstimatedDialogues) * 100)
-      : 0;
+    const overallProgress =
+      totalEstimatedDialogues > 0 ? Math.round((completedDialogues / totalEstimatedDialogues) * 100) : 0;
 
     return {
       totalSegments: segments.length,
@@ -383,41 +363,38 @@ export class IncrementalScriptGenerator {
       overallProgress,
       canStartGame: overallProgress >= this.config.minStartPercentage,
       segments: segmentProgress,
-      estimatedTimeRemaining: this.estimateRemainingTime(segments)
+      estimatedTimeRemaining: this.estimateRemainingTime(segments),
     };
   }
 
   /**
    * Get progress message for segment
    */
-  private getProgressMessage(
-    status: SegmentProgress['status'],
-    segment: PaperSegment
-  ): MultiLanguageContent {
+  private getProgressMessage(status: SegmentProgress['status'], segment: PaperSegment): MultiLanguageContent {
     switch (status) {
       case 'completed':
         return {
           zh: `${segment.title.zh} 已完成`,
           jp: `${segment.title.jp} 完了`,
-          en: `${segment.title.en} completed`
+          en: `${segment.title.en} completed`,
         };
       case 'generating':
         return {
           zh: `正在生成 ${segment.title.zh}...`,
           jp: `${segment.title.jp} を生成中...`,
-          en: `Generating ${segment.title.en}...`
+          en: `Generating ${segment.title.en}...`,
         };
       case 'failed':
         return {
           zh: `${segment.title.zh} 生成失败`,
           jp: `${segment.title.jp} 生成失敗`,
-          en: `${segment.title.en} generation failed`
+          en: `${segment.title.en} generation failed`,
         };
       default:
         return {
           zh: `等待生成 ${segment.title.zh}`,
           jp: `${segment.title.jp} 生成待ち`,
-          en: `Waiting to generate ${segment.title.en}`
+          en: `Waiting to generate ${segment.title.en}`,
         };
     }
   }
@@ -473,7 +450,7 @@ export class IncrementalScriptGenerator {
    * Get a random waiting dialogue
    */
   getWaitingDialogue(context: WaitingDialogue['context']): WaitingDialogue | undefined {
-    const contextDialogues = this.waitingDialogues.filter(d => d.context === context);
+    const contextDialogues = this.waitingDialogues.filter((d) => d.context === context);
     if (contextDialogues.length === 0) return undefined;
 
     const index = Math.floor(Math.random() * contextDialogues.length);
@@ -512,7 +489,7 @@ export class IncrementalScriptGenerator {
    * Delay helper
    */
   private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
 

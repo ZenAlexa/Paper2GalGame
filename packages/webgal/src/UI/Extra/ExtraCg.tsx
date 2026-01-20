@@ -1,11 +1,10 @@
-import styles from '@/UI/Extra/extra.module.scss';
-import React from 'react';
 import { useSelector } from 'react-redux';
-import { RootState } from '@/store/store';
 import { useValue } from '@/hooks/useValue';
+import type { RootState } from '@/store/store';
+import styles from '@/UI/Extra/extra.module.scss';
 import './extraCG_animation_List.scss';
-import { ExtraCgElement } from '@/UI/Extra/ExtraCgElement';
 import useSoundEffect from '@/hooks/useSoundEffect';
+import { ExtraCgElement } from '@/UI/Extra/ExtraCgElement';
 
 export function ExtraCg() {
   const cgPerPage = 8;
@@ -42,7 +41,7 @@ export function ExtraCg() {
   for (let i = 1; i <= pageNumber; i++) {
     let className = styles.cgNav;
     if (currentPage.value === i) {
-      className = className + ' ' + styles.cgNav_active;
+      className = `${className} ${styles.cgNav_active}`;
     }
     const temp = (
       <div
@@ -50,7 +49,7 @@ export function ExtraCg() {
           currentPage.set(i);
           playSeClick();
         }}
-        key={'nav' + i}
+        key={`nav${i}`}
         onMouseEnter={playSeEnter}
         className={className}
       >

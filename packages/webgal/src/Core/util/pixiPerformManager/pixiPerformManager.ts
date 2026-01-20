@@ -126,7 +126,7 @@ export function call(name: IName): IResult {
     const errorMsg = `Can't call the perform named "${nameStr}". It might not be registered or was unregistered.`;
     logger.error(errorMsg);
     throw new Error(
-      `Perform "${nameStr}" does not have a valid callback. Available performs: ${getPerforms().join(', ')}`,
+      `Perform "${nameStr}" does not have a valid callback. Available performs: ${getPerforms().join(', ')}`
     );
   }
   return callback();

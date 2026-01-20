@@ -1,13 +1,13 @@
-import { useEffect } from 'react';
-import { WebGAL } from '@/Core/WebGAL';
-import axios from 'axios';
-import { scss2cssinjsParser } from '@/Core/controller/customUI/scss2cssinjsParser';
-import { useValue } from '@/hooks/useValue';
 import { css, injectGlobal } from '@emotion/css';
+import axios from 'axios';
+import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { RootState } from '@/store/store';
-import { IWebGALStyleObj } from 'webgal-parser/build/types/styleParser';
+import type { IWebGALStyleObj } from 'webgal-parser/build/types/styleParser';
+import { scss2cssinjsParser } from '@/Core/controller/customUI/scss2cssinjsParser';
 import { logger } from '@/Core/util/logger';
+import { WebGAL } from '@/Core/WebGAL';
+import { useValue } from '@/hooks/useValue';
+import type { RootState } from '@/store/store';
 
 export default function useApplyStyle(url: string) {
   const styleObject = useValue<IWebGALStyleObj>({ classNameStyles: {}, others: '' });
@@ -32,7 +32,7 @@ export default function useApplyStyle(url: string) {
 
   useEffect(() => {
     updateStyleFile();
-  }, []);
+  }, [updateStyleFile]);
 
   useEffect(() => {
     injectGlobal(styleObject.value.others);
@@ -50,5 +50,5 @@ function useRigisterStyleUpdate(callback: Function) {
   useEffect(() => {
     WebGAL.events.styleUpdate.on(handler);
     return () => WebGAL.events.styleUpdate.off(handler);
-  }, []);
+  }, [handler]);
 }

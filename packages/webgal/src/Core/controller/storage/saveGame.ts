@@ -1,8 +1,6 @@
 import cloneDeep from 'lodash/cloneDeep';
 import { dumpSavesToStorage } from '@/Core/controller/storage/savesController';
-import { createPaperReadingEntry, updatePaperReadingEntry } from '@/Core/controller/storage/storageController';
 import { WebGAL } from '@/Core/WebGAL';
-import type { IPaperSaveState } from '@/store/paperInterface';
 import { saveActions } from '@/store/savesReducer';
 import { webgalStore } from '@/store/store';
 import type { ISaveData } from '@/store/userDataInterface';
@@ -16,16 +14,6 @@ export const saveGame = (index: number) => {
   const saveData: ISaveData = generateCurrentStageData(index);
   webgalStore.dispatch(saveActions.saveGame({ index, saveData }));
   dumpSavesToStorage(index, index);
-
-  // Update Paper reading list if this is a Paper mode save
-  if (saveData.paperState) {
-    const readingEntry = createPaperReadingEntry(saveData);
-    if (readingEntry) {
-      updatePaperReadingEntry(readingEntry).catch((error) => {
-        logger.error('Failed to update Paper reading list:', error);
-      });
-    }
-  }
 };
 
 /**
@@ -75,24 +63,6 @@ export function generateCurrentStageData(index: number, isSavePreviewImage = tru
     },
     previewImage: urlToSave,
   };
-
-  // Capture Paper mode state if active
-  const paperState = webgalStore.getState().paper;
-  if (paperState.isPaperMode && paperState.currentPaper && paperState.progress) {
-    const paperSaveState: IPaperSaveState = {
-      isPaperMode: true,
-      metadata: cloneDeep(paperState.currentPaper),
-      progress: cloneDeep(paperState.progress),
-      sessionId: paperState.session?.sessionId || '',
-      highlights: cloneDeep(paperState.highlights),
-      notes: cloneDeep(paperState.notes),
-    };
-    saveData.paperState = paperSaveState;
-    logger.info('Paper mode state captured for save', {
-      paperId: paperSaveState.metadata.paperId,
-      progress: paperSaveState.progress.percentage,
-    });
-  }
 
   return saveData;
 }

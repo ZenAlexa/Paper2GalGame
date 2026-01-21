@@ -1,7 +1,6 @@
 import type { IBacklogItem } from '@/Core/Modules/backlog';
 import type { ISceneEntry } from '@/Core/Modules/scene';
 import type { language } from '@/config/language';
-import type { IPaperSaveState } from './paperInterface';
 import type { IGameVar, IStageState } from './stageInterface';
 
 /**
@@ -70,8 +69,6 @@ export interface ISaveData {
   saveTime: string; // 保存时间
   sceneData: ISaveScene; // 场景数据
   previewImage: string;
-  /** Paper mode state (optional, only present when saving in Paper mode) */
-  paperState?: IPaperSaveState;
 }
 
 export interface IAppreciationAsset {

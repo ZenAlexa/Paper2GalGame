@@ -13,7 +13,6 @@ import { setVisibility } from '@/store/GUIReducer';
 import type { IGuiState } from '@/store/guiInterface';
 import type { IStageState } from '@/store/stageInterface';
 import { type RootState, webgalStore } from '@/store/store';
-import { PaperProgressBar } from '@/UI/PaperProgressBar';
 import { AudioContainer } from './AudioContainer/AudioContainer';
 import { FullScreenPerform } from './FullScreenPerform/FullScreenPerform';
 import styles from './stage.module.scss';
@@ -90,8 +89,6 @@ export const Stage: FC = () => {
   return (
     <div className={styles.MainStage_main}>
       <FullScreenPerform />
-      {/* Paper mode progress bar - only visible in Paper mode */}
-      <PaperProgressBar position="top" compact />
       {/* 已弃用旧的立绘与背景舞台 */}
       {/* <OldStage /> */}
       <MainStage />

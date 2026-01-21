@@ -6,7 +6,6 @@ import { getValueFromStateElseKey } from '@/Core/gameScripts/setVar';
 import type { ISceneEntry } from '@/Core/Modules/scene';
 import { getBooleanArgByKey, getStringArgByKey } from '@/Core/util/getSentenceArg';
 import { WebGAL } from '@/Core/WebGAL';
-import { updateProgress } from '@/store/paperReducer';
 import type { IStageState } from '@/store/stageInterface';
 import { webgalStore } from '@/store/store';
 import { logger } from '../../util/logger';
@@ -141,14 +140,4 @@ export const scriptExecutor = () => {
     }
   }, 0);
   WebGAL.sceneManager.sceneData.currentSentenceId++;
-
-  // Update Paper progress if in Paper mode
-  const paperState = webgalStore.getState().paper;
-  if (paperState.isPaperMode && paperState.progress) {
-    webgalStore.dispatch(
-      updateProgress({
-        currentIndex: WebGAL.sceneManager.sceneData.currentSentenceId,
-      })
-    );
-  }
 };

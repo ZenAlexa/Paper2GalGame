@@ -134,7 +134,7 @@ export class OpenRouterClient {
           { role: 'user', content: userPrompt },
         ],
         temperature: 0.8,
-        max_tokens: 256000, // Gemini 3 supports 1M context, output up to 256K
+        max_tokens: 50000, // Reduced for faster response - 50K tokens sufficient for script
         reasoning: true, // Enable reasoning for better script quality
       };
 

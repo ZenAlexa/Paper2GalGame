@@ -13,7 +13,6 @@ import { getUserInput } from '@/Core/gameScripts/getUserInput';
 import { intro } from '@/Core/gameScripts/intro';
 import { label } from '@/Core/gameScripts/label';
 import { miniAvatar } from '@/Core/gameScripts/miniAvatar';
-import { paperHighlight, paperQuote } from '@/Core/gameScripts/paperCommands';
 import { pixi } from '@/Core/gameScripts/pixi';
 import { playEffect } from '@/Core/gameScripts/playEffect';
 import { playVideo } from '@/Core/gameScripts/playVideo';
@@ -75,9 +74,6 @@ export const SCRIPT_TAG_MAP = defineScripts({
   applyStyle: ScriptConfig(commandType.applyStyle, applyStyle, { next: true }),
   wait: ScriptConfig(commandType.wait, wait),
   callSteam: ScriptConfig(commandType.callSteam, callSteam, { next: true }),
-  // Paper mode commands
-  paperQuote: ScriptConfig(commandType.paperQuote, paperQuote),
-  paperHighlight: ScriptConfig(commandType.paperHighlight, paperHighlight),
 });
 
 export const SCRIPT_CONFIG: IConfigInterface[] = Object.values(SCRIPT_TAG_MAP);

@@ -1,6 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit';
 import GUIReducer from '@/store/GUIReducer';
-import paperReducer from '@/store/paperReducer';
 import savesReducer from '@/store/savesReducer';
 import stageReducer from '@/store/stageReducer';
 import userDataReducer from '@/store/userDataReducer';
@@ -14,7 +13,6 @@ export const webgalStore = configureStore({
     GUI: GUIReducer,
     userData: userDataReducer,
     saveData: savesReducer,
-    paper: paperReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

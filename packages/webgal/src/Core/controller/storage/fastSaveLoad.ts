@@ -6,13 +6,7 @@ import {
   dumpFastSaveToStorageSync,
   getFastSaveFromStorage,
 } from '@/Core/controller/storage/savesController';
-import {
-  createPaperReadingEntry,
-  getStorageAsync,
-  setStorageAsync,
-  updatePaperReadingEntry,
-} from '@/Core/controller/storage/storageController';
-import { logger } from '@/Core/util/logger';
+import { getStorageAsync, setStorageAsync } from '@/Core/controller/storage/storageController';
 import { WebGAL } from '@/Core/WebGAL';
 import { saveActions } from '@/store/savesReducer';
 import { webgalStore } from '@/store/store';
@@ -36,16 +30,6 @@ export async function fastSaveGame() {
   const newSaveData = cloneDeep(saveData);
   webgalStore.dispatch(saveActions.setFastSave(newSaveData));
   await dumpFastSaveToStorage();
-
-  // Update Paper reading list if this is a Paper mode save
-  if (newSaveData.paperState) {
-    const readingEntry = createPaperReadingEntry(newSaveData);
-    if (readingEntry) {
-      await updatePaperReadingEntry(readingEntry).catch((error) => {
-        logger.error('Failed to update Paper reading list during fast save:', error);
-      });
-    }
-  }
 }
 
 /**

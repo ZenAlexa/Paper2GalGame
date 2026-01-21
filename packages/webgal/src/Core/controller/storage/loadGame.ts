@@ -5,7 +5,6 @@ import { setEbg } from '@/Core/gameScripts/changeBg/setEbg';
 import { scenePrefetcher } from '@/Core/util/prefetcher/scenePrefetcher';
 import { WebGAL } from '@/Core/WebGAL';
 import { setVisibility } from '@/store/GUIReducer';
-import { resetPaperState, restoreFromSave } from '@/store/paperReducer';
 import { resetStageState } from '@/store/stageReducer';
 import { webgalStore } from '@/store/store';
 import type { ISaveData } from '@/store/userDataInterface';
@@ -77,22 +76,6 @@ export function loadGameFromStageData(stageData: ISaveData) {
 
       // Restore blurred background
       setEbg(webgalStore.getState().stage.bgName);
-
-      // Restore Paper mode state if present in save
-      if (loadFile.paperState?.isPaperMode) {
-        dispatch(restoreFromSave(loadFile.paperState));
-        logger.info('Paper mode state restored from save', {
-          paperId: loadFile.paperState.metadata.paperId,
-          progress: loadFile.paperState.progress.percentage,
-        });
-      } else {
-        // Not a Paper mode save, ensure Paper mode is disabled
-        const currentPaperState = webgalStore.getState().paper;
-        if (currentPaperState.isPaperMode) {
-          dispatch(resetPaperState());
-          logger.info('Exited Paper mode (loaded non-Paper save)');
-        }
-      }
     })
     .catch((error) => {
       logger.error('Failed to load game scene:', error);

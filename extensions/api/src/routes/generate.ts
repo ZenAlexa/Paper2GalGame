@@ -284,7 +284,7 @@ router.post('/', async (req: Request, res: Response) => {
             const options = formatOptions(line.options);
             reconstructedLine = `${properCommand}:${content}${options};`;
 
-            console.log(`[Generate] Reconstructed say: "${content.substring(0, 30)}..." with options: ${options}`);
+            // Reduced logging for performance
           } else {
             // For other commands (changeBg, changeFigure, bgm, etc.)
             let content = line.params?.[0] || '';
@@ -300,7 +300,7 @@ router.post('/', async (req: Request, res: Response) => {
 
             const options = formatOptions(line.options);
             reconstructedLine = `${properCommand}:${content}${options};`;
-            console.log(`[Generate] Reconstructed ${properCommand}: "${content}" with options: ${options}`);
+            // Reduced logging for performance
           }
 
           webgalLines.push(reconstructedLine);
@@ -388,7 +388,7 @@ router.post('/', async (req: Request, res: Response) => {
             const spriteConfig = speakerSpriteMap[speaker] || speakerSpriteMap.unknown;
             const changeFigureLine = `changeFigure:${spriteConfig.sprite} ${spriteConfig.position} -next;`;
 
-            console.log(`[Generate] Speaker changed: ${currentSpeaker} → ${speaker}, inserting: ${changeFigureLine}`);
+            // Note: Speaker changed, figure inserted (logging reduced for performance)
             processedLines.push(changeFigureLine);
             currentSpeaker = speaker;
           }
@@ -403,12 +403,13 @@ router.post('/', async (req: Request, res: Response) => {
 
       console.log(`[Generate] After speaker processing: ${webgalLines.length} lines`);
 
+      // Note: Full script logging removed for performance
+      // Debug with first 5 lines only
       console.log(`[Generate] Reconstructed ${webgalLines.length} WebGAL lines`);
-      console.log('[Generate] ========== FULL WEBGAL SCRIPT ==========');
-      webgalLines.forEach((line, idx) => {
-        console.log(`[Generate] Line ${idx + 1}: ${line}`);
-      });
-      console.log('[Generate] ========== END SCRIPT ==========');
+      if (webgalLines.length > 0) {
+        console.log(`[Generate] First line: ${webgalLines[0]}`);
+        console.log(`[Generate] Last line: ${webgalLines[webgalLines.length - 1]}`);
+      }
 
       // Ensure we have at least some valid content
       if (webgalLines.length === 0) {

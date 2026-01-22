@@ -1,0 +1,228 @@
+// Upload Paper UI - Styled to match WebGAL choose command
+
+.UploadPaper_Main {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-flow: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 13;
+  background: rgba(0, 0, 0, 0.05);
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.UploadPaper_Container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 50%;
+  max-width: 700px;
+  padding: 1.5em 2em;
+  background: rgba(255, 255, 255, 0.65);
+  border-radius: 4px;
+  border: 3px solid rgba(0, 0, 0, 0);
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.25);
+  transition: background-color 0.5s, box-shadow 0.5s;
+}
+
+.UploadPaper_Title {
+  font-family: "WebgalUI", serif;
+  font-size: 265%;
+  color: #8E354A;
+  margin-bottom: 0.3em;
+  text-align: center;
+}
+
+.UploadPaper_Description {
+  font-family: "WebgalUI", serif;
+  font-size: 150%;
+  color: rgba(142, 53, 74, 0.7);
+  margin-bottom: 1em;
+  text-align: center;
+}
+
+.UploadPaper_DropZone {
+  width: 100%;
+  min-height: 180px;
+  border: 3px dashed rgba(142, 53, 74, 0.5);
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.5s, border-color 0.5s, box-shadow 0.5s;
+  background: rgba(255, 255, 255, 0.4);
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.7);
+    border-color: #8E354A;
+    border-style: dashed;
+    box-shadow: 0 0 15px rgba(142, 53, 74, 0.2);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: #8E354A;
+  }
+}
+
+.UploadPaper_DropZone_Active {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: #8E354A;
+  border-style: solid;
+  box-shadow: 0 0 20px rgba(142, 53, 74, 0.3);
+}
+
+.UploadPaper_Icon {
+  font-size: 400%;
+  color: rgba(142, 53, 74, 0.6);
+  margin-bottom: 0.2em;
+  line-height: 1;
+}
+
+.UploadPaper_HintText {
+  font-family: "WebgalUI", serif;
+  font-size: 180%;
+  color: #8E354A;
+}
+
+.UploadPaper_SubHint {
+  font-family: "WebgalUI", serif;
+  font-size: 130%;
+  color: rgba(142, 53, 74, 0.5);
+  margin-top: 0.3em;
+}
+
+.UploadPaper_FileInput {
+  display: none;
+}
+
+.UploadPaper_SelectedFile {
+  margin-top: 1em;
+  padding: 0.5em 1em;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 4px;
+  border: 2px solid rgba(142, 53, 74, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 0.8em;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.UploadPaper_FileName {
+  font-family: "WebgalUI", serif;
+  font-size: 150%;
+  color: #8E354A;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.UploadPaper_RemoveBtn {
+  cursor: pointer;
+  color: rgba(142, 53, 74, 0.5);
+  font-size: 180%;
+  transition: color 0.3s, transform 0.3s;
+  background: none;
+  border: none;
+  padding: 0 0.3em;
+  font-family: "WebgalUI", serif;
+  line-height: 1;
+
+  &:hover {
+    color: #8E354A;
+    transform: scale(1.2);
+  }
+}
+
+.UploadPaper_SubmitBtn {
+  margin-top: 1.2em;
+  min-width: 50%;
+  padding: 0.25em 1em;
+  font-family: "WebgalUI", serif;
+  font-size: 200%;
+  color: #8E354A;
+  text-align: center;
+  border-radius: 4px;
+  border: 3px solid rgba(0, 0, 0, 0);
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.25);
+  background: rgba(255, 255, 255, 0.65);
+  cursor: pointer;
+  transition: background-color 0.5s, border 0.5s, box-shadow 0.5s;
+
+  &:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.35);
+    border: 3px solid #8E354A;
+  }
+
+  &:disabled {
+    color: rgba(142, 53, 74, 0.5);
+    background: rgba(255, 255, 255, 0.5);
+    cursor: not-allowed;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.UploadPaper_Error {
+  margin-top: 0.8em;
+  padding: 0.4em 0.8em;
+  background: rgba(200, 50, 50, 0.15);
+  border-radius: 4px;
+  border: 2px solid rgba(200, 50, 50, 0.3);
+  color: #a33;
+  font-family: "WebgalUI", serif;
+  font-size: 130%;
+  text-align: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+// Progress bar styles
+.UploadPaper_Progress {
+  margin-top: 1em;
+  width: 100%;
+}
+
+.UploadPaper_ProgressBar {
+  width: 100%;
+  height: 8px;
+  background: rgba(142, 53, 74, 0.2);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.UploadPaper_ProgressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #8E354A, #B85070);
+  border-radius: 4px;
+  transition: width 0.3s ease-out;
+}
+
+.UploadPaper_ProgressText {
+  font-family: "WebgalUI", serif;
+  font-size: 130%;
+  color: #8E354A;
+  text-align: center;
+  margin-top: 0.5em;
+}
+
+// Uploading state animation
+.UploadPaper_Uploading {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}

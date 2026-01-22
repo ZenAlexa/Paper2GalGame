@@ -25,7 +25,9 @@ import { setTransform } from '@/Core/gameScripts/setTransform';
 import { setTransition } from '@/Core/gameScripts/setTransition';
 import { unlockBgm } from '@/Core/gameScripts/unlockBgm';
 import { unlockCg } from '@/Core/gameScripts/unlockCg';
+import { uploadPaper } from '@/Core/gameScripts/uploadPaper';
 import { wait } from '@/Core/gameScripts/wait';
+import { waitForGeneration } from '@/Core/gameScripts/waitForGeneration';
 import { assetSetter } from '@/Core/util/gameAssetsAccess/assetSetter';
 import { assetsPrefetcher } from '@/Core/util/prefetcher/assetsPrefetcher';
 import { commandType, type IScene } from '../controller/scene/sceneInterface';
@@ -74,6 +76,9 @@ export const SCRIPT_TAG_MAP = defineScripts({
   applyStyle: ScriptConfig(commandType.applyStyle, applyStyle, { next: true }),
   wait: ScriptConfig(commandType.wait, wait),
   callSteam: ScriptConfig(commandType.callSteam, callSteam, { next: true }),
+  // UGC commands for Paper2GalGame
+  uploadPaper: ScriptConfig(commandType.uploadPaper, uploadPaper),
+  waitForGeneration: ScriptConfig(commandType.waitForGeneration, waitForGeneration),
 });
 
 export const SCRIPT_CONFIG: IConfigInterface[] = Object.values(SCRIPT_TAG_MAP);

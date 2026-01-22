@@ -39,9 +39,9 @@ export const SCRIPT_CONFIG = [
   { scriptString: 'applyStyle', scriptType: commandType.applyStyle },
   { scriptString: 'wait', scriptType: commandType.wait },
   { scriptString: 'callSteam', scriptType: commandType.callSteam },
-  // Paper mode commands
-  { scriptString: 'paperQuote', scriptType: commandType.paperQuote },
-  { scriptString: 'paperHighlight', scriptType: commandType.paperHighlight },
+  // UGC commands for Paper2GalGame
+  { scriptString: 'uploadPaper', scriptType: commandType.uploadPaper },
+  { scriptString: 'waitForGeneration', scriptType: commandType.waitForGeneration },
 ];
 export const ADD_NEXT_ARG_LIST = [
   commandType.bgm,

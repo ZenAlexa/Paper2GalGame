@@ -1,0 +1,141 @@
+// Wait For Generation UI - Styled to match WebGAL choose command
+
+.WaitForGeneration_Main {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-flow: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 13;
+  background: rgba(0, 0, 0, 0.05);
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.WaitForGeneration_Container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 40%;
+  max-width: 600px;
+  padding: 2em 2.5em;
+  background: rgba(255, 255, 255, 0.65);
+  border-radius: 4px;
+  border: 3px solid rgba(0, 0, 0, 0);
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.25);
+  transition: background-color 0.5s, box-shadow 0.5s;
+}
+
+.WaitForGeneration_Title {
+  font-family: "WebgalUI", serif;
+  font-size: 220%;
+  color: #8E354A;
+  margin-bottom: 1em;
+  text-align: center;
+}
+
+// Spinner animation
+.WaitForGeneration_Spinner {
+  width: 60px;
+  height: 60px;
+  margin-bottom: 1.5em;
+}
+
+.WaitForGeneration_SpinnerInner {
+  width: 100%;
+  height: 100%;
+  border: 4px solid rgba(142, 53, 74, 0.2);
+  border-top-color: #8E354A;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+// Progress bar styles
+.WaitForGeneration_Progress {
+  width: 100%;
+  margin-bottom: 1em;
+}
+
+.WaitForGeneration_ProgressBar {
+  width: 100%;
+  height: 8px;
+  background: rgba(142, 53, 74, 0.2);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.WaitForGeneration_ProgressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #8E354A, #B85070);
+  border-radius: 4px;
+  transition: width 0.5s ease-out;
+}
+
+.WaitForGeneration_ProgressText {
+  font-family: "WebgalUI", serif;
+  font-size: 130%;
+  color: #8E354A;
+  text-align: center;
+  margin-top: 0.5em;
+}
+
+.WaitForGeneration_Hint {
+  font-family: "WebgalUI", serif;
+  font-size: 140%;
+  color: rgba(142, 53, 74, 0.7);
+  text-align: center;
+  margin-top: 0.5em;
+}
+
+.WaitForGeneration_Error {
+  margin-top: 1em;
+  padding: 0.6em 1em;
+  background: rgba(200, 50, 50, 0.15);
+  border-radius: 4px;
+  border: 2px solid rgba(200, 50, 50, 0.3);
+  color: #a33;
+  font-family: "WebgalUI", serif;
+  font-size: 140%;
+  text-align: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+// Retry and Cancel buttons (match choose command style)
+.WaitForGeneration_RetryBtn,
+.WaitForGeneration_CancelBtn {
+  margin-top: 1em;
+  padding: 0.5em 2em;
+  font-family: "WebgalUI", serif;
+  font-size: 160%;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.8);
+  border: 3px solid rgba(0, 0, 0, 0);
+  border-radius: 4px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s;
+
+  &:hover {
+    border: 3px solid #8E354A;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.WaitForGeneration_RetryBtn {
+  color: #8E354A;
+}
+
+.WaitForGeneration_CancelBtn {
+  margin-left: 1em;
+  color: #666;
+}
